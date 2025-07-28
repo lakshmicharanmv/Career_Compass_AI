@@ -22,7 +22,6 @@ import {
   BarChart3,
   Users,
   LogOut,
-  LayoutDashboard
 } from "lucide-react";
 import React from "react";
 import {
@@ -89,12 +88,6 @@ export default function Home() {
            <nav className="ml-auto flex items-center gap-2">
             {isAuthenticated ? (
               <>
-                <Link href="/dashboard" passHref>
-                  <Button variant="ghost">
-                    <LayoutDashboard className="mr-2 h-4 w-4" />
-                    Dashboard
-                  </Button>
-                </Link>
                 <Button variant="outline" onClick={handleSignOut}>
                   <LogOut className="mr-2 h-4 w-4" />
                   Sign Out
@@ -337,5 +330,3 @@ export default function Home() {
     </div>
   );
 }
-
-    
