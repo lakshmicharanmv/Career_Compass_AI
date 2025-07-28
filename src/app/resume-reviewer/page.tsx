@@ -12,7 +12,6 @@ import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -48,13 +47,16 @@ export default function ResumeReviewerPage() {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = React.useState(false);
   const [result, setResult] = React.useState<ReviewResumeOutput | null>(null);
-  const [fileName, setFileName] = React.useState<string | null>(null);
   const [copied, setCopied] = React.useState(false);
-
 
   const form = useForm<FormValues>({
     resolver: zodResolver(FormSchema),
+    mode: 'onChange', // Important for isValid to update on change
   });
+
+  const fileRef = form.register('resume');
+  const uploadedFile = form.watch('resume');
+  const fileName = uploadedFile?.[0]?.name;
 
 
   const readFileAsDataURL = (file: File): Promise<string> => {
@@ -120,10 +122,7 @@ export default function ResumeReviewerPage() {
                         id="resume-upload"
                         className="hidden"
                         accept=".pdf,.docx"
-                        onChange={(e) => {
-                            field.onChange(e.target.files);
-                            setFileName(e.target.files?.[0]?.name ?? null)
-                        }}
+                        {...fileRef}
                       />
                       <label 
                         htmlFor="resume-upload" 
@@ -151,7 +150,7 @@ export default function ResumeReviewerPage() {
                 </FormItem>
               )}
             />
-            <Button type="submit" disabled={isLoading || !fileName} className="w-full">
+            <Button type="submit" disabled={isLoading || !form.formState.isValid} className="w-full">
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               {isLoading ? 'Analyzing Your Resume...' : 'Get Feedback'}
             </Button>
@@ -219,7 +218,7 @@ export default function ResumeReviewerPage() {
                 </Card>
             </div>
              <div className="text-center">
-                <Button onClick={() => {setResult(null); setFileName(null); form.reset()}}>
+                <Button onClick={() => {setResult(null); form.reset()}}>
                     Review Another Resume
                 </Button>
             </div>
