@@ -11,7 +11,7 @@
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 
-export const RecommendDegreeCoursesInputSchema = z.object({
+const RecommendDegreeCoursesInputSchema = z.object({
   tenthPercentage: z.number().min(0).max(100).describe('Percentage obtained in 10th grade.'),
   twelfthStream: z.enum(['Science', 'Commerce', 'Arts']).describe('The academic stream taken in 12th grade.'),
   twelfthMarks: z.object({
@@ -24,7 +24,7 @@ export const RecommendDegreeCoursesInputSchema = z.object({
 });
 export type RecommendDegreeCoursesInput = z.infer<typeof RecommendDegreeCoursesInputSchema>;
 
-export const RecommendDegreeCoursesOutputSchema = z.object({
+const RecommendDegreeCoursesOutputSchema = z.object({
   recommendedCourses: z.array(z.string()).describe('A list of 3-5 recommended degree courses.'),
   reasoning: z.string().describe('The reasoning behind the recommendations, based on the provided academic data.'),
 });
