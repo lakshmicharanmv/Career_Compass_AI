@@ -4,7 +4,7 @@
 import Link from 'next/link';
 import * as React from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm, Controller } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { Bot, ArrowLeft, Loader2, Sparkles } from 'lucide-react';
 
@@ -47,20 +47,25 @@ import { Separator } from '@/components/ui/separator';
 const FormSchema = z.object({
   tenthPercentage: z.coerce.number().min(0).max(100),
   twelfthStream: z.enum(['Science', 'Commerce', 'Arts']),
-  subject1: z.coerce.number().min(0).max(100),
-  subject2: z.coerce.number().min(0).max(100),
-  subject3: z.coerce.number().min(0).max(100),
+  // Science
+  physics: z.coerce.number().min(0).max(100).optional(),
+  chemistry: z.coerce.number().min(0).max(100).optional(),
+  math: z.coerce.number().min(0).max(100).optional(),
+  biology: z.coerce.number().min(0).max(100).optional(),
+  // Commerce
+  accounts: z.coerce.number().min(0).max(100).optional(),
+  business_studies: z.coerce.number().min(0).max(100).optional(),
+  economics: z.coerce.number().min(0).max(100).optional(),
+  // Arts
+  history: z.coerce.number().min(0).max(100).optional(),
+  political_science: z.coerce.number().min(0).max(100).optional(),
+  sociology_psychology: z.coerce.number().min(0).max(100).optional(),
+  // Common
   english: z.coerce.number().min(0).max(100),
   takeTest: z.enum(['yes', 'no']),
 });
 
 type FormValues = z.infer<typeof FormSchema>;
-
-const STREAM_SUBJECTS = {
-  Science: ['Physics', 'Chemistry', 'Math/Biology'],
-  Commerce: ['Accounts', 'Business Studies', 'Economics'],
-  Arts: ['History', 'Political Science', 'Sociology/Psychology'],
-};
 
 export default function Grade12Page() {
   const { toast } = useToast();
@@ -71,37 +76,27 @@ export default function Grade12Page() {
   const [userAnswers, setUserAnswers] = React.useState<string[]>([]);
   const [testScore, setTestScore] = React.useState<number | null>(null);
   const [formValues, setFormValues] = React.useState<FormValues | null>(null);
-  const [twelfthPercentage, setTwelfthPercentage] = React.useState<number>(0);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
       tenthPercentage: 0,
-      subject1: 0,
-      subject2: 0,
-      subject3: 0,
       english: 0,
+      physics: 0,
+      chemistry: 0,
+      math: 0,
+      biology: 0,
+      accounts: 0,
+      business_studies: 0,
+      economics: 0,
+      history: 0,
+      political_science: 0,
+      sociology_psychology: 0,
       takeTest: 'no',
     },
   });
 
   const stream = form.watch('twelfthStream');
-  const s1 = form.watch('subject1');
-  const s2 = form.watch('subject2');
-  const s3 = form.watch('subject3');
-  const eng = form.watch('english');
-
-  React.useEffect(() => {
-    const marks = [s1, s2, s3, eng].filter(v => !isNaN(v));
-    if (marks.length > 0) {
-        const total = marks.reduce((acc, mark) => acc + mark, 0);
-        const avg = total / marks.length;
-        setTwelfthPercentage(avg);
-    } else {
-        setTwelfthPercentage(0);
-    }
-  }, [s1, s2, s3, eng]);
-
 
   async function onSubmit(data: FormValues) {
     setIsLoading(true);
@@ -130,9 +125,16 @@ export default function Grade12Page() {
             tenthPercentage: data.tenthPercentage,
             twelfthStream: data.twelfthStream,
             twelfthMarks: {
-                subject1: data.subject1,
-                subject2: data.subject2,
-                subject3: data.subject3,
+                physics: data.physics,
+                chemistry: data.chemistry,
+                math: data.math,
+                biology: data.biology,
+                accounts: data.accounts,
+                business_studies: data.business_studies,
+                economics: data.economics,
+                history: data.history,
+                political_science: data.political_science,
+                sociology_psychology: data.sociology_psychology,
                 english: data.english,
             },
         });
@@ -177,9 +179,16 @@ export default function Grade12Page() {
         tenthPercentage: formValues.tenthPercentage,
         twelfthStream: formValues.twelfthStream,
         twelfthMarks: {
-            subject1: formValues.subject1,
-            subject2: formValues.subject2,
-            subject3: formValues.subject3,
+            physics: formValues.physics,
+            chemistry: formValues.chemistry,
+            math: formValues.math,
+            biology: formValues.biology,
+            accounts: formValues.accounts,
+            business_studies: formValues.business_studies,
+            economics: formValues.economics,
+            history: formValues.history,
+            political_science: formValues.political_science,
+            sociology_psychology: formValues.sociology_psychology,
             english: formValues.english,
         },
         aptitudeTestScore: score,
@@ -335,19 +344,50 @@ export default function Grade12Page() {
                     <Separator />
                     <div className="space-y-2">
                         <h3 className="font-medium">12th Grade Marks (out of 100)</h3>
-                        {twelfthPercentage > 0 && <p className="text-sm text-muted-foreground">Calculated Percentage: {twelfthPercentage.toFixed(2)}%</p>}
                     </div>
-
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <FormField control={form.control} name="subject1" render={({ field }) => (
-                            <FormItem><FormLabel>{STREAM_SUBJECTS[stream][0]}</FormLabel><FormControl><Input type="number" placeholder="0" {...field} /></FormControl><FormMessage /></FormItem>
-                        )} />
-                        <FormField control={form.control} name="subject2" render={({ field }) => (
-                            <FormItem><FormLabel>{STREAM_SUBJECTS[stream][1]}</FormLabel><FormControl><Input type="number" placeholder="0" {...field} /></FormControl><FormMessage /></FormItem>
-                        )} />
-                        <FormField control={form.control} name="subject3" render={({ field }) => (
-                            <FormItem><FormLabel>{STREAM_SUBJECTS[stream][2]}</FormLabel><FormControl><Input type="number" placeholder="0" {...field} /></FormControl><FormMessage /></FormItem>
-                        )} />
+                        {stream === 'Science' && (
+                            <>
+                                <FormField control={form.control} name="physics" render={({ field }) => (
+                                    <FormItem><FormLabel>Physics</FormLabel><FormControl><Input type="number" placeholder="0" {...field} /></FormControl><FormMessage /></FormItem>
+                                )} />
+                                <FormField control={form.control} name="chemistry" render={({ field }) => (
+                                    <FormItem><FormLabel>Chemistry</FormLabel><FormControl><Input type="number" placeholder="0" {...field} /></FormControl><FormMessage /></FormItem>
+                                )} />
+                                <FormField control={form.control} name="math" render={({ field }) => (
+                                    <FormItem><FormLabel>Math</FormLabel><FormControl><Input type="number" placeholder="0" {...field} /></FormControl><FormMessage /></FormItem>
+                                )} />
+                                <FormField control={form.control} name="biology" render={({ field }) => (
+                                    <FormItem><FormLabel>Biology</FormLabel><FormControl><Input type="number" placeholder="0" {...field} /></FormControl><FormMessage /></FormItem>
+                                )} />
+                            </>
+                        )}
+                        {stream === 'Commerce' && (
+                            <>
+                                <FormField control={form.control} name="accounts" render={({ field }) => (
+                                    <FormItem><FormLabel>Accounts</FormLabel><FormControl><Input type="number" placeholder="0" {...field} /></FormControl><FormMessage /></FormItem>
+                                )} />
+                                <FormField control={form.control} name="business_studies" render={({ field }) => (
+                                    <FormItem><FormLabel>Business Studies</FormLabel><FormControl><Input type="number" placeholder="0" {...field} /></FormControl><FormMessage /></FormItem>
+                                )} />
+                                <FormField control={form.control} name="economics" render={({ field }) => (
+                                    <FormItem><FormLabel>Economics</FormLabel><FormControl><Input type="number" placeholder="0" {...field} /></FormControl><FormMessage /></FormItem>
+                                )} />
+                            </>
+                        )}
+                        {stream === 'Arts' && (
+                            <>
+                                <FormField control={form.control} name="history" render={({ field }) => (
+                                    <FormItem><FormLabel>History</FormLabel><FormControl><Input type="number" placeholder="0" {...field} /></FormControl><FormMessage /></FormItem>
+                                )} />
+                                <FormField control={form.control} name="political_science" render={({ field }) => (
+                                    <FormItem><FormLabel>Political Science</FormLabel><FormControl><Input type="number" placeholder="0" {...field} /></FormControl><FormMessage /></FormItem>
+                                )} />
+                                <FormField control={form.control} name="sociology_psychology" render={({ field }) => (
+                                    <FormItem><FormLabel>Sociology/Psychology</FormLabel><FormControl><Input type="number" placeholder="0" {...field} /></FormControl><FormMessage /></FormItem>
+                                )} />
+                            </>
+                        )}
                          <FormField control={form.control} name="english" render={({ field }) => (
                             <FormItem><FormLabel>English</FormLabel><FormControl><Input type="number" placeholder="0" {...field} /></FormControl><FormMessage /></FormItem>
                         )} />

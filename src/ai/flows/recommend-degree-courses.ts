@@ -15,9 +15,16 @@ const RecommendDegreeCoursesInputSchema = z.object({
   tenthPercentage: z.number().min(0).max(100).describe('Percentage obtained in 10th grade.'),
   twelfthStream: z.enum(['Science', 'Commerce', 'Arts']).describe('The academic stream taken in 12th grade.'),
   twelfthMarks: z.object({
-    subject1: z.number().describe('Marks for the first main subject.'),
-    subject2: z.number().describe('Marks for the second main subject.'),
-    subject3: z.number().describe('Marks for the third main subject.'),
+    physics: z.number().optional().describe('Marks for Physics (Science stream).'),
+    chemistry: z.number().optional().describe('Marks for Chemistry (Science stream).'),
+    math: z.number().optional().describe('Marks for Math (Science/Commerce stream).'),
+    biology: z.number().optional().describe('Marks for Biology (Science stream).'),
+    accounts: z.number().optional().describe('Marks for Accounts (Commerce stream).'),
+    business_studies: z.number().optional().describe('Marks for Business Studies (Commerce stream).'),
+    economics: z.number().optional().describe('Marks for Economics (Commerce stream).'),
+    history: z.number().optional().describe('Marks for History (Arts stream).'),
+    political_science: z.number().optional().describe('Marks for Political Science (Arts stream).'),
+    sociology_psychology: z.number().optional().describe('Marks for Sociology/Psychology (Arts stream).'),
     english: z.number().describe('Marks for English.'),
   }).describe('Marks obtained in 12th-grade subjects for the selected stream.'),
   aptitudeTestScore: z.number().optional().describe('The score from the stream-based aptitude test (percentage).'),
@@ -44,11 +51,18 @@ const recommendDegreeCoursesPrompt = ai.definePrompt({
   Student's Academic Data:
   - 10th Grade Percentage: {{{tenthPercentage}}}%
   - 12th Grade Stream: {{{twelfthStream}}}
-  - 12th Grade Marks:
-    - Subject 1: {{{twelfthMarks.subject1}}}/100
-    - Subject 2: {{{twelfthMarks.subject2}}}/100
-    - Subject 3: {{{twelfthMarks.subject3}}}/100
-    - English: {{{twelfthMarks.english}}}/100
+  - 12th Grade Marks (out of 100):
+    {{#if twelfthMarks.physics}} - Physics: {{{twelfthMarks.physics}}}{{/if}}
+    {{#if twelfthMarks.chemistry}} - Chemistry: {{{twelfthMarks.chemistry}}}{{/if}}
+    {{#if twelfthMarks.math}} - Math: {{{twelfthMarks.math}}}{{/if}}
+    {{#if twelfthMarks.biology}} - Biology: {{{twelfthMarks.biology}}}{{/if}}
+    {{#if twelfthMarks.accounts}} - Accounts: {{{twelfthMarks.accounts}}}{{/if}}
+    {{#if twelfthMarks.business_studies}} - Business Studies: {{{twelfthMarks.business_studies}}}{{/if}}
+    {{#if twelfthMarks.economics}} - Economics: {{{twelfthMarks.economics}}}{{/if}}
+    {{#if twelfthMarks.history}} - History: {{{twelfthMarks.history}}}{{/if}}
+    {{#if twelfthMarks.political_science}} - Political Science: {{{twelfthMarks.political_science}}}{{/if}}
+    {{#if twelfthMarks.sociology_psychology}} - Sociology/Psychology: {{{twelfthMarks.sociology_psychology}}}{{/if}}
+    - English: {{{twelfthMarks.english}}}
 
   {{#if aptitudeTestScore}}
   - Aptitude Test Score: {{{aptitudeTestScore}}}%
@@ -58,9 +72,12 @@ const recommendDegreeCoursesPrompt = ai.definePrompt({
   Analyze the provided data and recommend 3-5 suitable degree courses.
   
   General Guidelines for Recommendations:
-  - **Science Stream**: If performance is strong (especially in Math/Biology, Physics, Chemistry), suggest courses like Engineering (B.E./B.Tech), Medical (MBBS), Pharmacy (B.Pharm), or pure sciences (BSc).
-  - **Commerce Stream**: If performance is strong (especially in Accounts, Business Studies, Economics), suggest courses like B.Com, BBA, BMS, or preparations for professional exams like CA Foundation.
-  - **Arts/Humanities Stream**: If performance is strong (especially in History, Political Science, English), suggest courses like B.A. in various specializations, B.Ed (for teaching), Journalism (BJMC), or Design.
+  - **Science Stream**: 
+    - If performance is strong in Math, Physics, and Chemistry, suggest Engineering courses (B.E./B.Tech) in relevant fields.
+    - If performance is strong in Biology, Physics, and Chemistry, suggest Medical courses (MBBS, BDS), Pharmacy (B.Pharm), or Biotechnology.
+    - If performance is balanced, suggest pure sciences (B.Sc.).
+  - **Commerce Stream**: If performance is strong in Accounts, Business Studies, and Economics, suggest courses like B.Com, BBA, BMS, or preparations for professional exams like CA Foundation.
+  - **Arts/Humanities Stream**: If performance is strong in History, Political Science, English, etc., suggest courses like B.A. in various specializations, B.Ed (for teaching), Journalism (BJMC), or Design.
 
   Your response must include:
   1.  **recommendedCourses**: A list of 3-5 suitable degree courses.
