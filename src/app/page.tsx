@@ -31,6 +31,7 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
+  DialogTrigger,
 } from "@/components/ui/dialog";
 import { useRouter } from "next/navigation";
 
@@ -39,6 +40,7 @@ export default function Home() {
   const [year, setYear] = React.useState<number | null>(null);
   const [isAuthenticated, setIsAuthenticated] = React.useState(false);
   const [userName, setUserName] = React.useState("");
+  const [showLearnMore, setShowLearnMore] = React.useState(false);
   const router = useRouter();
 
   React.useEffect(() => {
@@ -116,7 +118,7 @@ export default function Home() {
       <main className="flex-1">
         <section className="relative w-full h-screen bg-cover bg-center bg-no-repeat" style={{backgroundImage: "url('/photo/hero-image.png')"}}>
           <div className="absolute inset-0 bg-black/50" />
-          <div className="relative container h-full flex flex-col items-center justify-center text-center text-white space-y-4">
+          <div className="relative container h-full flex flex-col items-center justify-center text-center text-white space-y-6 pt-16">
             <h1 className="font-headline text-4xl font-bold tracking-tighter sm:text-5xl md:text-6xl xl:text-7xl/none text-shadow-lg">
               {isAuthenticated ? `Welcome, ${userName}! ` : ''}Navigate Your Future with AI
             </h1>
@@ -132,9 +134,27 @@ export default function Home() {
               >
                 Find Your Path
               </Link>
-              <Button variant="outline" size="lg" className="bg-transparent text-white border-white hover:bg-white hover:text-black">
-                Learn More
-              </Button>
+              <Dialog open={showLearnMore} onOpenChange={setShowLearnMore}>
+                <DialogTrigger asChild>
+                    <Button variant="outline" size="lg" className="bg-transparent text-white border-white hover:bg-white hover:text-black">
+                        Learn More
+                    </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-[600px]">
+                  <DialogHeader>
+                    <DialogTitle className="text-2xl font-headline">About Career Compass AI</DialogTitle>
+                    <DialogDescription className="text-left pt-2">
+                      Career Compass AI is a comprehensive platform designed to guide you through every stage of your academic and professional journey. Whether you're a student making crucial career decisions or a professional aiming to advance, our AI-powered tools provide the personalized support you need to succeed.
+                      <br /><br />
+                      <strong className="font-semibold text-foreground">For Students:</strong> We help 10th-grade students choose the right academic stream (Science, Commerce, or Arts) based on their marks and interests. For 12th graders, we recommend suitable degree courses and career paths, ensuring a smooth transition to higher education.
+                      <br /><br />
+                      <strong className="font-semibold text-foreground">For Professionals:</strong> Our platform assists undergraduates and professionals in preparing for the job market. From building an ATS-friendly resume with our AI Resume Reviewer to exploring career progression maps and identifying upskilling opportunities, we empower you to take the next step in your career with confidence.
+                      <br /><br />
+                      With a suite of tools including an AI Career Advisor and a 24/7 AI Career Counselor chatbot, Career Compass AI is your trusted partner in navigating the complexities of the modern career landscape.
+                    </DialogDescription>
+                  </DialogHeader>
+                </DialogContent>
+              </Dialog>
             </div>
           </div>
         </section>
@@ -321,6 +341,3 @@ export default function Home() {
       </footer>
     </div>
   );
-
-    
-    
