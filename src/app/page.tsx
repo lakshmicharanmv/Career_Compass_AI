@@ -42,10 +42,14 @@ export default function Home() {
             </span>
           </Link>
           <nav className="ml-auto flex items-center gap-2">
-            <Button variant="ghost">Sign In</Button>
-            <Button className="bg-primary hover:bg-primary/90">
-              Get Started
-            </Button>
+            <Link href="/signin" passHref>
+                <Button variant="ghost">Sign In</Button>
+            </Link>
+            <Link href="/signup" passHref>
+                <Button className="bg-primary hover:bg-primary/90">
+                  Get Started
+                </Button>
+            </Link>
           </nav>
         </div>
       </header>
