@@ -67,6 +67,8 @@ export default function Grade10Page() {
       science: 0,
       english: 0,
       social_studies: 0,
+      optional_subject: '',
+      optional_marks: 0,
       takeTest: 'no',
     },
   });
