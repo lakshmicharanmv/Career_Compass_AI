@@ -6,8 +6,7 @@ import * as React from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
-import { Bot, ArrowLeft, Loader2, UploadCloud, FileCheck2, BookText } from 'lucide-react';
-import mammoth from 'mammoth';
+import { Bot, ArrowLeft, Loader2, UploadCloud, FileCheck2, FileText, Wand2, Copy, Download } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -27,6 +26,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
+import { reviewResume, ReviewResumeOutput } from '@/ai/flows/ai-resume-reviewer';
 
 const FormSchema = z.object({
   resume: z
@@ -44,53 +44,43 @@ type FormValues = z.infer<typeof FormSchema>;
 export default function ResumeReviewerPage() {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = React.useState(false);
-  const [resumeContent, setResumeContent] = React.useState<string | null>(null);
+  const [result, setResult] = React.useState<ReviewResumeOutput | null>(null);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(FormSchema),
-    mode: 'onChange', 
+    mode: 'onChange',
   });
-  
-  const handleFileRead = (file: File): Promise<ArrayBuffer> => {
+
+  const fileRef = form.register('resume');
+
+  const handleFileRead = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
-      reader.onload = (event) => resolve(event.target?.result as ArrayBuffer);
+      reader.onload = (event) => {
+        const dataUri = event.target?.result as string;
+        resolve(dataUri);
+      };
       reader.onerror = reject;
-      reader.readAsArrayBuffer(file);
+      reader.readAsDataURL(file);
     });
   };
 
   async function onSubmit(data: FormValues) {
     setIsLoading(true);
-    setResumeContent(null);
+    setResult(null);
 
     try {
       const file = data.resume[0];
       if (file) {
-        if (file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' || file.type === 'application/msword') {
-          const arrayBuffer = await handleFileRead(file);
-          const result = await mammoth.convertToHtml({ arrayBuffer });
-          setResumeContent(result.value);
-        } else if (file.type === 'application/pdf') {
-          setResumeContent('<p>PDF text extraction is not yet supported. Please upload a DOCX file for content viewing.</p>');
-           toast({
-                variant: 'default',
-                title: 'PDF Preview Not Available',
-                description: 'Please upload a DOCX file to view content directly in the browser.'
-            });
-        } else {
-            toast({
-                variant: 'destructive',
-                title: 'Unsupported file type',
-                description: 'Please upload a DOCX or PDF file.'
-            });
-        }
+        const resumeDataUri = await handleFileRead(file);
+        const aiResult = await reviewResume({ resumeDataUri });
+        setResult(aiResult);
       }
     } catch (error) {
       toast({
         variant: 'destructive',
         title: 'Uh oh! Something went wrong.',
-        description: 'There was a problem reading your resume. Please try again.',
+        description: 'There was a problem analyzing your resume. Please try again.',
       });
       console.error(error);
     } finally {
@@ -98,18 +88,40 @@ export default function ResumeReviewerPage() {
     }
   }
 
+  const handleDownload = () => {
+    if (!result) return;
+    const blob = new Blob([result.improvedResume], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'improved_resume.txt';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  const handleCopy = () => {
+    if (!result) return;
+    navigator.clipboard.writeText(result.improvedResume);
+    toast({
+      title: 'Copied!',
+      description: 'The improved resume content has been copied to your clipboard.',
+    });
+  };
+
   const renderForm = () => (
     <Card className="max-w-2xl mx-auto">
       <CardHeader>
-        <CardTitle>Resume Viewer</CardTitle>
+        <CardTitle>AI Resume Reviewer</CardTitle>
         <CardDescription>
-          Upload your resume (DOCX, max 5MB) to view its content directly in the browser.
+          Upload your resume (PDF or DOCX, max 5MB) to get AI-powered feedback and an ATS-friendly version.
         </CardDescription>
       </CardHeader>
       <CardContent>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-             <FormField
+            <FormField
               control={form.control}
               name="resume"
               render={({ field }) => (
@@ -122,9 +134,7 @@ export default function ResumeReviewerPage() {
                         id="resume-upload"
                         className="hidden"
                         accept=".pdf,.doc,.docx"
-                        onChange={(e) => {
-                           field.onChange(e.target.files && e.target.files.length > 0 ? e.target.files : null);
-                        }}
+                        {...fileRef}
                       />
                       <label
                         htmlFor="resume-upload"
@@ -154,7 +164,7 @@ export default function ResumeReviewerPage() {
             />
             <Button type="submit" disabled={isLoading || !form.formState.isValid} className="w-full">
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {isLoading ? 'Processing...' : 'View Content'}
+              {isLoading ? 'Analyzing Your Resume...' : 'Get Feedback'}
             </Button>
           </form>
         </Form>
@@ -162,36 +172,56 @@ export default function ResumeReviewerPage() {
     </Card>
   );
 
-
   const renderResult = () => {
-    if (!resumeContent) return null;
+    if (!result) return null;
     return (
-        <div className="max-w-4xl mx-auto space-y-8">
-            <Card>
-                <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                       <BookText className="text-primary"/> Resume Content
-                    </CardTitle>
-                    <CardDescription>
-                        This is the content extracted from your uploaded resume.
-                    </CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <div
-                      className="p-4 bg-secondary rounded-lg h-96 overflow-y-auto text-sm space-y-4 prose prose-sm max-w-none"
-                      dangerouslySetInnerHTML={{ __html: resumeContent }}
-                    />
-                </CardContent>
-            </Card>
-             <div className="text-center">
-                <Button onClick={() => {setResumeContent(null); form.reset();}}>
-                    Upload Another Resume
-                </Button>
+      <div className="max-w-4xl mx-auto grid gap-8 lg:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Wand2 className="text-primary" /> AI Feedback
+            </CardTitle>
+            <CardDescription>
+              Here are the suggestions to improve your resume's impact and ATS compatibility.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div
+              className="p-4 bg-secondary rounded-lg h-96 overflow-y-auto text-sm space-y-4 prose prose-sm max-w-none"
+            >
+                {result.feedback.split('\n').map((line, i) => <p key={i}>{line}</p>)}
             </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <FileText className="text-primary" /> Improved Resume
+            </CardTitle>
+            <CardDescription>
+              This is the revised, ATS-friendly version of your resume content.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div
+              className="p-4 bg-secondary rounded-lg h-96 overflow-y-auto text-sm space-y-4 prose prose-sm max-w-none"
+            >
+                {result.improvedResume.split('\n').map((line, i) => <p key={i}>{line}</p>)}
+            </div>
+            <div className="mt-4 flex gap-2">
+              <Button onClick={handleCopy}><Copy className="mr-2 h-4 w-4"/> Copy Content</Button>
+              <Button onClick={handleDownload} variant="outline"><Download className="mr-2 h-4 w-4"/> Download as .txt</Button>
+            </div>
+          </CardContent>
+        </Card>
+        <div className="lg:col-span-2 text-center">
+          <Button onClick={() => { setResult(null); form.reset(); }}>
+            Upload Another Resume
+          </Button>
         </div>
+      </div>
     );
   };
-
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
@@ -213,24 +243,22 @@ export default function ResumeReviewerPage() {
             </Button>
           </Link>
           <h1 className="text-3xl font-bold tracking-tighter sm:text-4xl font-headline ml-4">
-            Resume Viewer
+            AI Resume Reviewer
           </h1>
         </div>
         
         {isLoading ? (
-             <Card className="max-w-2xl mx-auto">
-                <CardHeader>
-                    <CardTitle>Processing Your Resume...</CardTitle>
-                    <CardDescription>This may take a moment.</CardDescription>
-                </CardHeader>
-                <CardContent className="flex items-center justify-center p-8">
-                    <Loader2 className="h-12 w-12 animate-spin text-primary" />
-                </CardContent>
-            </Card>
-        ) : resumeContent ? renderResult() : renderForm()}
-
+          <Card className="max-w-2xl mx-auto">
+            <CardHeader>
+              <CardTitle>Analyzing Your Resume...</CardTitle>
+              <CardDescription>Our AI is working its magic. This may take a moment.</CardDescription>
+            </CardHeader>
+            <CardContent className="flex items-center justify-center p-8">
+              <Loader2 className="h-12 w-12 animate-spin text-primary" />
+            </CardContent>
+          </Card>
+        ) : result ? renderResult() : renderForm()}
       </main>
     </div>
   );
 }
-
