@@ -38,7 +38,7 @@ const prompt = ai.definePrompt({
 
 Resume: {{media url=resumeDataUri}}
 
-Respond with the improved resume and your feedback.`, // Added URL
+Respond with the improved resume and your feedback.`,
 });
 
 const reviewResumeFlow = ai.defineFlow(
