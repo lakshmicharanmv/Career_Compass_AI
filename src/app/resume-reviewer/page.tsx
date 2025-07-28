@@ -51,11 +51,9 @@ export default function ResumeReviewerPage() {
 
   const form = useForm<FormValues>({
     resolver: zodResolver(FormSchema),
-    mode: 'onChange', // Use onChange mode to get instant validation feedback
+    mode: 'onChange', 
   });
   
-  const fileRef = form.register("resume");
-
   const readFileAsDataURL = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -121,7 +119,6 @@ export default function ResumeReviewerPage() {
                         id="resume-upload"
                         className="hidden"
                         accept=".pdf,.doc,.docx"
-                        {...fileRef}
                         onChange={(e) => {
                            field.onChange(e.target.files && e.target.files.length > 0 ? e.target.files : null);
                         }}
