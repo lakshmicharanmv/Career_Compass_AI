@@ -268,7 +268,7 @@ export default function Home() {
                 every stage of your career journey.
               </p>
             </div>
-            <div className="mx-auto grid grid-cols-1 gap-8 py-12 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="mx-auto grid grid-cols-1 gap-8 py-12 sm:grid-cols-2 lg:grid-cols-3">
               <div className="flex flex-col items-center space-y-2 text-center">
                 <div className="p-3 bg-primary/10 rounded-full transition-transform duration-300 hover:scale-110">
                   <BrainCircuit className="text-primary h-8 w-8" />
@@ -280,17 +280,6 @@ export default function Home() {
                   Intelligent career path mapping.
                 </p>
               </div>
-              <Link href="/resume-reviewer" className="flex flex-col items-center space-y-2 text-center transition-transform duration-300 hover:scale-105">
-                <div className="p-3 bg-primary/10 rounded-full transition-transform duration-300 hover:scale-110">
-                  <FileText className="text-primary h-8 w-8" />
-                </div>
-                <h3 className="text-lg font-bold font-headline">
-                  AI Resume Reviewer
-                </h3>
-                <p className="text-sm text-muted-foreground">
-                  ATS-friendly resume analysis.
-                </p>
-              </Link>
               <Link href="/career-dashboard" className="flex flex-col items-center space-y-2 text-center transition-transform duration-300 hover:scale-105">
                 <div className="p-3 bg-primary/10 rounded-full transition-transform duration-300 hover:scale-110">
                   <BarChart3 className="text-primary h-8 w-8" />
@@ -341,3 +330,5 @@ export default function Home() {
       </footer>
     </div>
   );
+
+    
