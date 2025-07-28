@@ -302,7 +302,7 @@ export default function Home() {
                   Job trends and salary insights.
                 </p>
               </div>
-              <div className="flex flex-col items-center space-y-2 text-center">
+              <Link href="/career-counselor" className="flex flex-col items-center space-y-2 text-center">
                 <div className="p-3 bg-primary/10 rounded-full transition-transform duration-300 hover:scale-110">
                   <Users className="text-primary h-8 w-8" />
                 </div>
@@ -312,7 +312,7 @@ export default function Home() {
                 <p className="text-sm text-muted-foreground">
                   24/7 AI-powered chatbot.
                 </p>
-              </div>
+              </Link>
             </div>
           </div>
         </section>
@@ -341,3 +341,5 @@ export default function Home() {
       </footer>
     </div>
   );
+
+    
