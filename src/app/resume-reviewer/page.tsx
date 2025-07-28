@@ -51,10 +51,9 @@ export default function ResumeReviewerPage() {
 
   const form = useForm<FormValues>({
     resolver: zodResolver(FormSchema),
-    mode: 'onChange', // Important for isValid to update on change
+    mode: 'onChange',
   });
 
-  const fileRef = form.register('resume');
   const uploadedFile = form.watch('resume');
   const fileName = uploadedFile?.[0]?.name;
 
@@ -112,17 +111,20 @@ export default function ResumeReviewerPage() {
             <FormField
               control={form.control}
               name="resume"
-              render={({ field }) => (
+              render={({ field: { value, onChange, ...fieldProps } }) => (
                 <FormItem>
                   <FormLabel>Your Resume</FormLabel>
                   <FormControl>
                     <div className="relative">
                       <Input
+                        {...fieldProps}
                         type="file"
                         id="resume-upload"
                         className="hidden"
                         accept=".pdf,.docx"
-                        {...fileRef}
+                        onChange={(event) =>
+                          onChange(event.target.files && event.target.files)
+                        }
                       />
                       <label 
                         htmlFor="resume-upload" 
