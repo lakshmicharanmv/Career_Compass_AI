@@ -71,9 +71,9 @@ export default function SignInPage() {
             localStorage.setItem("currentUser", JSON.stringify(user));
             toast({
               title: "Signed in successfully!",
-              description: "Redirecting to your dashboard...",
+              description: "Redirecting to the main page...",
             });
-            router.push("/dashboard");
+            router.push("/");
         } else {
             setError("Invalid email or password.");
         }
@@ -200,4 +200,3 @@ export default function SignInPage() {
     </div>
   );
 }
-
