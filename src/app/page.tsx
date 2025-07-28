@@ -1,3 +1,6 @@
+
+"use client";
+
 import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
@@ -19,8 +22,15 @@ import {
   BarChart3,
   Users,
 } from "lucide-react";
+import React from "react";
 
 export default function Home() {
+  const [year, setYear] = React.useState(new Date().getFullYear());
+
+  React.useEffect(() => {
+    setYear(new Date().getFullYear());
+  }, []);
+
   return (
     <div className="flex flex-col min-h-[100dvh] bg-background">
       <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -230,7 +240,7 @@ export default function Home() {
       </main>
       <footer className="flex flex-col gap-2 sm:flex-row py-6 w-full shrink-0 items-center px-4 md:px-6 border-t">
         <p className="text-xs text-muted-foreground">
-          &copy; {new Date().getFullYear()} Career Compass AI. All rights
+          &copy; {year} Career Compass AI. All rights
           reserved.
         </p>
         <nav className="sm:ml-auto flex gap-4 sm:gap-6">
