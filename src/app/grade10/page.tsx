@@ -58,7 +58,6 @@ export default function Grade10Page() {
   const [userAnswers, setUserAnswers] = React.useState<string[]>([]);
   const [testScore, setTestScore] = React.useState<number | null>(null);
   const [formValues, setFormValues] = React.useState<FormValues | null>(null);
-  const [percentage, setPercentage] = React.useState<number | null>(null);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(FormSchema),
@@ -72,25 +71,6 @@ export default function Grade10Page() {
       takeTest: 'no',
     },
   });
-
-  const math = form.watch('math');
-  const science = form.watch('science');
-  const english = form.watch('english');
-  const social_studies = form.watch('social_studies');
-
-  React.useEffect(() => {
-    if (
-      typeof math === 'number' &&
-      typeof science === 'number' &&
-      typeof english === 'number' &&
-      typeof social_studies === 'number'
-    ) {
-      const total = math + science + english + social_studies;
-      const calculatedPercentage = total > 0 ? total / 4 : 0;
-      setPercentage(calculatedPercentage);
-    }
-  }, [math, science, english, social_studies]);
-
 
   async function onSubmit(data: FormValues) {
     setIsLoading(true);
@@ -361,16 +341,6 @@ export default function Grade10Page() {
               />
             </div>
 
-            {percentage !== null && (
-              <div className="space-y-2 pt-4">
-                  <Separator />
-                  <div className="flex justify-between items-center pt-4">
-                      <h3 className="text-lg font-medium">Calculated Percentage</h3>
-                      <p className="text-2xl font-bold text-primary">{percentage.toFixed(2)}%</p>
-                  </div>
-              </div>
-            )}
-            
             <Separator />
 
             <FormField
