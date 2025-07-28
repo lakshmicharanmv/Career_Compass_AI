@@ -32,7 +32,7 @@ import { Badge } from '@/components/ui/badge';
 
 const FormSchema = z.object({
   resume: z
-    .custom<FileList>()
+    .any()
     .refine((files) => files?.length === 1, 'Resume is required.')
     .refine((files) => files?.[0]?.size <= 5 * 1024 * 1024, `Max file size is 5MB.`)
     .refine(
@@ -48,15 +48,14 @@ export default function ResumeReviewerPage() {
   const [isLoading, setIsLoading] = React.useState(false);
   const [result, setResult] = React.useState<ReviewResumeOutput | null>(null);
   const [copied, setCopied] = React.useState(false);
+  const [fileName, setFileName] = React.useState<string | null>(null);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(FormSchema),
     mode: 'onChange',
   });
 
-  const uploadedFile = form.watch('resume');
-  const fileName = uploadedFile?.[0]?.name;
-
+  const { ref: resumeRef, ...resumeRest } = form.register('resume');
 
   const readFileAsDataURL = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
@@ -108,50 +107,47 @@ export default function ResumeReviewerPage() {
       <CardContent>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <FormField
-              control={form.control}
-              name="resume"
-              render={({ field: { value, onChange, ...fieldProps } }) => (
-                <FormItem>
-                  <FormLabel>Your Resume</FormLabel>
-                  <FormControl>
-                    <div className="relative">
-                      <Input
-                        {...fieldProps}
-                        type="file"
-                        id="resume-upload"
-                        className="hidden"
-                        accept=".pdf,.docx"
-                        onChange={(event) =>
-                          onChange(event.target.files && event.target.files)
-                        }
-                      />
-                      <label 
-                        htmlFor="resume-upload" 
-                        className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed rounded-lg cursor-pointer bg-secondary hover:bg-muted"
-                      >
-                         {fileName ? (
-                            <>
-                                <FileCheck2 className="w-12 h-12 text-green-500 mb-2"/>
-                                <p className="font-semibold text-foreground">{fileName}</p>
-                                <p className="text-xs text-muted-foreground">Click again to change file</p>
-                            </>
-                         ) : (
-                            <>
-                                <UploadCloud className="w-12 h-12 text-muted-foreground mb-2"/>
-                                <p className="mb-2 text-sm text-muted-foreground">
-                                    <span className="font-semibold text-primary">Click to upload</span> or drag and drop
-                                </p>
-                                <p className="text-xs text-muted-foreground">PDF or DOCX (MAX. 5MB)</p>
-                            </>
-                         )}
-                      </label>
-                    </div>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <FormItem>
+              <FormLabel>Your Resume</FormLabel>
+              <FormControl>
+                <div className="relative">
+                  <Input
+                    {...resumeRest}
+                    ref={resumeRef}
+                    type="file"
+                    id="resume-upload"
+                    className="hidden"
+                    accept=".pdf,.docx"
+                    onChange={(event) => {
+                        const file = event.target.files?.[0];
+                        setFileName(file ? file.name : null);
+                        form.setValue('resume', event.target.files, { shouldValidate: true });
+                    }}
+                  />
+                  <label 
+                    htmlFor="resume-upload" 
+                    className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed rounded-lg cursor-pointer bg-secondary hover:bg-muted"
+                  >
+                     {fileName ? (
+                        <>
+                            <FileCheck2 className="w-12 h-12 text-green-500 mb-2"/>
+                            <p className="font-semibold text-foreground">{fileName}</p>
+                            <p className="text-xs text-muted-foreground">Click again to change file</p>
+                        </>
+                     ) : (
+                        <>
+                            <UploadCloud className="w-12 h-12 text-muted-foreground mb-2"/>
+                            <p className="mb-2 text-sm text-muted-foreground">
+                                <span className="font-semibold text-primary">Click to upload</span> or drag and drop
+                            </p>
+                            <p className="text-xs text-muted-foreground">PDF or DOCX (MAX. 5MB)</p>
+                        </>
+                     )}
+                  </label>
+                </div>
+              </FormControl>
+              {form.formState.errors.resume && <FormMessage>{form.formState.errors.resume.message as React.ReactNode}</FormMessage>}
+            </FormItem>
             <Button type="submit" disabled={isLoading || !form.formState.isValid} className="w-full">
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               {isLoading ? 'Analyzing Your Resume...' : 'Get Feedback'}
@@ -220,7 +216,7 @@ export default function ResumeReviewerPage() {
                 </Card>
             </div>
              <div className="text-center">
-                <Button onClick={() => {setResult(null); form.reset()}}>
+                <Button onClick={() => {setResult(null); form.reset(); setFileName(null);}}>
                     Review Another Resume
                 </Button>
             </div>
