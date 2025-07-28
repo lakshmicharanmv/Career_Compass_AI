@@ -186,24 +186,26 @@ export default function Grade10Page() {
     const progress = ((currentQuestionIndex + 1) / assessment.questions.length) * 100;
 
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Assessment Test</CardTitle>
-          <CardDescription>Question {currentQuestionIndex + 1} of {assessment.questions.length}</CardDescription>
-          <Progress value={progress} className="mt-2" />
-        </CardHeader>
-        <CardContent>
-          <p className="font-semibold mb-4">{question.question}</p>
-          <RadioGroup onValueChange={handleAnswerSubmit} key={currentQuestionIndex}>
-            {question.options.map((option, index) => (
-              <div key={index} className="flex items-center space-x-2">
-                <RadioGroupItem value={option} id={`q${currentQuestionIndex}-o${index}`} />
-                <FormLabel htmlFor={`q${currentQuestionIndex}-o${index}`}>{option}</FormLabel>
-              </div>
-            ))}
-          </RadioGroup>
-        </CardContent>
-      </Card>
+      <Form {...form}>
+        <Card>
+          <CardHeader>
+            <CardTitle>Assessment Test</CardTitle>
+            <CardDescription>Question {currentQuestionIndex + 1} of {assessment.questions.length}</CardDescription>
+            <Progress value={progress} className="mt-2" />
+          </CardHeader>
+          <CardContent>
+            <p className="font-semibold mb-4">{question.question}</p>
+            <RadioGroup onValueChange={handleAnswerSubmit} key={currentQuestionIndex}>
+              {question.options.map((option, index) => (
+                <div key={index} className="flex items-center space-x-2">
+                  <RadioGroupItem value={option} id={`q${currentQuestionIndex}-o${index}`} />
+                  <FormLabel htmlFor={`q${currentQuestionIndex}-o${index}`}>{option}</FormLabel>
+                </div>
+              ))}
+            </RadioGroup>
+          </CardContent>
+        </Card>
+      </Form>
     );
   };
   
@@ -400,7 +402,7 @@ export default function Grade10Page() {
         <div className="max-w-4xl mx-auto">
           {recommendation 
             ? renderRecommendation()
-            : (assessment && !testScore)
+            : (assessment && !isLoading && testScore === null)
               ? renderAssessment()
               : renderForm()
           }
