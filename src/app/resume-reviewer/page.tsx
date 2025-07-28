@@ -1,4 +1,3 @@
-
 'use client';
 
 import Link from 'next/link';
@@ -6,7 +5,8 @@ import * as React from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
-import { Bot, ArrowLeft, Loader2, UploadCloud, FileCheck2, FileText, Wand2, Copy, Download } from 'lucide-react';
+import { Bot, ArrowLeft, Loader2, UploadCloud, FileCheck2, FileText, Wand2, Copy, Download, CheckCircle, AlertTriangle } from 'lucide-react';
+import mammoth from 'mammoth';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -27,11 +27,12 @@ import {
 } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { reviewResume, ReviewResumeOutput } from '@/ai/flows/ai-resume-reviewer';
+import { Progress } from '@/components/ui/progress';
 
 const FormSchema = z.object({
   resume: z
     .any()
-    .refine((files) => files?.length > 0, 'Resume is required.')
+    .refine((files) => files?.length === 1, 'Resume is required.')
     .refine((files) => files?.[0]?.size <= 5 * 1024 * 1024, `Max file size is 5MB.`)
     .refine(
       (files) => ['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/msword'].includes(files?.[0]?.type),
@@ -50,8 +51,6 @@ export default function ResumeReviewerPage() {
     resolver: zodResolver(FormSchema),
     mode: 'onChange',
   });
-
-  const fileRef = form.register('resume');
 
   const handleFileRead = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
@@ -88,34 +87,12 @@ export default function ResumeReviewerPage() {
     }
   }
 
-  const handleDownload = () => {
-    if (!result) return;
-    const blob = new Blob([result.improvedResume], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'improved_resume.txt';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  };
-
-  const handleCopy = () => {
-    if (!result) return;
-    navigator.clipboard.writeText(result.improvedResume);
-    toast({
-      title: 'Copied!',
-      description: 'The improved resume content has been copied to your clipboard.',
-    });
-  };
-
   const renderForm = () => (
     <Card className="max-w-2xl mx-auto">
       <CardHeader>
         <CardTitle>AI Resume Reviewer</CardTitle>
         <CardDescription>
-          Upload your resume (PDF or DOCX, max 5MB) to get AI-powered feedback and an ATS-friendly version.
+          Upload your resume (PDF or DOCX, max 5MB) to get AI-powered feedback on how to improve it.
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -129,12 +106,12 @@ export default function ResumeReviewerPage() {
                   <FormLabel>Your Resume</FormLabel>
                   <FormControl>
                     <div className="relative">
-                      <Input
+                       <Input
                         type="file"
                         id="resume-upload"
                         className="hidden"
                         accept=".pdf,.doc,.docx"
-                        {...fileRef}
+                        onChange={(e) => field.onChange(e.target.files)}
                       />
                       <label
                         htmlFor="resume-upload"
@@ -175,46 +152,37 @@ export default function ResumeReviewerPage() {
   const renderResult = () => {
     if (!result) return null;
     return (
-      <div className="max-w-4xl mx-auto grid gap-8 lg:grid-cols-2">
+      <div className="max-w-2xl mx-auto space-y-8">
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Wand2 className="text-primary" /> AI Feedback
+              <Wand2 className="text-primary" /> ATS Score & Analysis
             </CardTitle>
             <CardDescription>
-              Here are the suggestions to improve your resume's impact and ATS compatibility.
+              Your resume has been scored based on its compatibility with Applicant Tracking Systems.
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <div
-              className="p-4 bg-secondary rounded-lg h-96 overflow-y-auto text-sm space-y-4 prose prose-sm max-w-none"
-            >
-                {result.feedback.split('\n').map((line, i) => <p key={i}>{line}</p>)}
+          <CardContent className="space-y-6">
+            <div className="text-center">
+              <p className="text-muted-foreground">Your ATS Score</p>
+              <p className="text-6xl font-bold text-primary">{result.atsScore.toFixed(1)} <span className="text-2xl text-muted-foreground">/ 10</span></p>
+              <Progress value={result.atsScore * 10} className="mt-4" />
+            </div>
+            <div>
+              <h3 className="font-semibold mb-2">Key Improvements:</h3>
+              <ul className="space-y-2 list-inside">
+                {result.improvements.map((item, index) => (
+                  <li key={index} className="flex items-start gap-2">
+                    <CheckCircle className="h-5 w-5 text-green-500 mt-0.5 shrink-0" />
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
             </div>
           </CardContent>
         </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <FileText className="text-primary" /> Improved Resume
-            </CardTitle>
-            <CardDescription>
-              This is the revised, ATS-friendly version of your resume content.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div
-              className="p-4 bg-secondary rounded-lg h-96 overflow-y-auto text-sm space-y-4 prose prose-sm max-w-none"
-            >
-                {result.improvedResume.split('\n').map((line, i) => <p key={i}>{line}</p>)}
-            </div>
-            <div className="mt-4 flex gap-2">
-              <Button onClick={handleCopy}><Copy className="mr-2 h-4 w-4"/> Copy Content</Button>
-              <Button onClick={handleDownload} variant="outline"><Download className="mr-2 h-4 w-4"/> Download as .txt</Button>
-            </div>
-          </CardContent>
-        </Card>
-        <div className="lg:col-span-2 text-center">
+
+        <div className="text-center">
           <Button onClick={() => { setResult(null); form.reset(); }}>
             Upload Another Resume
           </Button>

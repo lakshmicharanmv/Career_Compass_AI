@@ -21,8 +21,8 @@ const ReviewResumeInputSchema = z.object({
 export type ReviewResumeInput = z.infer<typeof ReviewResumeInputSchema>;
 
 const ReviewResumeOutputSchema = z.object({
-  improvedResume: z.string().describe('The improved, ATS-friendly resume.'),
-  feedback: z.string().describe('Feedback on formatting, keyword gaps, and grammar errors.'),
+  atsScore: z.number().min(0).max(10).describe('The ATS score of the resume, from 0 to 10.'),
+  improvements: z.array(z.string()).describe('A list of suggested improvements for the resume.'),
 });
 export type ReviewResumeOutput = z.infer<typeof ReviewResumeOutputSchema>;
 
@@ -34,11 +34,11 @@ const prompt = ai.definePrompt({
   name: 'reviewResumePrompt',
   input: {schema: ReviewResumeInputSchema},
   output: {schema: ReviewResumeOutputSchema},
-  prompt: `You are an expert resume reviewer. You will review the resume and provide feedback on formatting, keyword gaps, and grammar errors. Then, you will generate an improved, ATS-friendly version of the resume.
+  prompt: `You are an expert resume reviewer. Your task is to analyze the provided resume and give it a score based on its compatibility with Applicant Tracking Systems (ATS).
 
 Resume: {{media url=resumeDataUri}}
 
-Respond with the improved resume and your feedback.`,
+Based on your analysis, provide an ATS score from 0 to 10. A score of 10 means the resume is perfectly optimized. Also, provide a list of concrete, actionable improvements.`,
 });
 
 const reviewResumeFlow = ai.defineFlow(
