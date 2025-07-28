@@ -66,7 +66,7 @@ export default function Grade10Page() {
       science: undefined,
       english: undefined,
       social_studies: undefined,
-      optional_subject: '',
+      optional_subject: "",
       optional_marks: undefined,
       takeTest: 'no',
     },
