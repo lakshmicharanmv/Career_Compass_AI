@@ -79,27 +79,27 @@ export default function Home() {
         </DialogContent>
       </Dialog>
       <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container flex h-14 max-w-screen-xl items-center">
-          <Link href="#" className="flex items-center" prefetch={false}>
+        <div className="container flex h-14 max-w-screen-xl items-center justify-between">
+          <Link href="#" className="flex items-center gap-2" prefetch={false}>
             <Bot className="h-6 w-6 text-primary" />
-            <span className="ml-2 font-bold font-headline text-lg">
+            <span className="font-bold font-headline text-lg">
               Career Compass AI
             </span>
           </Link>
-           <nav className="ml-auto flex items-center gap-4">
+           <nav className="flex items-center gap-4">
             {isAuthenticated ? (
-              <>
+              <div className="flex items-center gap-4">
                 <div className="flex items-center gap-2">
                     <User className="h-5 w-5 text-muted-foreground" />
                     <span className="font-medium">{userName}</span>
                 </div>
-                <Button variant="outline" onClick={handleSignOut}>
+                <Button variant="outline" size="sm" onClick={handleSignOut}>
                   <LogOut className="mr-2 h-4 w-4" />
                   Sign Out
                 </Button>
-              </>
+              </div>
             ) : (
-              <>
+              <div className="flex items-center gap-2">
                 <Link href="/signin" passHref>
                   <Button variant="ghost">Sign In</Button>
                 </Link>
@@ -108,7 +108,7 @@ export default function Home() {
                     Get Started
                   </Button>
                 </Link>
-              </>
+              </div>
             )}
           </nav>
         </div>

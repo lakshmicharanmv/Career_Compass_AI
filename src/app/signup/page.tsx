@@ -89,13 +89,19 @@ export default function SignUpPage() {
   return (
     <div className="flex flex-col min-h-screen bg-background">
       <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container flex h-14 max-w-screen-xl items-center">
+        <div className="container flex h-14 max-w-screen-xl items-center justify-between">
           <Link href="/" className="flex items-center" prefetch={false}>
             <Bot className="h-6 w-6 text-primary" />
             <span className="ml-2 font-bold font-headline text-lg">
               Career Compass AI
             </span>
           </Link>
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-muted-foreground">Already have an account?</span>
+            <Link href="/signin" passHref>
+              <Button variant="outline">Sign In</Button>
+            </Link>
+          </div>
         </div>
       </header>
       <main className="flex-1 container flex items-center justify-center py-12 md:py-16">
