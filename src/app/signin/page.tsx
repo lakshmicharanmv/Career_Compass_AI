@@ -58,11 +58,17 @@ export default function SignInPage() {
   function onSubmit(data: FormValues) {
     setIsLoading(true);
     setError(null);
-    console.log("Form submitted", data);
 
     // Simulate API call
     setTimeout(() => {
         const users = JSON.parse(localStorage.getItem("users") || "[]");
+
+        if (users.length === 0) {
+          setError("No accounts found. Please sign up first.");
+          setIsLoading(false);
+          return;
+        }
+
         const user = users.find(
           (u: any) => u.email === data.email && u.password === data.password
         );

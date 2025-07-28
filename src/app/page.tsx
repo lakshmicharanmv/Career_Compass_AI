@@ -22,6 +22,7 @@ import {
   BarChart3,
   Users,
   LogOut,
+  User,
 } from "lucide-react";
 import React from "react";
 import {
@@ -85,9 +86,13 @@ export default function Home() {
               Career Compass AI
             </span>
           </Link>
-           <nav className="ml-auto flex items-center gap-2">
+           <nav className="ml-auto flex items-center gap-4">
             {isAuthenticated ? (
               <>
+                <div className="flex items-center gap-2">
+                    <User className="h-5 w-5 text-muted-foreground" />
+                    <span className="font-medium">{userName}</span>
+                </div>
                 <Button variant="outline" onClick={handleSignOut}>
                   <LogOut className="mr-2 h-4 w-4" />
                   Sign Out
