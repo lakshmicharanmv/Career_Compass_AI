@@ -104,7 +104,7 @@ export default function Home() {
                   <Button variant="ghost">Sign In</Button>
                 </Link>
                 <Link href="/signup" passHref>
-                  <Button className="bg-primary hover:bg-primary/90">
+                  <Button>
                     Get Started
                   </Button>
                 </Link>
@@ -131,7 +131,7 @@ export default function Home() {
                 <div className="flex flex-col gap-2 min-[400px]:flex-row">
                   <Link
                     href="#start"
-                    className="inline-flex h-11 items-center justify-center rounded-md bg-accent px-8 text-sm font-medium text-accent-foreground shadow transition-colors hover:bg-accent/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
+                    className="inline-flex h-11 items-center justify-center rounded-md bg-primary px-8 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
                   >
                     Find Your Path
                   </Link>
@@ -263,8 +263,8 @@ export default function Home() {
             </div>
             <div className="mx-auto grid grid-cols-1 gap-8 py-12 sm:grid-cols-2 lg:grid-cols-4">
               <div className="flex flex-col items-center space-y-2 text-center">
-                <div className="p-3 bg-accent/10 rounded-full transition-transform duration-300 hover:scale-110">
-                  <BrainCircuit className="text-accent h-8 w-8" />
+                <div className="p-3 bg-primary/10 rounded-full transition-transform duration-300 hover:scale-110">
+                  <BrainCircuit className="text-primary h-8 w-8" />
                 </div>
                 <h3 className="text-lg font-bold font-headline">
                   AI Career Advisor
@@ -274,8 +274,8 @@ export default function Home() {
                 </p>
               </div>
               <div className="flex flex-col items-center space-y-2 text-center">
-                <div className="p-3 bg-accent/10 rounded-full transition-transform duration-300 hover:scale-110">
-                  <FileText className="text-accent h-8 w-8" />
+                <div className="p-3 bg-primary/10 rounded-full transition-transform duration-300 hover:scale-110">
+                  <FileText className="text-primary h-8 w-8" />
                 </div>
                 <h3 className="text-lg font-bold font-headline">
                   AI Resume Reviewer
@@ -285,8 +285,8 @@ export default function Home() {
                 </p>
               </div>
               <div className="flex flex-col items-center space-y-2 text-center">
-                <div className="p-3 bg-accent/10 rounded-full transition-transform duration-300 hover:scale-110">
-                  <BarChart3 className="text-accent h-8 w-8" />
+                <div className="p-3 bg-primary/10 rounded-full transition-transform duration-300 hover:scale-110">
+                  <BarChart3 className="text-primary h-8 w-8" />
                 </div>
                 <h3 className="text-lg font-bold font-headline">
                   Career Dashboard
@@ -296,8 +296,8 @@ export default function Home() {
                 </p>
               </div>
               <div className="flex flex-col items-center space-y-2 text-center">
-                <div className="p-3 bg-accent/10 rounded-full transition-transform duration-300 hover:scale-110">
-                  <Users className="text-accent h-8 w-8" />
+                <div className="p-3 bg-primary/10 rounded-full transition-transform duration-300 hover:scale-110">
+                  <Users className="text-primary h-8 w-8" />
                 </div>
                 <h3 className="text-lg font-bold font-headline">
                   AI Career Counselor
