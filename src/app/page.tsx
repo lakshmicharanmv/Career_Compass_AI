@@ -114,7 +114,7 @@ export default function Home() {
         </div>
       </header>
       <main className="flex-1">
-        <section className="w-full pt-8 md:pt-16 lg:pt-16 pb-8 md:pb-16 lg:pb-16">
+        <section className="w-full pb-8 md:pb-16 lg:pb-16">
           <div className="container px-4 md:px-6">
             <div className="grid gap-6 lg:grid-cols-[1fr_550px] lg:gap-12 xl:grid-cols-[1fr_650px]">
               <div className="flex flex-col justify-center space-y-4">
@@ -335,3 +335,5 @@ export default function Home() {
     </div>
   );
 }
+
+    
