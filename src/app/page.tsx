@@ -114,40 +114,27 @@ export default function Home() {
         </div>
       </header>
       <main className="flex-1">
-        <section className="w-full py-10">
-          <div className="container px-4 md:px-6">
-            <div className="grid gap-6 lg:grid-cols-[1fr_550px] lg:gap-12 xl:grid-cols-[1fr_650px]">
-              <div className="flex flex-col justify-center space-y-4">
-                <div className="space-y-4">
-                  <h1 className="font-headline text-4xl font-bold tracking-tighter text-primary sm:text-5xl md:text-6xl xl:text-7xl/none">
-                    {isAuthenticated ? `Welcome, ${userName}! ` : ''}Navigate Your Future with AI
-                  </h1>
-                  <p className="max-w-[600px] text-muted-foreground md:text-xl">
-                    Career Compass AI provides personalized guidance for students
-                    and professionals. Discover your path, build a winning
-                    resume, and unlock your potential.
-                  </p>
-                </div>
-                <div className="flex flex-col gap-2 min-[400px]:flex-row">
-                  <Link
-                    href="#start"
-                    className="inline-flex h-11 items-center justify-center rounded-md bg-primary px-8 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
-                  >
-                    Find Your Path
-                  </Link>
-                  <Button variant="outline" size="lg">
-                    Learn More
-                  </Button>
-                </div>
-              </div>
-              <Image
-                src="/photo/hero-image.png"
-                width="650"
-                height="650"
-                alt="Hero Image"
-                data-ai-hint="futuristic abstract"
-                className="mx-auto aspect-square overflow-hidden rounded-xl object-cover"
-              />
+        <section className="relative w-full h-screen bg-cover bg-center bg-no-repeat" style={{backgroundImage: "url('/photo/hero-image.png')"}}>
+          <div className="absolute inset-0 bg-black/50" />
+          <div className="relative container h-full flex flex-col items-center justify-center text-center text-white space-y-4">
+            <h1 className="font-headline text-4xl font-bold tracking-tighter sm:text-5xl md:text-6xl xl:text-7xl/none text-shadow-lg">
+              {isAuthenticated ? `Welcome, ${userName}! ` : ''}Navigate Your Future with AI
+            </h1>
+            <p className="max-w-[600px] md:text-xl text-shadow">
+              Career Compass AI provides personalized guidance for students
+              and professionals. Discover your path, build a winning
+              resume, and unlock your potential.
+            </p>
+            <div className="flex flex-col gap-2 min-[400px]:flex-row">
+              <Link
+                href="#start"
+                className="inline-flex h-11 items-center justify-center rounded-md bg-primary px-8 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
+              >
+                Find Your Path
+              </Link>
+              <Button variant="outline" size="lg" className="bg-transparent text-white border-white hover:bg-white hover:text-black">
+                Learn More
+              </Button>
             </div>
           </div>
         </section>
@@ -335,4 +322,5 @@ export default function Home() {
     </div>
   );
 
+    
     
