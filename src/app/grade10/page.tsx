@@ -71,10 +71,12 @@ export default function Grade10Page() {
     },
   });
 
-  const marks = form.watch(['math', 'science', 'english', 'social_studies']);
+  const math = form.watch('math');
+  const science = form.watch('science');
+  const english = form.watch('english');
+  const social_studies = form.watch('social_studies');
 
   React.useEffect(() => {
-    const [math, science, english, social_studies] = marks;
     if (
       typeof math === 'number' &&
       typeof science === 'number' &&
@@ -82,10 +84,10 @@ export default function Grade10Page() {
       typeof social_studies === 'number'
     ) {
       const total = math + science + english + social_studies;
-      const calculatedPercentage = total / 4;
+      const calculatedPercentage = total > 0 ? total / 4 : 0;
       setPercentage(calculatedPercentage);
     }
-  }, [marks]);
+  }, [math, science, english, social_studies]);
 
 
   async function onSubmit(data: FormValues) {
@@ -206,24 +208,26 @@ export default function Grade10Page() {
 
     return (
       <Form {...form}>
-        <Card>
-          <CardHeader>
-            <CardTitle>Assessment Test</CardTitle>
-            <CardDescription>Question {currentQuestionIndex + 1} of {assessment.questions.length}</CardDescription>
-            <Progress value={progress} className="mt-2" />
-          </CardHeader>
-          <CardContent>
-            <p className="font-semibold mb-4">{question.question}</p>
-            <RadioGroup onValueChange={handleAnswerSubmit} key={currentQuestionIndex}>
-              {question.options.map((option, index) => (
-                <div key={index} className="flex items-center space-x-2">
-                  <RadioGroupItem value={option} id={`q${currentQuestionIndex}-o${index}`} />
-                  <FormLabel htmlFor={`q${currentQuestionIndex}-o${index}`}>{option}</FormLabel>
-                </div>
-              ))}
-            </RadioGroup>
-          </CardContent>
-        </Card>
+        <form>
+          <Card>
+            <CardHeader>
+              <CardTitle>Assessment Test</CardTitle>
+              <CardDescription>Question {currentQuestionIndex + 1} of {assessment.questions.length}</CardDescription>
+              <Progress value={progress} className="mt-2" />
+            </CardHeader>
+            <CardContent>
+              <p className="font-semibold mb-4">{question.question}</p>
+              <RadioGroup onValueChange={handleAnswerSubmit} key={currentQuestionIndex}>
+                {question.options.map((option, index) => (
+                  <div key={index} className="flex items-center space-x-2">
+                    <RadioGroupItem value={option} id={`q${currentQuestionIndex}-o${index}`} />
+                    <FormLabel htmlFor={`q${currentQuestionIndex}-o${index}`}>{option}</FormLabel>
+                  </div>
+                ))}
+              </RadioGroup>
+            </CardContent>
+          </Card>
+        </form>
       </Form>
     );
   };
