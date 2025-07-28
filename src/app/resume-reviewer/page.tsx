@@ -56,7 +56,6 @@ export default function ResumeReviewerPage() {
     resolver: zodResolver(FormSchema),
   });
 
-  const fileRef = form.register('resume');
 
   const readFileAsDataURL = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
@@ -121,7 +120,6 @@ export default function ResumeReviewerPage() {
                         id="resume-upload"
                         className="hidden"
                         accept=".pdf,.docx"
-                        {...fileRef}
                         onChange={(e) => {
                             field.onChange(e.target.files);
                             setFileName(e.target.files?.[0]?.name ?? null)
