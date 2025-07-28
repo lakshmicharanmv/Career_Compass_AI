@@ -31,9 +31,8 @@ import { useToast } from '@/hooks/use-toast';
 import { generateAssessmentQuestions, AssessmentQuestionsOutput } from '@/ai/flows/ai-assessment-generation';
 import { recommendUndergraduateOptions, UndergraduateOptionsOutput } from '@/ai/flows/undergraduate-career-advisor';
 import { Progress } from '@/components/ui/progress';
-import { Textarea } from '@/components/ui/textarea';
 
-const degreeData = {
+const degreeData: Record<string, Record<string, string[]>> = {
   Science: {
     'B.Tech/B.E.': ['Computer Science', 'Mechanical Engineering', 'Civil Engineering', 'Electrical Engineering', 'Electronics & Communication', 'Information Technology'],
     'MBBS': ['General Medicine', 'Surgery'],
@@ -86,8 +85,11 @@ export default function UndergraduatePage() {
   const academicForm = useForm<AcademicFormValues>({ 
     resolver: zodResolver(academicSchema),
     defaultValues: {
+        tenthPercentage: undefined,
+        twelfthPercentage: undefined,
         degreeName: '',
         specialization: '',
+        currentGrade: undefined,
     }
   });
   const skillsForm = useForm<SkillsFormValues>({ resolver: zodResolver(skillsSchema) });
@@ -225,7 +227,7 @@ export default function UndergraduatePage() {
                     <Select onValueChange={field.onChange} value={field.value} disabled={!watchedStream}>
                         <FormControl><SelectTrigger><SelectValue placeholder="Select degree" /></SelectTrigger></FormControl>
                         <SelectContent>
-                            {watchedStream && Object.keys(degreeData[watchedStream]).map(degree => (
+                            {watchedStream && degreeData[watchedStream] && Object.keys(degreeData[watchedStream]).map(degree => (
                                 <SelectItem key={degree} value={degree}>{degree}</SelectItem>
                             ))}
                         </SelectContent>
@@ -265,16 +267,30 @@ export default function UndergraduatePage() {
     <Card>
       <CardHeader>
         <CardTitle>Step 2: Your Skills</CardTitle>
-        <CardDescription>List your technical and soft skills, separated by commas.</CardDescription>
+        <CardDescription>
+          Based on your degree, list your skills. Please separate each skill with a comma.
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <Form {...skillsForm}>
           <form onSubmit={skillsForm.handleSubmit(handleSkillsSubmit)} className="space-y-6">
             <FormField name="technical" control={skillsForm.control} render={({ field }) => (
-              <FormItem><FormLabel>Technical Skills</FormLabel><FormControl><Textarea placeholder="e.g., Java, Python, CAD, Legal Research" {...field} /></FormControl><FormMessage /></FormItem>
+              <FormItem>
+                <FormLabel>Technical Skills</FormLabel>
+                <FormControl>
+                  <Input placeholder="e.g., Java, CAD, Legal Research, Photoshop" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
             )} />
             <FormField name="soft" control={skillsForm.control} render={({ field }) => (
-                <FormItem><FormLabel>Soft Skills</FormLabel><FormControl><Textarea placeholder="e.g., Communication, Leadership, Teamwork" {...field} /></FormControl><FormMessage /></FormItem>
+                <FormItem>
+                  <FormLabel>Soft Skills</FormLabel>
+                  <FormControl>
+                    <Input placeholder="e.g., Communication, Leadership, Teamwork" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
             )} />
             <div className="flex gap-4">
               <Button variant="outline" onClick={() => setCurrentStep(1)}>Back</Button>
@@ -392,12 +408,12 @@ export default function UndergraduatePage() {
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
-      <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container flex h-14 max-w-screen-xl items-center justify-between">
-          <Link href="/" className="flex items-center" prefetch={false}>
+       <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <div className="container flex h-14 max-w-screen-xl items-center">
+          <Link href="/" className="mr-auto flex items-center gap-2" prefetch={false}>
             <Bot className="h-6 w-6 text-primary" />
-            <span className="ml-2 font-bold font-headline text-lg">
-              Career Compass AI
+            <span className="font-bold font-headline text-lg">
+               Career Compass AI
             </span>
           </Link>
         </div>
@@ -420,3 +436,5 @@ export default function UndergraduatePage() {
     </div>
   );
 }
+
+    
