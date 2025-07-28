@@ -375,7 +375,7 @@ export default function Grade10Page() {
                   <FormLabel>Do you want to take an assessment test?</FormLabel>
                   <FormControl>
                     <RadioGroup
-                      onValue-change={field.onChange}
+                      onValueChange={field.onChange}
                       defaultValue={field.value}
                       className="flex flex-col space-y-1"
                     >
@@ -446,5 +446,3 @@ export default function Grade10Page() {
     </div>
   );
 }
-
-    
