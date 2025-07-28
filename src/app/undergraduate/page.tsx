@@ -92,7 +92,13 @@ export default function UndergraduatePage() {
         currentGrade: undefined,
     }
   });
-  const skillsForm = useForm<SkillsFormValues>({ resolver: zodResolver(skillsSchema) });
+  const skillsForm = useForm<SkillsFormValues>({ 
+      resolver: zodResolver(skillsSchema),
+      defaultValues: {
+        technical: '',
+        soft: '',
+      }
+   });
 
   const watchedStream = academicForm.watch('twelfthStream');
   const watchedDegree = academicForm.watch('degreeName');
@@ -172,6 +178,7 @@ export default function UndergraduatePage() {
       setRecommendation(result);
     } catch (error) {
       toast({ variant: 'destructive', title: 'Error', description: 'Could not get recommendations.' });
+      console.error(error);
     } finally {
       setIsLoading(false);
     }
@@ -224,7 +231,7 @@ export default function UndergraduatePage() {
               <FormField name="degreeName" control={academicForm.control} render={({ field }) => (
                 <FormItem>
                     <FormLabel>Degree Name</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value} disabled={!watchedStream}>
+                    <Select onValueChange={field.onChange} value={field.value || ''} disabled={!watchedStream}>
                         <FormControl><SelectTrigger><SelectValue placeholder="Select degree" /></SelectTrigger></FormControl>
                         <SelectContent>
                             {watchedStream && degreeData[watchedStream] && Object.keys(degreeData[watchedStream]).map(degree => (
@@ -239,10 +246,10 @@ export default function UndergraduatePage() {
               <FormField name="specialization" control={academicForm.control} render={({ field }) => (
                 <FormItem>
                     <FormLabel>Specialization</FormLabel>
-                     <Select onValueChange={field.onChange} value={field.value} disabled={!watchedDegree}>
+                     <Select onValueChange={field.onChange} value={field.value || ''} disabled={!watchedDegree}>
                         <FormControl><SelectTrigger><SelectValue placeholder="Select specialization" /></SelectTrigger></FormControl>
                         <SelectContent>
-                            {watchedStream && watchedDegree && degreeData[watchedStream][watchedDegree] &&
+                            {watchedStream && watchedDegree && degreeData[watchedStream]?.[watchedDegree] &&
                                 degreeData[watchedStream][watchedDegree].map(spec => (
                                 <SelectItem key={spec} value={spec}>{spec}</SelectItem>
                             ))}
@@ -440,3 +447,5 @@ export default function UndergraduatePage() {
     </div>
   );
 }
+
+    
