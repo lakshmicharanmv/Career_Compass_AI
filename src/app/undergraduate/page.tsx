@@ -25,6 +25,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { Badge } from "@/components/ui/badge";
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
@@ -32,23 +41,72 @@ import { generateAssessmentQuestions, AssessmentQuestionsOutput } from '@/ai/flo
 import { recommendUndergraduateOptions, UndergraduateOptionsOutput } from '@/ai/flows/undergraduate-career-advisor';
 import { Progress } from '@/components/ui/progress';
 
-const degreeData: Record<string, Record<string, string[]>> = {
+const degreeData: Record<string, Record<string, Record<string, { skills: string[] }>>> = {
   Science: {
-    'B.Tech/B.E.': ['Computer Science', 'Mechanical Engineering', 'Civil Engineering', 'Electrical Engineering', 'Electronics & Communication', 'Information Technology'],
-    'MBBS': ['General Medicine', 'Surgery'],
-    'B.Sc': ['Physics', 'Chemistry', 'Mathematics', 'Biology', 'Biotechnology', 'Agriculture', 'Computer Science'],
-    'B.Pharm': ['Pharmacy'],
-    'BDS': ['Dental Surgery'],
+    'B.Tech/B.E.': {
+      'Computer Science': { skills: ['Java', 'Python', 'C++', 'Data Structures', 'Algorithms', 'JavaScript', 'React', 'Node.js', 'SQL', 'Git'] },
+      'Mechanical Engineering': { skills: ['AutoCAD', 'SolidWorks', 'MATLAB', 'Thermodynamics', 'Fluid Mechanics', 'CATIA'] },
+      'Civil Engineering': { skills: ['AutoCAD', 'STAAD.Pro', 'Surveying', 'Structural Analysis', 'Concrete Technology'] },
+      'Electrical Engineering': { skills: ['MATLAB', 'PSpice', 'VHDL', 'Circuit Design', 'Power Systems'] },
+      'Electronics & Communication': { skills: ['VHDL', 'Verilog', 'Embedded C', 'DSP', 'Microcontrollers'] },
+      'Information Technology': { skills: ['Java', 'Python', 'SQL', 'JavaScript', 'Networking', 'Cybersecurity'] },
+    },
+    'MBBS': {
+      'General Medicine': { skills: ['Clinical Diagnosis', 'Pharmacology', 'Anatomy', 'Physiology', 'Patient Care'] },
+      'Surgery': { skills: ['Surgical Procedures', 'Anatomy', 'Sterilization Techniques', 'Post-operative Care'] },
+    },
+    'B.Sc': {
+      'Physics': { skills: ['Quantum Mechanics', 'Electromagnetism', 'MATLAB', 'Experimental Physics'] },
+      'Chemistry': { skills: ['Organic Chemistry', 'Inorganic Chemistry', 'Lab Techniques', 'Spectroscopy'] },
+      'Mathematics': { skills: ['Calculus', 'Linear Algebra', 'Statistics', 'R', 'Python'] },
+      'Biology': { skills: ['Genetics', 'Microbiology', 'Molecular Biology', 'Lab Techniques'] },
+      'Biotechnology': { skills: ['Genetic Engineering', 'PCR', 'Cell Culture', 'Bioinformatics'] },
+      'Agriculture': { skills: ['Soil Science', 'Horticulture', 'Crop Management', 'Agri-business'] },
+      'Computer Science': { skills: ['C++', 'Java', 'Web Development', 'Database Management', 'Networking'] },
+    },
+    'B.Pharm': {
+      'Pharmacy': { skills: ['Pharmacology', 'Pharmaceutical Chemistry', 'Dispensing', 'Regulatory Affairs'] },
+    },
+    'BDS': {
+      'Dental Surgery': { skills: ['Oral Diagnosis', 'Prosthodontics', 'Periodontics', 'Dental Materials'] },
+    },
   },
   Commerce: {
-    'B.Com': ['Accounting and Finance', 'Taxation', 'Banking and Insurance', 'General Commerce'],
-    'BBA': ['Marketing', 'Finance', 'Human Resources', 'International Business'],
-    'BMS': ['Management Studies'],
+    'B.Com': {
+      'Accounting and Finance': { skills: ['Tally', 'GST', 'Financial Accounting', 'Auditing', 'MS Excel'] },
+      'Taxation': { skills: ['Direct Tax', 'Indirect Tax', 'GST', 'Tally'] },
+      'Banking and Insurance': { skills: ['Financial Products', 'Risk Management', 'Customer Service'] },
+      'General Commerce': { skills: ['MS Office', 'Business Communication', 'Basic Accounting'] },
+    },
+    'BBA': {
+      'Marketing': { skills: ['Digital Marketing', 'SEO', 'Market Research', 'Salesforce'] },
+      'Finance': { skills: ['Financial Modeling', 'MS Excel', 'Capital Markets', 'Valuation'] },
+      'Human Resources': { skills: ['Recruitment', 'HR Policies', 'Performance Management'] },
+      'International Business': { skills: ['Export-Import', 'Global Strategy', 'Foreign Trade Policy'] },
+    },
+    'BMS': {
+      'Management Studies': { skills: ['Project Management', 'Business Analytics', 'MS Office Suite'] },
+    },
   },
   Arts: {
-    'B.A.': ['History', 'Psychology', 'Sociology', 'Political Science', 'English Literature', 'Journalism'],
-    'B.Des': ['Fashion Design', 'Graphic Design', 'Interior Design'],
-    'LLB': ['Corporate Law', 'Criminal Law', 'Civil Law'],
+    'B.A.': {
+      'History': { skills: ['Archival Research', 'Critical Analysis', 'Historiography'] },
+      'Psychology': { skills: ['SPSS', 'Counseling', 'Research Methods', 'Cognitive Assessment'] },
+      'Sociology': { skills: ['Qualitative Research', 'Quantitative Analysis', 'Social Theory'] },
+      'Political Science': { skills: ['Public Policy Analysis', 'Comparative Politics', 'International Relations'] },
+      'English Literature': { skills: ['Creative Writing', 'Critical Reading', 'Editing', 'Content Creation'] },
+      'Journalism': { skills: ['Reporting', 'Video Editing', 'Content Management Systems (CMS)', 'Social Media'] },
+    },
+    'B.Des': {
+      'Fashion Design': { skills: ['Adobe Illustrator', 'Pattern Making', 'Draping', 'Textile Knowledge'] },
+      'Graphic Design': { skills: ['Adobe Photoshop', 'Illustrator', 'InDesign', 'UI/UX Principles'] },
+      'Interior Design': { skills: ['AutoCAD', 'SketchUp', '3ds Max', 'Space Planning'] },
+    },
+    'LLB': {
+      'Corporate Law': { skills: ['Contract Drafting', 'Legal Research', 'Due Diligence', 'M&A'] },
+      'Criminal Law': { skills: ['Legal Research', 'Mooting', 'Drafting Pleadings', 'IPC/CrPC'] },
+      'Civil Law': { skills: ['Drafting', 'Legal Notice', 'Client Counseling', 'CPC'] },
+    },
   },
 };
 
@@ -63,7 +121,9 @@ const academicSchema = z.object({
 });
 
 const skillsSchema = z.object({
-    technical: z.string().min(1, 'Please list at least one technical skill.'),
+    technical: z.array(z.string()).refine(value => value.some(item => item), {
+        message: "You have to select at least one technical skill.",
+    }),
     soft: z.string().min(1, 'Please list at least one soft skill.'),
 });
 
@@ -95,13 +155,14 @@ export default function UndergraduatePage() {
   const skillsForm = useForm<SkillsFormValues>({ 
       resolver: zodResolver(skillsSchema),
       defaultValues: {
-        technical: '',
+        technical: [],
         soft: '',
       }
    });
 
   const watchedStream = academicForm.watch('twelfthStream');
   const watchedDegree = academicForm.watch('degreeName');
+  const watchedSpecialization = academicForm.watch('specialization');
 
   React.useEffect(() => {
     if (watchedStream) {
@@ -123,7 +184,11 @@ export default function UndergraduatePage() {
   };
 
   const handleSkillsSubmit = (data: SkillsFormValues) => {
-    setSkillsData(data);
+    const formattedData = { ...data, technical: data.technical.join(', ') };
+    setSkillsData({
+      technical: data.technical.join(', '),
+      soft: data.soft,
+    });
     setCurrentStep(3);
   };
 
@@ -161,6 +226,7 @@ export default function UndergraduatePage() {
       });
       const finalScore = (score / (assessment?.questions.length ?? 1)) * 100;
       setTestScore(finalScore);
+      setCurrentStep(5);
       getRecommendations(finalScore);
     }
   };
@@ -250,7 +316,7 @@ export default function UndergraduatePage() {
                         <FormControl><SelectTrigger><SelectValue placeholder="Select specialization" /></SelectTrigger></FormControl>
                         <SelectContent>
                             {watchedStream && watchedDegree && degreeData[watchedStream]?.[watchedDegree] &&
-                                degreeData[watchedStream][watchedDegree].map(spec => (
+                                Object.keys(degreeData[watchedStream][watchedDegree]).map(spec => (
                                 <SelectItem key={spec} value={spec}>{spec}</SelectItem>
                             ))}
                         </SelectContent>
@@ -270,7 +336,12 @@ export default function UndergraduatePage() {
     </Card>
   );
 
-  const renderSkillsForm = () => (
+  const renderSkillsForm = () => {
+    const technicalSkillsOptions = academicData?.twelfthStream && academicData.degreeName && academicData.specialization
+      ? degreeData[academicData.twelfthStream]?.[academicData.degreeName]?.[academicData.specialization]?.skills || []
+      : [];
+    
+    return (
     <Card>
       <CardHeader>
         <CardTitle>Step 2: Your Skills</CardTitle>
@@ -281,15 +352,44 @@ export default function UndergraduatePage() {
       <CardContent>
         <Form {...skillsForm}>
           <form onSubmit={skillsForm.handleSubmit(handleSkillsSubmit)} className="space-y-6">
-            <FormField name="technical" control={skillsForm.control} render={({ field }) => (
-              <FormItem>
-                <FormLabel>Technical Skills</FormLabel>
-                <FormControl>
-                  <Input placeholder="e.g., Java, CAD, Legal Research, Photoshop" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )} />
+            <FormField
+              control={skillsForm.control}
+              name="technical"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Technical Skills</FormLabel>
+                   <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="outline" className="w-full justify-start font-normal">
+                        {field.value?.length > 0 ? (
+                          <div className="flex gap-1 flex-wrap">
+                            {field.value.map((skill) => <Badge key={skill}>{skill}</Badge>)}
+                          </div>
+                        ) : 'Select your technical skills'}
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="w-[--radix-dropdown-menu-trigger-width]">
+                      <DropdownMenuLabel>Suggested Skills</DropdownMenuLabel>
+                      <DropdownMenuSeparator />
+                      {technicalSkillsOptions.map((skill) => (
+                        <DropdownMenuCheckboxItem
+                          key={skill}
+                          checked={field.value?.includes(skill)}
+                          onCheckedChange={(checked) => {
+                            return checked
+                              ? field.onChange([...(field.value || []), skill])
+                              : field.onChange(field.value?.filter((value) => value !== skill))
+                          }}
+                        >
+                          {skill}
+                        </DropdownMenuCheckboxItem>
+                      ))}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             <FormField name="soft" control={skillsForm.control} render={({ field }) => (
                 <FormItem>
                   <FormLabel>Soft Skills</FormLabel>
@@ -307,7 +407,8 @@ export default function UndergraduatePage() {
         </Form>
       </CardContent>
     </Card>
-  );
+    );
+  };
   
   const renderAssessmentChoice = () => (
       <Card>
