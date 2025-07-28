@@ -51,8 +51,10 @@ export default function ResumeReviewerPage() {
 
   const form = useForm<FormValues>({
     resolver: zodResolver(FormSchema),
-    mode: 'onBlur', // Validate on blur to give users a chance to select a file
+    mode: 'onBlur',
   });
+  
+  const fileRef = form.register('resume');
 
   const readFileAsDataURL = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
@@ -92,6 +94,10 @@ export default function ResumeReviewerPage() {
       setTimeout(() => setCopied(false), 2000);
     }
   };
+  
+  const fileList = form.watch('resume');
+  const fileName = fileList?.[0]?.name;
+
 
   const renderForm = () => (
     <Card className="max-w-2xl mx-auto">
@@ -104,51 +110,43 @@ export default function ResumeReviewerPage() {
       <CardContent>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <FormField
-              control={form.control}
-              name="resume"
-              render={({ field }) => {
-                const fileName = field.value?.[0]?.name;
-                return (
-                  <FormItem>
-                    <FormLabel>Your Resume</FormLabel>
-                    <FormControl>
-                      <div className="relative">
-                        <Input
-                          type="file"
-                          id="resume-upload"
-                          className="hidden"
-                          accept=".pdf,.doc,.docx"
-                          onChange={(e) => field.onChange(e.target.files)}
-                          onBlur={field.onBlur}
-                        />
-                        <label
-                          htmlFor="resume-upload"
-                          className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed rounded-lg cursor-pointer bg-secondary hover:bg-muted"
-                        >
-                          {fileName ? (
-                            <>
-                              <FileCheck2 className="w-12 h-12 text-green-500 mb-2" />
-                              <p className="font-semibold text-foreground">{fileName}</p>
-                              <p className="text-xs text-muted-foreground">Click again to change file</p>
-                            </>
-                          ) : (
-                            <>
-                              <UploadCloud className="w-12 h-12 text-muted-foreground mb-2" />
-                              <p className="mb-2 text-sm text-muted-foreground">
-                                <span className="font-semibold text-primary">Click to upload</span> or drag and drop
-                              </p>
-                              <p className="text-xs text-muted-foreground">PDF, DOC, or DOCX (MAX. 5MB)</p>
-                            </>
-                          )}
-                        </label>
-                      </div>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                );
-              }}
-            />
+             <FormItem>
+              <FormLabel>Your Resume</FormLabel>
+              <FormControl>
+                <div className="relative">
+                  <Input
+                    type="file"
+                    id="resume-upload"
+                    className="hidden"
+                    accept=".pdf,.doc,.docx"
+                    {...fileRef}
+                  />
+                  <label
+                    htmlFor="resume-upload"
+                    className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed rounded-lg cursor-pointer bg-secondary hover:bg-muted"
+                  >
+                    {fileName ? (
+                      <>
+                        <FileCheck2 className="w-12 h-12 text-green-500 mb-2" />
+                        <p className="font-semibold text-foreground">{fileName}</p>
+                        <p className="text-xs text-muted-foreground">Click again to change file</p>
+                      </>
+                    ) : (
+                      <>
+                        <UploadCloud className="w-12 h-12 text-muted-foreground mb-2" />
+                        <p className="mb-2 text-sm text-muted-foreground">
+                          <span className="font-semibold text-primary">Click to upload</span> or drag and drop
+                        </p>
+                        <p className="text-xs text-muted-foreground">PDF, DOC, or DOCX (MAX. 5MB)</p>
+                      </>
+                    )}
+                  </label>
+                </div>
+              </FormControl>
+              <FormMessage>
+                {form.formState.errors.resume?.message as React.ReactNode}
+              </FormMessage>
+            </FormItem>
             <Button type="submit" disabled={isLoading || !form.formState.isValid} className="w-full">
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               {isLoading ? 'Analyzing Your Resume...' : 'Get Feedback'}
