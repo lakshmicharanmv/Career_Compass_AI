@@ -5,9 +5,7 @@ import * as React from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
-import { Bot, ArrowLeft, Loader2, UploadCloud, FileCheck2, FileText, Wand2, Copy, Download, CheckCircle, AlertTriangle } from 'lucide-react';
-import mammoth from 'mammoth';
-
+import { Bot, ArrowLeft, Loader2, UploadCloud, FileCheck2, Wand2, CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Form,
@@ -52,6 +50,8 @@ export default function ResumeReviewerPage() {
     mode: 'onChange',
   });
 
+  const fileRef = form.register('resume');
+
   const handleFileRead = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -86,6 +86,10 @@ export default function ResumeReviewerPage() {
       setIsLoading(false);
     }
   }
+  
+  const resumeFile = form.watch('resume');
+  const fileName = resumeFile?.[0]?.name;
+
 
   const renderForm = () => (
     <Card className="max-w-2xl mx-auto">
@@ -111,16 +115,16 @@ export default function ResumeReviewerPage() {
                         id="resume-upload"
                         className="hidden"
                         accept=".pdf,.doc,.docx"
-                        onChange={(e) => field.onChange(e.target.files)}
+                        {...fileRef}
                       />
                       <label
                         htmlFor="resume-upload"
                         className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed rounded-lg cursor-pointer bg-secondary hover:bg-muted"
                       >
-                        {field.value?.[0]?.name ? (
+                        {fileName ? (
                           <>
                             <FileCheck2 className="w-12 h-12 text-green-500 mb-2" />
-                            <p className="font-semibold text-foreground">{field.value[0].name}</p>
+                            <p className="font-semibold text-foreground">{fileName}</p>
                             <p className="text-xs text-muted-foreground">Click again to change file</p>
                           </>
                         ) : (
