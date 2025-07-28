@@ -79,8 +79,6 @@ export default function Home() {
         </DialogContent>
       </Dialog>
       <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-
-
         <div className="container flex h-14 max-w-screen-xl items-center justify-between">
           <Link href="#" className="flex items-center gap-2" prefetch={false}>
             <Bot className="h-6 w-6 text-primary" />
@@ -116,7 +114,7 @@ export default function Home() {
         </div>
       </header>
       <main className="flex-1">
-        <section className="w-full py-8">
+        <section className="w-full py-10">
           <div className="container px-4 md:px-6">
             <div className="grid gap-6 lg:grid-cols-[1fr_550px] lg:gap-12 xl:grid-cols-[1fr_650px]">
               <div className="flex flex-col justify-center space-y-4">
@@ -143,10 +141,10 @@ export default function Home() {
                 </div>
               </div>
               <Image
-                src="https://placehold.co/650x650.png"
+                src="/photo/hero-image.png"
                 width="650"
                 height="650"
-                alt="AI helping with career choices"
+                alt="Hero Image"
                 data-ai-hint="futuristic abstract"
                 className="mx-auto aspect-square overflow-hidden rounded-xl object-cover"
               />
@@ -336,4 +334,5 @@ export default function Home() {
       </footer>
     </div>
   );
-}
+
+    
