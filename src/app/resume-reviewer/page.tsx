@@ -6,7 +6,8 @@ import * as React from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
-import { Bot, ArrowLeft, Loader2, Sparkles, UploadCloud, FileCheck2, Clipboard, Check, BookText, MessageSquare } from 'lucide-react';
+import { Bot, ArrowLeft, Loader2, UploadCloud, FileCheck2, BookText } from 'lucide-react';
+import * as mammoth from 'mammoth';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -26,9 +27,6 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { reviewResume, ReviewResumeOutput } from '@/ai/flows/ai-resume-reviewer';
-import { Textarea } from '@/components/ui/textarea';
-import { Badge } from '@/components/ui/badge';
 
 const FormSchema = z.object({
   resume: z
@@ -46,61 +44,61 @@ type FormValues = z.infer<typeof FormSchema>;
 export default function ResumeReviewerPage() {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = React.useState(false);
-  const [result, setResult] = React.useState<ReviewResumeOutput | null>(null);
-  const [copied, setCopied] = React.useState(false);
+  const [resumeContent, setResumeContent] = React.useState<string | null>(null);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(FormSchema),
     mode: 'onChange', 
   });
   
-  const readFileAsDataURL = (file: File): Promise<string> => {
+  const handleFileRead = (file: File): Promise<ArrayBuffer> => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
-      reader.onloadend = () => resolve(reader.result as string);
+      reader.onload = (event) => resolve(event.target?.result as ArrayBuffer);
       reader.onerror = reject;
-      reader.readAsDataURL(file);
+      reader.readAsArrayBuffer(file);
     });
   };
 
   async function onSubmit(data: FormValues) {
     setIsLoading(true);
-    setResult(null);
+    setResumeContent(null);
 
     try {
       const file = data.resume[0];
       if (file) {
-        const resumeDataUri = await readFileAsDataURL(file);
-        const aiResult = await reviewResume({ resumeDataUri });
-        setResult(aiResult);
+        if (file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' || file.type === 'application/msword') {
+          const arrayBuffer = await handleFileRead(file);
+          const result = await mammoth.convertToHtml({ arrayBuffer });
+          setResumeContent(result.value);
+        } else if (file.type === 'application/pdf') {
+          setResumeContent('<p>PDF text extraction is not yet supported. Please upload a DOCX file.</p>');
+        } else {
+            toast({
+                variant: 'destructive',
+                title: 'Unsupported file type',
+                description: 'Please upload a DOCX or PDF file.'
+            });
+        }
       }
     } catch (error) {
       toast({
         variant: 'destructive',
         title: 'Uh oh! Something went wrong.',
-        description: 'There was a problem with your request. Please try again.',
+        description: 'There was a problem reading your resume. Please try again.',
       });
       console.error(error);
     } finally {
       setIsLoading(false);
     }
   }
-  
-  const handleCopy = () => {
-    if (result?.improvedResume) {
-      navigator.clipboard.writeText(result.improvedResume);
-      setCopied(true);
-      toast({ title: "Copied to clipboard!"});
-      setTimeout(() => setCopied(false), 2000);
-    }
-  };
 
   const renderForm = () => (
     <Card className="max-w-2xl mx-auto">
       <CardHeader>
-        <CardTitle>AI Resume Reviewer</CardTitle>
+        <CardTitle>Resume Viewer</CardTitle>
         <CardDescription>
-          Upload your resume (PDF, DOC, or DOCX, max 5MB) to get AI-powered feedback and an improved, ATS-friendly version.
+          Upload your resume (DOCX, max 5MB) to view its content directly in the browser.
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -139,7 +137,7 @@ export default function ResumeReviewerPage() {
                             <p className="mb-2 text-sm text-muted-foreground">
                               <span className="font-semibold text-primary">Click to upload</span> or drag and drop
                             </p>
-                            <p className="text-xs text-muted-foreground">PDF, DOC, or DOCX (MAX. 5MB)</p>
+                            <p className="text-xs text-muted-foreground">PDF or DOCX (MAX. 5MB)</p>
                           </>
                         )}
                       </label>
@@ -151,7 +149,7 @@ export default function ResumeReviewerPage() {
             />
             <Button type="submit" disabled={isLoading || !form.formState.isValid} className="w-full">
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {isLoading ? 'Analyzing Your Resume...' : 'Get Feedback'}
+              {isLoading ? 'Processing...' : 'Submit'}
             </Button>
           </form>
         </Form>
@@ -161,65 +159,28 @@ export default function ResumeReviewerPage() {
 
 
   const renderResult = () => {
-    if (!result) return null;
+    if (!resumeContent) return null;
     return (
         <div className="max-w-4xl mx-auto space-y-8">
-            <div className="text-center">
-                <Badge variant="secondary" className="text-lg py-2 px-4">
-                    <Sparkles className="h-5 w-5 mr-2 text-primary" />
-                    AI Review Complete
-                </Badge>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <Card>
-                    <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
-                           <BookText className="text-primary"/> Improved Resume
-                        </CardTitle>
-                        <CardDescription>
-                            An ATS-friendly version of your resume. Copy the text and paste it into a new document.
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="relative">
-                            <Textarea
-                                readOnly
-                                value={result.improvedResume}
-                                className="h-96 text-sm"
-                            />
-                             <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={handleCopy}
-                                className="absolute top-2 right-2"
-                            >
-                                {copied ? <Check className="h-4 w-4" /> : <Clipboard className="h-4 w-4" />}
-                                <span className="sr-only">Copy</span>
-                            </Button>
-                        </div>
-                    </CardContent>
-                </Card>
-                <Card>
-                    <CardHeader>
-                       <CardTitle className="flex items-center gap-2">
-                           <MessageSquare className="text-primary"/> AI Feedback
-                        </CardTitle>
-                        <CardDescription>
-                           Suggestions on formatting, keyword gaps, and grammar.
-                        </CardDescription>
-                    </CardHeader>
-                     <CardContent>
-                        <div className="p-4 bg-secondary rounded-lg h-96 overflow-y-auto text-sm space-y-4">
-                            {result.feedback.split('\n').map((line, index) => (
-                                <p key={index}>{line}</p>
-                            ))}
-                        </div>
-                    </CardContent>
-                </Card>
-            </div>
+            <Card>
+                <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                       <BookText className="text-primary"/> Resume Content
+                    </CardTitle>
+                    <CardDescription>
+                        This is the content extracted from your uploaded resume.
+                    </CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <div
+                      className="p-4 bg-secondary rounded-lg h-96 overflow-y-auto text-sm space-y-4 prose prose-sm max-w-none"
+                      dangerouslySetInnerHTML={{ __html: resumeContent }}
+                    />
+                </CardContent>
+            </Card>
              <div className="text-center">
-                <Button onClick={() => {setResult(null); form.reset();}}>
-                    Review Another Resume
+                <Button onClick={() => {setResumeContent(null); form.reset();}}>
+                    Upload Another Resume
                 </Button>
             </div>
         </div>
@@ -247,21 +208,21 @@ export default function ResumeReviewerPage() {
             </Button>
           </Link>
           <h1 className="text-3xl font-bold tracking-tighter sm:text-4xl font-headline ml-4">
-            AI Resume Reviewer
+            Resume Viewer
           </h1>
         </div>
         
         {isLoading ? (
              <Card className="max-w-2xl mx-auto">
                 <CardHeader>
-                    <CardTitle>Analyzing Your Resume...</CardTitle>
-                    <CardDescription>Our AI is reviewing your resume. This may take a moment.</CardDescription>
+                    <CardTitle>Processing Your Resume...</CardTitle>
+                    <CardDescription>This may take a moment.</CardDescription>
                 </CardHeader>
                 <CardContent className="flex items-center justify-center p-8">
                     <Loader2 className="h-12 w-12 animate-spin text-primary" />
                 </CardContent>
             </Card>
-        ) : result ? renderResult() : renderForm()}
+        ) : resumeContent ? renderResult() : renderForm()}
 
       </main>
     </div>
