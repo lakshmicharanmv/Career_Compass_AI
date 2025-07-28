@@ -8,3 +8,4 @@ import '@/ai/flows/ai-assessment-generation.ts';
 import '@/ai/flows/career-progression-mapping.ts';
 import '@/ai/flows/recommend-stream.ts';
 import '@/ai/flows/recommend-degree-courses.ts';
+import '@/ai/flows/undergraduate-career-advisor.ts';
