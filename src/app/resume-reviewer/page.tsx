@@ -33,7 +33,7 @@ import { Badge } from '@/components/ui/badge';
 const FormSchema = z.object({
   resume: z
     .any()
-    .refine((files) => files?.[0], 'Resume is required.')
+    .refine((files) => files?.length > 0, 'Resume is required.')
     .refine((files) => files?.[0]?.size <= 5 * 1024 * 1024, `Max file size is 5MB.`)
     .refine(
       (files) => ['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/msword'].includes(files?.[0]?.type),
@@ -51,8 +51,10 @@ export default function ResumeReviewerPage() {
 
   const form = useForm<FormValues>({
     resolver: zodResolver(FormSchema),
-    mode: 'onBlur',
+    mode: 'onChange', // Use onChange mode to get instant validation feedback
   });
+  
+  const fileRef = form.register("resume");
 
   const readFileAsDataURL = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
@@ -69,9 +71,11 @@ export default function ResumeReviewerPage() {
 
     try {
       const file = data.resume[0];
-      const resumeDataUri = await readFileAsDataURL(file);
-      const aiResult = await reviewResume({ resumeDataUri });
-      setResult(aiResult);
+      if (file) {
+        const resumeDataUri = await readFileAsDataURL(file);
+        const aiResult = await reviewResume({ resumeDataUri });
+        setResult(aiResult);
+      }
     } catch (error) {
       toast({
         variant: 'destructive',
@@ -116,8 +120,11 @@ export default function ResumeReviewerPage() {
                         type="file"
                         id="resume-upload"
                         className="hidden"
-                        accept=".pdf,.doc,.docx,.msword"
-                        onChange={(e) => field.onChange(e.target.files)}
+                        accept=".pdf,.doc,.docx"
+                        {...fileRef}
+                        onChange={(e) => {
+                           field.onChange(e.target.files && e.target.files.length > 0 ? e.target.files : null);
+                        }}
                       />
                       <label
                         htmlFor="resume-upload"
@@ -247,7 +254,17 @@ export default function ResumeReviewerPage() {
           </h1>
         </div>
         
-        {result ? renderResult() : renderForm()}
+        {isLoading ? (
+             <Card className="max-w-2xl mx-auto">
+                <CardHeader>
+                    <CardTitle>Analyzing Your Resume...</CardTitle>
+                    <CardDescription>Our AI is reviewing your resume. This may take a moment.</CardDescription>
+                </CardHeader>
+                <CardContent className="flex items-center justify-center p-8">
+                    <Loader2 className="h-12 w-12 animate-spin text-primary" />
+                </CardContent>
+            </Card>
+        ) : result ? renderResult() : renderForm()}
 
       </main>
     </div>
