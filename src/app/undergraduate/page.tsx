@@ -268,7 +268,7 @@ export default function UndergraduatePage() {
       <CardHeader>
         <CardTitle>Step 2: Your Skills</CardTitle>
         <CardDescription>
-          Based on your degree, list your skills. Please separate each skill with a comma.
+          List your skills based on your degree. Please separate each skill with a comma.
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -328,24 +328,28 @@ export default function UndergraduatePage() {
     const progress = ((currentQuestionIndex + 1) / assessment.questions.length) * 100;
 
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Assessment Test</CardTitle>
-          <CardDescription>Question {currentQuestionIndex + 1} of {assessment.questions.length}</CardDescription>
-          <Progress value={progress} className="mt-2" />
-        </CardHeader>
-        <CardContent>
-          <p className="font-semibold mb-4">{question.question}</p>
-          <RadioGroup onValueChange={handleAnswerSubmit} key={currentQuestionIndex}>
-            {question.options.map((option, index) => (
-              <div key={index} className="flex items-center space-x-2">
-                <RadioGroupItem value={option} id={`q${currentQuestionIndex}-o${index}`} />
-                <FormLabel htmlFor={`q${currentQuestionIndex}-o${index}`}>{option}</FormLabel>
-              </div>
-            ))}
-          </RadioGroup>
-        </CardContent>
-      </Card>
+      <Form {...academicForm}>
+        <form>
+          <Card>
+            <CardHeader>
+              <CardTitle>Assessment Test</CardTitle>
+              <CardDescription>Question {currentQuestionIndex + 1} of {assessment.questions.length}</CardDescription>
+              <Progress value={progress} className="mt-2" />
+            </CardHeader>
+            <CardContent>
+              <p className="font-semibold mb-4">{question.question}</p>
+              <RadioGroup onValueChange={handleAnswerSubmit} key={currentQuestionIndex}>
+                {question.options.map((option, index) => (
+                  <div key={index} className="flex items-center space-x-2">
+                    <RadioGroupItem value={option} id={`q${currentQuestionIndex}-o${index}`} />
+                    <FormLabel htmlFor={`q${currentQuestionIndex}-o${index}`}>{option}</FormLabel>
+                  </div>
+                ))}
+              </RadioGroup>
+            </CardContent>
+          </Card>
+        </form>
+      </Form>
     );
   };
 
@@ -436,5 +440,3 @@ export default function UndergraduatePage() {
     </div>
   );
 }
-
-    
