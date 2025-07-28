@@ -21,18 +21,63 @@ import {
   FileText,
   BarChart3,
   Users,
+  LogOut,
+  LayoutDashboard
 } from "lucide-react";
 import React from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { useRouter } from "next/navigation";
+
 
 export default function Home() {
   const [year, setYear] = React.useState<number | null>(null);
+  const [isAuthenticated, setIsAuthenticated] = React.useState(false);
+  const [userName, setUserName] = React.useState("");
+  const router = useRouter();
 
   React.useEffect(() => {
+    const currentUser = JSON.parse(localStorage.getItem("currentUser") || "{}");
+    if (currentUser && currentUser.name) {
+        setIsAuthenticated(true);
+        setUserName(currentUser.name);
+    }
     setYear(new Date().getFullYear());
   }, []);
 
+  const handleSignOut = () => {
+    localStorage.removeItem("currentUser");
+    setIsAuthenticated(false);
+    setUserName("");
+    router.push("/"); // Refresh the page to reflect signed-out state
+  };
+
+
   return (
     <div className="flex flex-col min-h-[100dvh] bg-background">
+       <Dialog open={!isAuthenticated} onOpenChange={() => {}}>
+        <DialogContent className="sm:max-w-[425px]" hideCloseButton={true}>
+          <DialogHeader>
+            <DialogTitle className="text-center text-2xl font-headline">Welcome to Career Compass AI</DialogTitle>
+            <DialogDescription className="text-center">
+              Please sign in or create an account to continue.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid grid-cols-2 gap-4">
+            <Link href="/signin" passHref>
+                <Button className="w-full">Sign In</Button>
+            </Link>
+            <Link href="/signup" passHref>
+                <Button variant="outline" className="w-full">Sign Up</Button>
+            </Link>
+          </div>
+        </DialogContent>
+      </Dialog>
       <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container flex h-14 max-w-screen-xl items-center">
           <Link href="#" className="flex items-center" prefetch={false}>
@@ -41,15 +86,32 @@ export default function Home() {
               Career Compass AI
             </span>
           </Link>
-          <nav className="ml-auto flex items-center gap-2">
-            <Link href="/signin" passHref>
-                <Button variant="ghost">Sign In</Button>
-            </Link>
-            <Link href="/signup" passHref>
-                <Button className="bg-primary hover:bg-primary/90">
-                  Get Started
+           <nav className="ml-auto flex items-center gap-2">
+            {isAuthenticated ? (
+              <>
+                <Link href="/dashboard" passHref>
+                  <Button variant="ghost">
+                    <LayoutDashboard className="mr-2 h-4 w-4" />
+                    Dashboard
+                  </Button>
+                </Link>
+                <Button variant="outline" onClick={handleSignOut}>
+                  <LogOut className="mr-2 h-4 w-4" />
+                  Sign Out
                 </Button>
-            </Link>
+              </>
+            ) : (
+              <>
+                <Link href="/signin" passHref>
+                  <Button variant="ghost">Sign In</Button>
+                </Link>
+                <Link href="/signup" passHref>
+                  <Button className="bg-primary hover:bg-primary/90">
+                    Get Started
+                  </Button>
+                </Link>
+              </>
+            )}
           </nav>
         </div>
       </header>
@@ -60,7 +122,7 @@ export default function Home() {
               <div className="flex flex-col justify-center space-y-4">
                 <div className="space-y-4">
                   <h1 className="font-headline text-4xl font-bold tracking-tighter text-primary sm:text-5xl md:text-6xl xl:text-7xl/none">
-                    Navigate Your Future with AI
+                    {isAuthenticated ? `Welcome, ${userName}! ` : ''}Navigate Your Future with AI
                   </h1>
                   <p className="max-w-[600px] text-muted-foreground md:text-xl">
                     Career Compass AI provides personalized guidance for students
@@ -275,3 +337,5 @@ export default function Home() {
     </div>
   );
 }
+
+    
