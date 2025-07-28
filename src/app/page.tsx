@@ -34,6 +34,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { useRouter } from "next/navigation";
+import { useToast } from "@/hooks/use-toast";
 
 
 export default function Home() {
@@ -42,6 +43,7 @@ export default function Home() {
   const [userName, setUserName] = React.useState("");
   const [showLearnMore, setShowLearnMore] = React.useState(false);
   const router = useRouter();
+  const { toast } = useToast();
 
   React.useEffect(() => {
     const currentUser = JSON.parse(localStorage.getItem("currentUser") || "{}");
@@ -268,8 +270,11 @@ export default function Home() {
                 every stage of your career journey.
               </p>
             </div>
-            <div className="mx-auto grid grid-cols-1 gap-8 py-12 sm:grid-cols-2 lg:grid-cols-3">
-              <div className="flex flex-col items-center space-y-2 text-center">
+            <div className="mx-auto grid grid-cols-1 gap-8 py-12 sm:grid-cols-2 lg:grid-cols-4">
+              <div
+                className="flex flex-col items-center space-y-2 text-center transition-transform duration-300 hover:scale-105 cursor-pointer"
+                onClick={() => toast({ title: 'AI Career Advisor: Coming Soon!', description: 'This feature is under development.' })}
+              >
                 <div className="p-3 bg-primary/10 rounded-full transition-transform duration-300 hover:scale-110">
                   <BrainCircuit className="text-primary h-8 w-8" />
                 </div>
@@ -302,6 +307,20 @@ export default function Home() {
                   24/7 AI-powered chatbot.
                 </p>
               </Link>
+              <div
+                className="flex flex-col items-center space-y-2 text-center transition-transform duration-300 hover:scale-105 cursor-pointer"
+                onClick={() => toast({ title: 'AI Resume Reviewer: Coming Soon!', description: 'This feature is under development.' })}
+              >
+                <div className="p-3 bg-primary/10 rounded-full transition-transform duration-300 hover:scale-110">
+                  <FileText className="text-primary h-8 w-8" />
+                </div>
+                <h3 className="text-lg font-bold font-headline">
+                  AI Resume Reviewer
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  ATS-friendly resume analysis.
+                </p>
+              </div>
             </div>
           </div>
         </section>
