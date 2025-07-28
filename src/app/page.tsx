@@ -141,11 +141,11 @@ export default function Home() {
                 </div>
               </div>
               <Image
-                src="https://placehold.co/650x650/1E3A8A/F9FAFB.png"
+                src="https://placehold.co/650x650.png"
                 width="650"
                 height="650"
                 alt="AI helping with career choices"
-                data-ai-hint="futuristic tech"
+                data-ai-hint="team collaboration"
                 className="mx-auto aspect-square overflow-hidden rounded-xl object-cover"
               />
             </div>
