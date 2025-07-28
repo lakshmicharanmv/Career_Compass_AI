@@ -31,15 +31,35 @@ import { useToast } from '@/hooks/use-toast';
 import { generateAssessmentQuestions, AssessmentQuestionsOutput } from '@/ai/flows/ai-assessment-generation';
 import { recommendUndergraduateOptions, UndergraduateOptionsOutput } from '@/ai/flows/undergraduate-career-advisor';
 import { Progress } from '@/components/ui/progress';
-import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
+
+const degreeData = {
+  Science: {
+    'B.Tech/B.E.': ['Computer Science', 'Mechanical Engineering', 'Civil Engineering', 'Electrical Engineering', 'Electronics & Communication', 'Information Technology'],
+    'MBBS': ['General Medicine', 'Surgery'],
+    'B.Sc': ['Physics', 'Chemistry', 'Mathematics', 'Biology', 'Biotechnology', 'Agriculture', 'Computer Science'],
+    'B.Pharm': ['Pharmacy'],
+    'BDS': ['Dental Surgery'],
+  },
+  Commerce: {
+    'B.Com': ['Accounting and Finance', 'Taxation', 'Banking and Insurance', 'General Commerce'],
+    'BBA': ['Marketing', 'Finance', 'Human Resources', 'International Business'],
+    'BMS': ['Management Studies'],
+  },
+  Arts: {
+    'B.A.': ['History', 'Psychology', 'Sociology', 'Political Science', 'English Literature', 'Journalism'],
+    'B.Des': ['Fashion Design', 'Graphic Design', 'Interior Design'],
+    'LLB': ['Corporate Law', 'Criminal Law', 'Civil Law'],
+  },
+};
+
 
 const academicSchema = z.object({
   tenthPercentage: z.coerce.number().min(0).max(100),
   twelfthPercentage: z.coerce.number().min(0).max(100),
   twelfthStream: z.enum(['Science', 'Commerce', 'Arts']),
-  degreeName: z.string().min(2, 'Degree name is required.'),
-  specialization: z.string().min(2, 'Specialization is required.'),
+  degreeName: z.string().min(1, 'Degree name is required.'),
+  specialization: z.string().min(1, 'Specialization is required.'),
   currentGrade: z.coerce.number().min(0).max(100),
 });
 
@@ -63,8 +83,31 @@ export default function UndergraduatePage() {
   const [userAnswers, setUserAnswers] = React.useState<string[]>([]);
   const [testScore, setTestScore] = React.useState<number | null>(null);
 
-  const academicForm = useForm<AcademicFormValues>({ resolver: zodResolver(academicSchema) });
+  const academicForm = useForm<AcademicFormValues>({ 
+    resolver: zodResolver(academicSchema),
+    defaultValues: {
+        degreeName: '',
+        specialization: '',
+    }
+  });
   const skillsForm = useForm<SkillsFormValues>({ resolver: zodResolver(skillsSchema) });
+
+  const watchedStream = academicForm.watch('twelfthStream');
+  const watchedDegree = academicForm.watch('degreeName');
+
+  React.useEffect(() => {
+    if (watchedStream) {
+        academicForm.resetField('degreeName', { defaultValue: '' });
+        academicForm.resetField('specialization', { defaultValue: '' });
+    }
+  }, [watchedStream, academicForm]);
+
+  React.useEffect(() => {
+    if (watchedDegree) {
+        academicForm.resetField('specialization', { defaultValue: '' });
+    }
+  }, [watchedDegree, academicForm]);
+
 
   const handleAcademicSubmit = (data: AcademicFormValues) => {
     setAcademicData(data);
@@ -175,12 +218,38 @@ export default function UndergraduatePage() {
               <FormField name="twelfthStream" control={academicForm.control} render={({ field }) => (
                 <FormItem><FormLabel>12th Stream</FormLabel><Select onValueChange={field.onChange} defaultValue={field.value}><FormControl><SelectTrigger><SelectValue placeholder="Select stream" /></SelectTrigger></FormControl><SelectContent><SelectItem value="Science">Science</SelectItem><SelectItem value="Commerce">Commerce</SelectItem><SelectItem value="Arts">Arts</SelectItem></SelectContent></Select><FormMessage /></FormItem>
               )} />
+              
               <FormField name="degreeName" control={academicForm.control} render={({ field }) => (
-                <FormItem><FormLabel>Degree Name</FormLabel><FormControl><Input placeholder="e.g., B.Tech, MBBS" {...field} /></FormControl><FormMessage /></FormItem>
+                <FormItem>
+                    <FormLabel>Degree Name</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value} disabled={!watchedStream}>
+                        <FormControl><SelectTrigger><SelectValue placeholder="Select degree" /></SelectTrigger></FormControl>
+                        <SelectContent>
+                            {watchedStream && Object.keys(degreeData[watchedStream]).map(degree => (
+                                <SelectItem key={degree} value={degree}>{degree}</SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                    <FormMessage />
+                </FormItem>
               )} />
+              
               <FormField name="specialization" control={academicForm.control} render={({ field }) => (
-                <FormItem><FormLabel>Specialization</FormLabel><FormControl><Input placeholder="e.g., Computer Science" {...field} /></FormControl><FormMessage /></FormItem>
+                <FormItem>
+                    <FormLabel>Specialization</FormLabel>
+                     <Select onValueChange={field.onChange} value={field.value} disabled={!watchedDegree}>
+                        <FormControl><SelectTrigger><SelectValue placeholder="Select specialization" /></SelectTrigger></FormControl>
+                        <SelectContent>
+                            {watchedStream && watchedDegree && degreeData[watchedStream][watchedDegree] &&
+                                degreeData[watchedStream][watchedDegree].map(spec => (
+                                <SelectItem key={spec} value={spec}>{spec}</SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                    <FormMessage />
+                </FormItem>
               )} />
+
               <FormField name="currentGrade" control={academicForm.control} render={({ field }) => (
                 <FormItem><FormLabel>Current CGPA / Percentage</FormLabel><FormControl><Input type="number" step="0.01" placeholder="e.g., 8.5" {...field} /></FormControl><FormMessage /></FormItem>
               )} />
@@ -323,7 +392,7 @@ export default function UndergraduatePage() {
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
-      <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container flex h-14 max-w-screen-xl items-center justify-between">
           <Link href="/" className="flex items-center" prefetch={false}>
             <Bot className="h-6 w-6 text-primary" />
