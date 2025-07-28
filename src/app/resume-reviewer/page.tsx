@@ -7,7 +7,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { Bot, ArrowLeft, Loader2, UploadCloud, FileCheck2, BookText } from 'lucide-react';
-import * as mammoth from 'mammoth';
+import mammoth from 'mammoth';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -72,7 +72,12 @@ export default function ResumeReviewerPage() {
           const result = await mammoth.convertToHtml({ arrayBuffer });
           setResumeContent(result.value);
         } else if (file.type === 'application/pdf') {
-          setResumeContent('<p>PDF text extraction is not yet supported. Please upload a DOCX file.</p>');
+          setResumeContent('<p>PDF text extraction is not yet supported. Please upload a DOCX file for content viewing.</p>');
+           toast({
+                variant: 'default',
+                title: 'PDF Preview Not Available',
+                description: 'Please upload a DOCX file to view content directly in the browser.'
+            });
         } else {
             toast({
                 variant: 'destructive',
@@ -149,7 +154,7 @@ export default function ResumeReviewerPage() {
             />
             <Button type="submit" disabled={isLoading || !form.formState.isValid} className="w-full">
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {isLoading ? 'Processing...' : 'Submit'}
+              {isLoading ? 'Processing...' : 'View Content'}
             </Button>
           </form>
         </Form>
@@ -228,3 +233,4 @@ export default function ResumeReviewerPage() {
     </div>
   );
 }
+
