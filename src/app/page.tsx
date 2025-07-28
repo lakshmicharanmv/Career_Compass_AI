@@ -280,7 +280,7 @@ export default function Home() {
                   Intelligent career path mapping.
                 </p>
               </div>
-              <div className="flex flex-col items-center space-y-2 text-center">
+              <Link href="/resume-reviewer" className="flex flex-col items-center space-y-2 text-center">
                 <div className="p-3 bg-primary/10 rounded-full transition-transform duration-300 hover:scale-110">
                   <FileText className="text-primary h-8 w-8" />
                 </div>
@@ -290,7 +290,7 @@ export default function Home() {
                 <p className="text-sm text-muted-foreground">
                   ATS-friendly resume analysis.
                 </p>
-              </div>
+              </Link>
               <div className="flex flex-col items-center space-y-2 text-center">
                 <div className="p-3 bg-primary/10 rounded-full transition-transform duration-300 hover:scale-110">
                   <BarChart3 className="text-primary h-8 w-8" />
