@@ -1,3 +1,4 @@
+
 'use server';
 
 /**
@@ -11,7 +12,7 @@
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 
-export const UndergraduateOptionsInputSchema = z.object({
+const UndergraduateOptionsInputSchema = z.object({
   academics: z.object({
     tenthPercentage: z.number().describe("Percentage in 10th grade."),
     twelfthPercentage: z.number().describe("Percentage in 12th grade."),
@@ -28,7 +29,7 @@ export const UndergraduateOptionsInputSchema = z.object({
 });
 export type UndergraduateOptionsInput = z.infer<typeof UndergraduateOptionsInputSchema>;
 
-export const UndergraduateOptionsOutputSchema = z.object({
+const UndergraduateOptionsOutputSchema = z.object({
   jobRoles: z.array(z.object({
     role: z.string().describe("Recommended job role."),
     reason: z.string().describe("Reason for recommending this role based on the user's profile."),
