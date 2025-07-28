@@ -25,7 +25,7 @@ import {
 import React from "react";
 
 export default function Home() {
-  const [year, setYear] = React.useState(new Date().getFullYear());
+  const [year, setYear] = React.useState<number | null>(null);
 
   React.useEffect(() => {
     setYear(new Date().getFullYear());
@@ -115,9 +115,11 @@ export default function Home() {
                   <CardDescription>
                     Explore streams and subjects for your future.
                   </CardDescription>
-                  <Button variant="outline" className="mt-4">
-                    Choose Path
-                  </Button>
+                  <Link href="/grade10" passHref>
+                    <Button variant="outline" className="mt-4">
+                      Choose Path
+                    </Button>
+                  </Link>
                 </CardContent>
               </Card>
               <Card className="transform transition-transform duration-300 hover:-translate-y-2 hover:shadow-2xl">
@@ -133,9 +135,11 @@ export default function Home() {
                   <CardDescription>
                     Find your college, major and career options.
                   </CardDescription>
-                  <Button variant="outline" className="mt-4">
-                    Find Major
-                  </Button>
+                   <Link href="/grade12" passHref>
+                    <Button variant="outline" className="mt-4">
+                      Find Major
+                    </Button>
+                  </Link>
                 </CardContent>
               </Card>
               <Card className="transform transition-transform duration-300 hover:-translate-y-2 hover:shadow-2xl">
@@ -151,9 +155,11 @@ export default function Home() {
                   <CardDescription>
                     Prepare for your first job and internships.
                   </CardDescription>
-                  <Button variant="outline" className="mt-4">
-                    Get Job Ready
-                  </Button>
+                  <Link href="/undergraduate" passHref>
+                    <Button variant="outline" className="mt-4">
+                      Get Job Ready
+                    </Button>
+                  </Link>
                 </CardContent>
               </Card>
               <Card className="transform transition-transform duration-300 hover:-translate-y-2 hover:shadow-2xl">
@@ -169,9 +175,11 @@ export default function Home() {
                   <CardDescription>
                     Advance your career and find new opportunities.
                   </CardDescription>
-                  <Button variant="outline" className="mt-4">
-                    Level Up
-                  </Button>
+                  <Link href="/professional" passHref>
+                    <Button variant="outline" className="mt-4">
+                      Level Up
+                    </Button>
+                  </Link>
                 </CardContent>
               </Card>
             </div>
