@@ -80,18 +80,18 @@ export default function Grade12Page() {
   const form = useForm<FormValues>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
-      tenthPercentage: 0,
-      english: 0,
-      physics: 0,
-      chemistry: 0,
-      math: 0,
-      biology: 0,
-      accounts: 0,
-      business_studies: 0,
-      economics: 0,
-      history: 0,
-      political_science: 0,
-      sociology_psychology: 0,
+      tenthPercentage: undefined,
+      english: undefined,
+      physics: undefined,
+      chemistry: undefined,
+      math: undefined,
+      biology: undefined,
+      accounts: undefined,
+      business_studies: undefined,
+      economics: undefined,
+      history: undefined,
+      political_science: undefined,
+      sociology_psychology: undefined,
       takeTest: 'no',
     },
   });
@@ -309,7 +309,7 @@ export default function Grade12Page() {
                 <FormItem>
                   <FormLabel>10th Grade Percentage (%)</FormLabel>
                   <FormControl>
-                    <Input type="number" placeholder="0" {...field} />
+                    <Input type="number" placeholder=" " {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -349,47 +349,47 @@ export default function Grade12Page() {
                         {stream === 'Science' && (
                             <>
                                 <FormField control={form.control} name="physics" render={({ field }) => (
-                                    <FormItem><FormLabel>Physics</FormLabel><FormControl><Input type="number" placeholder="0" {...field} /></FormControl><FormMessage /></FormItem>
+                                    <FormItem><FormLabel>Physics</FormLabel><FormControl><Input type="number" placeholder=" " {...field} /></FormControl><FormMessage /></FormItem>
                                 )} />
                                 <FormField control={form.control} name="chemistry" render={({ field }) => (
-                                    <FormItem><FormLabel>Chemistry</FormLabel><FormControl><Input type="number" placeholder="0" {...field} /></FormControl><FormMessage /></FormItem>
+                                    <FormItem><FormLabel>Chemistry</FormLabel><FormControl><Input type="number" placeholder=" " {...field} /></FormControl><FormMessage /></FormItem>
                                 )} />
                                 <FormField control={form.control} name="math" render={({ field }) => (
-                                    <FormItem><FormLabel>Math</FormLabel><FormControl><Input type="number" placeholder="0" {...field} /></FormControl><FormMessage /></FormItem>
+                                    <FormItem><FormLabel>Math</FormLabel><FormControl><Input type="number" placeholder=" " {...field} /></FormControl><FormMessage /></FormItem>
                                 )} />
                                 <FormField control={form.control} name="biology" render={({ field }) => (
-                                    <FormItem><FormLabel>Biology</FormLabel><FormControl><Input type="number" placeholder="0" {...field} /></FormControl><FormMessage /></FormItem>
+                                    <FormItem><FormLabel>Biology</FormLabel><FormControl><Input type="number" placeholder=" " {...field} /></FormControl><FormMessage /></FormItem>
                                 )} />
                             </>
                         )}
                         {stream === 'Commerce' && (
                             <>
                                 <FormField control={form.control} name="accounts" render={({ field }) => (
-                                    <FormItem><FormLabel>Accounts</FormLabel><FormControl><Input type="number" placeholder="0" {...field} /></FormControl><FormMessage /></FormItem>
+                                    <FormItem><FormLabel>Accounts</FormLabel><FormControl><Input type="number" placeholder=" " {...field} /></FormControl><FormMessage /></FormItem>
                                 )} />
                                 <FormField control={form.control} name="business_studies" render={({ field }) => (
-                                    <FormItem><FormLabel>Business Studies</FormLabel><FormControl><Input type="number" placeholder="0" {...field} /></FormControl><FormMessage /></FormItem>
+                                    <FormItem><FormLabel>Business Studies</FormLabel><FormControl><Input type="number" placeholder=" " {...field} /></FormControl><FormMessage /></FormItem>
                                 )} />
                                 <FormField control={form.control} name="economics" render={({ field }) => (
-                                    <FormItem><FormLabel>Economics</FormLabel><FormControl><Input type="number" placeholder="0" {...field} /></FormControl><FormMessage /></FormItem>
+                                    <FormItem><FormLabel>Economics</FormLabel><FormControl><Input type="number" placeholder=" " {...field} /></FormControl><FormMessage /></FormItem>
                                 )} />
                             </>
                         )}
                         {stream === 'Arts' && (
                             <>
                                 <FormField control={form.control} name="history" render={({ field }) => (
-                                    <FormItem><FormLabel>History</FormLabel><FormControl><Input type="number" placeholder="0" {...field} /></FormControl><FormMessage /></FormItem>
+                                    <FormItem><FormLabel>History</FormLabel><FormControl><Input type="number" placeholder=" " {...field} /></FormControl><FormMessage /></FormItem>
                                 )} />
                                 <FormField control={form.control} name="political_science" render={({ field }) => (
-                                    <FormItem><FormLabel>Political Science</FormLabel><FormControl><Input type="number" placeholder="0" {...field} /></FormControl><FormMessage /></FormItem>
+                                    <FormItem><FormLabel>Political Science</FormLabel><FormControl><Input type="number" placeholder=" " {...field} /></FormControl><FormMessage /></FormItem>
                                 )} />
                                 <FormField control={form.control} name="sociology_psychology" render={({ field }) => (
-                                    <FormItem><FormLabel>Sociology/Psychology</FormLabel><FormControl><Input type="number" placeholder="0" {...field} /></FormControl><FormMessage /></FormItem>
+                                    <FormItem><FormLabel>Sociology/Psychology</FormLabel><FormControl><Input type="number" placeholder=" " {...field} /></FormControl><FormMessage /></FormItem>
                                 )} />
                             </>
                         )}
                          <FormField control={form.control} name="english" render={({ field }) => (
-                            <FormItem><FormLabel>English</FormLabel><FormControl><Input type="number" placeholder="0" {...field} /></FormControl><FormMessage /></FormItem>
+                            <FormItem><FormLabel>English</FormLabel><FormControl><Input type="number" placeholder=" " {...field} /></FormControl><FormMessage /></FormItem>
                         )} />
                     </div>
                 </>

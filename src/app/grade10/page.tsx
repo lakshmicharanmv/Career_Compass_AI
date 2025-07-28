@@ -62,12 +62,12 @@ export default function Grade10Page() {
   const form = useForm<FormValues>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
-      math: 0,
-      science: 0,
-      english: 0,
-      social_studies: 0,
+      math: undefined,
+      science: undefined,
+      english: undefined,
+      social_studies: undefined,
       optional_subject: '',
-      optional_marks: 0,
+      optional_marks: undefined,
       takeTest: 'no',
     },
   });
@@ -268,7 +268,7 @@ export default function Grade10Page() {
                   <FormItem>
                     <FormLabel>Math Marks (out of 100)</FormLabel>
                     <FormControl>
-                      <Input type="number" placeholder="0" {...field} />
+                      <Input type="number" placeholder=" " {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -281,7 +281,7 @@ export default function Grade10Page() {
                   <FormItem>
                     <FormLabel>Science Marks (out of 100)</FormLabel>
                     <FormControl>
-                      <Input type="number" placeholder="0" {...field} />
+                      <Input type="number" placeholder=" " {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -294,7 +294,7 @@ export default function Grade10Page() {
                   <FormItem>
                     <FormLabel>English Marks (out of 100)</FormLabel>
                     <FormControl>
-                      <Input type="number" placeholder="0" {...field} />
+                      <Input type="number" placeholder=" " {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -307,7 +307,7 @@ export default function Grade10Page() {
                   <FormItem>
                     <FormLabel>Social Studies Marks (out of 100)</FormLabel>
                     <FormControl>
-                      <Input type="number" placeholder="0" {...field} />
+                      <Input type="number" placeholder=" " {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -333,7 +333,7 @@ export default function Grade10Page() {
                   <FormItem>
                     <FormLabel>Optional Subject Marks</FormLabel>
                     <FormControl>
-                      <Input type="number" placeholder="0" {...field} />
+                      <Input type="number" placeholder=" " {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
