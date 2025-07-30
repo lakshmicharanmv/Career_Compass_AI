@@ -10,6 +10,7 @@
  */
 
 import {ai} from '@/ai/genkit';
+import {googleAI} from '@genkit-ai/googleai';
 import {z} from 'genkit';
 
 const AssessmentQuestionsInputSchema = z.object({
@@ -64,7 +65,9 @@ const generateAssessmentQuestionsFlow = ai.defineFlow(
     outputSchema: AssessmentQuestionsOutputSchema,
   },
   async input => {
-    const {output} = await assessmentQuestionsPrompt(input);
+    const {output} = await assessmentQuestionsPrompt(input, {
+      model: googleAI.model('gemini-1.5-flash'),
+    });
     return output!;
   }
 );
