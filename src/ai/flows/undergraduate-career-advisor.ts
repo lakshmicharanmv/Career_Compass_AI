@@ -10,6 +10,7 @@
  */
 
 import {ai} from '@/ai/genkit';
+import {googleAI} from '@genkit-ai/googleai';
 import {z} from 'genkit';
 
 const UndergraduateOptionsInputSchema = z.object({
@@ -84,7 +85,9 @@ const recommendUndergraduateOptionsFlow = ai.defineFlow(
     outputSchema: UndergraduateOptionsOutputSchema,
   },
   async input => {
-    const {output} = await recommendUndergraduateOptionsPrompt(input);
+    const {output} = await recommendUndergraduateOptionsPrompt(input, {
+      model: googleAI.model('gemini-1.5-flash'),
+    });
     return output!;
   }
 );

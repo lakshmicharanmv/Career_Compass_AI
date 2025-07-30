@@ -9,6 +9,7 @@
  */
 
 import {ai} from '@/ai/genkit';
+import {googleAI} from '@genkit-ai/googleai';
 import {z} from 'genkit';
 
 const RecommendDegreeCoursesInputSchema = z.object({
@@ -93,7 +94,9 @@ const recommendDegreeCoursesFlow = ai.defineFlow(
     outputSchema: RecommendDegreeCoursesOutputSchema,
   },
   async input => {
-    const {output} = await recommendDegreeCoursesPrompt(input);
+    const {output} = await recommendDegreeCoursesPrompt(input, {
+      model: googleAI.model('gemini-1.5-flash'),
+    });
     return output!;
   }
 );

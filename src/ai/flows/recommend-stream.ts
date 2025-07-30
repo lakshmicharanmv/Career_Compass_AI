@@ -11,6 +11,7 @@
  */
 
 import {ai} from '@/ai/genkit';
+import {googleAI} from '@genkit-ai/googleai';
 import {z} from 'genkit';
 
 const RecommendStreamInputSchema = z.object({
@@ -80,7 +81,9 @@ const recommendStreamFlow = ai.defineFlow(
     outputSchema: RecommendStreamOutputSchema,
   },
   async input => {
-    const {output} = await recommendStreamPrompt(input);
+    const {output} = await recommendStreamPrompt(input, {
+      model: googleAI.model('gemini-1.5-flash'),
+    });
     return output!;
   }
 );

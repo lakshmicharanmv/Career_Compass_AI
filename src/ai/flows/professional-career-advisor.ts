@@ -5,9 +5,9 @@
  * @fileOverview Provides a comprehensive career advisory for professionals based on their work experience, goals, and optional assessment.
  * This flow is designed to be industry-agnostic.
  *
- * - getProfessionalAdvice - A function that takes a professional's profile and returns a tailored career roadmap.
- * - ProfessionalCareerAdvisorInput - The input type for the getProfessionalAdvice function.
- * - ProfessionalCareerAdvisorOutput - The return type for the getProfessionalAdvice function.
+ * @exports getProfessionalAdvice - A function that takes a professional's profile and returns a tailored career roadmap.
+ * @exports ProfessionalCareerAdvisorInput - The input type for the getProfessionalAdvice function.
+ * @exports ProfessionalCareerAdvisorOutput - The return type for the getProfessionalAdvice function.
  */
 
 import {ai} from '@/ai/genkit';
