@@ -127,8 +127,13 @@ export default function ProfessionalPage() {
       });
       setRecommendation(result);
     } catch (error) {
-      toast({ variant: 'destructive', title: 'Error', description: 'Could not get recommendations.' });
-      console.error(error);
+      toast({ 
+          variant: 'destructive', 
+          title: 'AI is Busy', 
+          description: 'The AI model is currently overloaded. Please try again in a few moments.' 
+      });
+      setStep('form'); // Go back to the form
+      setFormData(null);
     } finally {
       setIsLoading(false);
     }

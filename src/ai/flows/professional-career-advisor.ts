@@ -97,10 +97,28 @@ const professionalCareerAdvisorFlow = ai.defineFlow(
     inputSchema: ProfessionalCareerAdvisorInputSchema,
     outputSchema: ProfessionalCareerAdvisorOutputSchema,
   },
-  async input => {
-    const {output} = await professionalCareerAdvisorPrompt(input);
-    return output!;
+  async (input) => {
+    const maxRetries = 3;
+    for (let i = 0; i < maxRetries; i++) {
+      try {
+        const { output } = await professionalCareerAdvisorPrompt(input);
+        return output!;
+      } catch (error: any) {
+        const errorMessage = error.message || '';
+        if (
+          (errorMessage.includes('503') || errorMessage.includes('overloaded')) &&
+          i < maxRetries - 1
+        ) {
+          console.log(`Attempt ${i + 1} failed. Retrying in 3 seconds...`);
+          await new Promise((resolve) => setTimeout(resolve, 3000));
+        } else {
+          console.error("AI API Error after retries:", error);
+          throw error;
+        }
+      }
+    }
+    // This part should not be reachable, but returning a default or throwing an error is good practice.
+    throw new Error('Failed to get a response from the AI service after multiple retries.');
   }
 );
-
     
