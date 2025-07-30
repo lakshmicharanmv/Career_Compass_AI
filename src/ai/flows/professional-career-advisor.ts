@@ -12,6 +12,7 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
+import {googleAI} from '@genkit-ai/googleai';
 
 const ProfessionalCareerAdvisorInputSchema = z.object({
   workExperience: z.array(z.object({
@@ -98,27 +99,29 @@ const professionalCareerAdvisorFlow = ai.defineFlow(
     outputSchema: ProfessionalCareerAdvisorOutputSchema,
   },
   async (input) => {
-    const maxRetries = 3;
-    for (let i = 0; i < maxRetries; i++) {
-      try {
-        const { output } = await professionalCareerAdvisorPrompt(input);
-        return output!;
-      } catch (error: any) {
-        const errorMessage = error.message || '';
-        if (
-          (errorMessage.includes('503') || errorMessage.includes('overloaded')) &&
-          i < maxRetries - 1
-        ) {
-          console.log(`Attempt ${i + 1} failed. Retrying in 3 seconds...`);
-          await new Promise((resolve) => setTimeout(resolve, 3000));
-        } else {
-          console.error("AI API Error after retries:", error);
-          throw error;
+    const primaryModel = googleAI.model('gemini-pro');
+    const fallbackModel = googleAI.model('gemini-1.5-flash');
+    
+    try {
+      console.log('Attempting to use primary model: gemini-pro');
+      const { output } = await professionalCareerAdvisorPrompt(input, { model: primaryModel });
+      return output!;
+    } catch (error: any) {
+      const errorMessage = error.message || '';
+      if (errorMessage.includes('503') || errorMessage.includes('overloaded')) {
+        console.warn('Primary model failed. Switching to fallback model: gemini-1.5-flash');
+        try {
+           const { output } = await professionalCareerAdvisorPrompt(input, { model: fallbackModel });
+           return output!;
+        } catch (fallbackError: any) {
+            console.error("Fallback model also failed:", fallbackError);
+            throw fallbackError;
         }
+      } else {
+         console.error("An unexpected error occurred:", error);
+         throw error;
       }
     }
-    // This part should not be reachable, but returning a default or throwing an error is good practice.
-    throw new Error('Failed to get a response from the AI service after multiple retries.');
   }
 );
     
