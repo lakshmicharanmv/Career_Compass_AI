@@ -6,7 +6,7 @@ import * as React from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { z } from 'zod';
-import { Bot, ArrowLeft, Loader2, Sparkles, Plus, Trash2, Briefcase, BookOpen, GitBranch } from 'lucide-react';
+import { Bot, ArrowLeft, Loader2, Sparkles, Plus, Trash2, Briefcase, BookOpen, GitBranch, AlertTriangle } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
@@ -57,6 +57,7 @@ export default function ProfessionalPage() {
   const [currentQuestionIndex, setCurrentQuestionIndex] = React.useState(0);
   const [userAnswers, setUserAnswers] = React.useState<string[]>([]);
   const [testScore, setTestScore] = React.useState<number | null>(null);
+  const [apiError, setApiError] = React.useState<string | null>(null);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -73,6 +74,7 @@ export default function ProfessionalPage() {
   });
   
   async function onSubmit(data: FormValues) {
+    setApiError(null);
     setFormData(data);
     setStep('assessmentChoice');
   }
@@ -120,6 +122,7 @@ export default function ProfessionalPage() {
     if (!formData) return;
     setStep('results');
     setIsLoading(true);
+    setApiError(null);
     try {
       const result = await getProfessionalAdvice({
         ...formData,
@@ -127,13 +130,8 @@ export default function ProfessionalPage() {
       });
       setRecommendation(result);
     } catch (error) {
-      toast({ 
-          variant: 'destructive', 
-          title: 'AI is Busy', 
-          description: 'The AI model is currently overloaded. Please try again in a few moments.' 
-      });
-      setStep('form'); // Go back to the form
-      setFormData(null);
+      console.error("Failed to get recommendations:", error);
+      setApiError("Our AI is currently busy and both our primary and backup systems are overloaded. We apologize for the inconvenience. Please try again in a few moments.");
     } finally {
       setIsLoading(false);
     }
@@ -147,6 +145,7 @@ export default function ProfessionalPage() {
     setTestScore(null);
     setUserAnswers([]);
     setCurrentQuestionIndex(0);
+    setApiError(null);
     form.reset();
   };
   
@@ -285,6 +284,23 @@ export default function ProfessionalPage() {
             <Loader2 className="h-12 w-12 animate-spin text-primary" />
             <p className="text-muted-foreground">Our AI is analyzing your profile to forge the best path forward.</p>
           </CardContent>
+        </Card>
+      );
+    }
+    if (apiError) {
+      return (
+        <Card className="border-destructive/50">
+           <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-destructive">
+                <AlertTriangle /> Service Temporarily Unavailable
+              </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-destructive-foreground">{apiError}</p>
+          </CardContent>
+          <CardFooter>
+              <Button onClick={startOver}>Start Over</Button>
+          </CardFooter>
         </Card>
       );
     }
