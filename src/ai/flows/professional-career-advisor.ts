@@ -99,11 +99,11 @@ const professionalCareerAdvisorFlow = ai.defineFlow(
     outputSchema: ProfessionalCareerAdvisorOutputSchema,
   },
   async (input) => {
-    const primaryModel = googleAI.model('gemini-pro');
+    const primaryModel = googleAI.model('gemini-1.5-pro');
     const fallbackModel = googleAI.model('gemini-1.5-flash');
     
     try {
-      console.log('Attempting to use primary model: gemini-pro');
+      console.log('Attempting to use primary model: gemini-1.5-pro');
       const { output } = await professionalCareerAdvisorPrompt(input, { model: primaryModel });
       return output!;
     } catch (error: any) {
