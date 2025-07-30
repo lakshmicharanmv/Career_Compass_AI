@@ -74,8 +74,8 @@ const generateAssessmentQuestionsFlow = ai.defineFlow(
       return output!;
     } catch (error: any) {
       const errorMessage = error.message || '';
-      if (errorMessage.includes('503') || errorMessage.includes('overloaded')) {
-        console.warn('Primary assessment model failed. Switching to fallback model: gemini-1.5-flash');
+      if (errorMessage.includes('503') || errorMessage.includes('overloaded') || errorMessage.includes('429')) {
+        console.warn('Primary assessment model failed or was rate-limited. Switching to fallback model: gemini-1.5-flash');
         try {
            const { output } = await assessmentQuestionsPrompt(input, { model: fallbackModel });
            return output!;
