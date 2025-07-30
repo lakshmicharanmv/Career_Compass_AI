@@ -254,24 +254,28 @@ export default function ProfessionalPage() {
     const progress = ((currentQuestionIndex + 1) / assessment.questions.length) * 100;
 
     return (
-        <Card>
-          <CardHeader>
-            <CardTitle>Professional Skills Assessment</CardTitle>
-            <CardDescription>Question {currentQuestionIndex + 1} of {assessment.questions.length}</CardDescription>
-            <Progress value={progress} className="mt-2" />
-          </CardHeader>
-          <CardContent>
-            <p className="font-semibold mb-4">{question.question}</p>
-            <RadioGroup onValueChange={handleAnswerSubmit} key={currentQuestionIndex} className="space-y-2">
-              {question.options.map((option, index) => (
-                <div key={index} className="flex items-center space-x-2 p-3 border rounded-md has-[:checked]:bg-primary/10 has-[:checked]:border-primary">
-                  <RadioGroupItem value={option} id={`q${currentQuestionIndex}-o${index}`} />
-                  <FormLabel htmlFor={`q${currentQuestionIndex}-o${index}`} className="flex-1 cursor-pointer">{option}</FormLabel>
-                </div>
-              ))}
-            </RadioGroup>
-          </CardContent>
-        </Card>
+      <Form {...form}>
+        <form>
+          <Card>
+            <CardHeader>
+              <CardTitle>Professional Skills Assessment</CardTitle>
+              <CardDescription>Question {currentQuestionIndex + 1} of {assessment.questions.length}</CardDescription>
+              <Progress value={progress} className="mt-2" />
+            </CardHeader>
+            <CardContent>
+              <p className="font-semibold mb-4">{question.question}</p>
+              <RadioGroup onValueChange={handleAnswerSubmit} key={currentQuestionIndex} className="space-y-2">
+                {question.options.map((option, index) => (
+                  <div key={index} className="flex items-center space-x-2 p-3 border rounded-md has-[:checked]:bg-primary/10 has-[:checked]:border-primary">
+                    <RadioGroupItem value={option} id={`q${currentQuestionIndex}-o${index}`} />
+                    <FormLabel htmlFor={`q${currentQuestionIndex}-o${index}`} className="flex-1 cursor-pointer">{option}</FormLabel>
+                  </div>
+                ))}
+              </RadioGroup>
+            </CardContent>
+          </Card>
+        </form>
+      </Form>
     );
   };
 
@@ -406,4 +410,6 @@ export default function ProfessionalPage() {
     </div>
   );
 }
+    
+
     
