@@ -64,10 +64,29 @@ const generateAssessmentQuestionsFlow = ai.defineFlow(
     inputSchema: AssessmentQuestionsInputSchema,
     outputSchema: AssessmentQuestionsOutputSchema,
   },
-  async input => {
-    const {output} = await assessmentQuestionsPrompt(input, {
-      model: googleAI.model('gemini-1.5-flash'),
-    });
-    return output!;
+  async (input) => {
+    const primaryModel = googleAI.model('gemini-1.5-pro');
+    const fallbackModel = googleAI.model('gemini-1.5-flash');
+
+    try {
+      console.log('Attempting to use primary model for assessment: gemini-1.5-pro');
+      const { output } = await assessmentQuestionsPrompt(input, { model: primaryModel });
+      return output!;
+    } catch (error: any) {
+      const errorMessage = error.message || '';
+      if (errorMessage.includes('503') || errorMessage.includes('overloaded')) {
+        console.warn('Primary assessment model failed. Switching to fallback model: gemini-1.5-flash');
+        try {
+           const { output } = await assessmentQuestionsPrompt(input, { model: fallbackModel });
+           return output!;
+        } catch (fallbackError: any) {
+            console.error("Fallback assessment model also failed:", fallbackError);
+            throw fallbackError;
+        }
+      } else {
+         console.error("An unexpected error occurred during assessment generation:", error);
+         throw error;
+      }
+    }
   }
 );
