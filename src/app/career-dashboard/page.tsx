@@ -53,6 +53,7 @@ const placeholderData = {
         currentRole: 'Software Engineer',
         nextRoles: ['Senior Engineer', 'Tech Lead', 'Engineering Manager'],
       },
+      mapUrl: 'https://www.google.com/maps/embed?pb=!1m16!1m12!1m3!1d124416.8966916805!2d77.6011656847926!3d12.96264988775497!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!2m1!1sit%20parks%20in%20bangalore!5e0!3m2!1sen!2sin!4v1719598285994!5m2!1sen!2sin'
     },
     'bangalore': {
         jobTrends: [ { name: 'AI/ML Engineer', growth: 30 }, { name: 'SDE', growth: 25 }, { name: 'Cloud Architect', growth: 22 } ],
@@ -71,6 +72,7 @@ const placeholderData = {
           currentRole: 'SDE-1',
           nextRoles: ['SDE-2', 'SDE-3', 'Principal Engineer'],
         },
+        mapUrl: 'https://www.google.com/maps/embed?pb=!1m16!1m12!1m3!1d124416.8966916805!2d77.6011656847926!3d12.96264988775497!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!2m1!1sit%20parks%20in%20bangalore!5e0!3m2!1sen!2sin!4v1719598285994!5m2!1sen!2sin'
     }
   },
   'Healthcare': {
@@ -112,6 +114,7 @@ const placeholderData = {
         currentRole: 'Senior Nurse',
         nextRoles: ['Head Nurse', 'Nursing Supervisor', 'Hospital Administrator'],
       },
+       mapUrl: 'https://www.google.com/maps/embed?pb=!1m16!1m12!1m3!1d62817.93510255427!2d76.31934989673417!3d10.518686159516627!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!2m1!1shospitals%20in%20kerala!5e0!3m2!1sen!2sin!4v1719598466838!5m2!1sen!2sin'
     },
      'mumbai': {
         jobTrends: [ { name: 'Health Manager', growth: 25 }, { name: 'Pharma Sales', growth: 20 }, { name: 'Medical Officer', growth: 18 } ],
@@ -130,6 +133,7 @@ const placeholderData = {
           currentRole: 'Medical Representative',
           nextRoles: ['Area Sales Manager', 'Medical Advisor', 'Marketing Manager'],
         },
+        mapUrl: 'https://www.google.com/maps/embed?pb=!1m16!1m12!1m3!1d241317.03901968568!2d72.88040439678161!3d19.082250731005!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!2m1!1shospitals%20in%20mumbai!5e0!3m2!1sen!2sin!4v1719598501168!5m2!1sen!2sin'
     }
   },
   'Finance': {
@@ -171,6 +175,7 @@ const placeholderData = {
         currentRole: 'Accountant',
         nextRoles: ['Senior Accountant', 'Financial Analyst', 'Finance Manager'],
       },
+      mapUrl: 'https://www.google.com/maps/embed?pb=!1m16!1m12!1m3!1d497698.6600777959!2d77.3507311299946!3d12.972099797521796!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!2m1!1sfinancial%20district!5e0!3m2!1sen!2sin!4v1719598544078!5m2!1sen!2sin'
     },
     'delhi-ncr': {
         jobTrends: [ { name: 'Fintech Specialist', growth: 28 }, { name: 'Investment Banker', growth: 20 }, { name: 'Auditor', growth: 15 } ],
@@ -189,6 +194,7 @@ const placeholderData = {
           currentRole: 'Financial Analyst',
           nextRoles: ['Associate', 'Vice President', 'Director'],
         },
+        mapUrl: 'https://www.google.com/maps/embed?pb=!1m16!1m12!1m3!1d448193.4739194511!2d76.81307297382098!3d28.64428743968481!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!2m1!1sfinancial%20district%20gurgaon!5e0!3m2!1sen!2sin!4v1719598572178!5m2!1sen!2sin'
     }
   },
   'Law': {
@@ -230,6 +236,7 @@ const placeholderData = {
         currentRole: 'Junior Associate',
         nextRoles: ['Associate', 'Senior Associate', 'Partner'],
       },
+      mapUrl: 'https://www.google.com/maps/embed?pb=!1m16!1m12!1m3!1d29433.99507982894!2d77.19943283515431!3d28.61664273822183!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!2m1!1shigh%20court!5e0!3m2!1sen!2sin!4v1719598612195!5m2!1sen!2sin'
     },
     'mumbai': {
         jobTrends: [ { name: 'Corporate Lawyer', growth: 20 }, { name: 'IPR Attorney', growth: 22 }, { name: 'Arbitration', growth: 15 } ],
@@ -248,6 +255,7 @@ const placeholderData = {
           currentRole: 'Paralegal',
           nextRoles: ['Lawyer', 'IPR Attorney', 'Senior Counsel'],
         },
+        mapUrl: 'https://www.google.com/maps/embed?pb=!1m16!1m12!1m3!1d60352.22013837996!2d72.82296041692888!3d18.96102607147814!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!2m1!1slaw%20firms%20in%20mumbai!5e0!3m2!1sen!2sin!4v1719598650117!5m2!1sen!2sin'
     }
   }
 };
@@ -449,7 +457,16 @@ export default function CareerDashboardPage() {
                     <CardDescription>Job hotspots for the {selectedIndustry} industry.</CardDescription>
                 </CardHeader>
                 <CardContent className="p-0">
-                    <Image src="https://placehold.co/600x400.png" width={600} height={400} alt="Map of job opportunities" className="w-full h-auto rounded-b-lg" data-ai-hint="world map" />
+                   <iframe
+                        src={industryData.mapUrl}
+                        width="100%"
+                        height="400"
+                        style={{ border: 0 }}
+                        allowFullScreen={false}
+                        loading="lazy"
+                        referrerPolicy="no-referrer-when-downgrade"
+                        className="w-full h-[400px] rounded-b-lg"
+                    ></iframe>
                 </CardContent>
             </Card>
 
