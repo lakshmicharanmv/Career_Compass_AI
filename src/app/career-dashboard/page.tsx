@@ -265,8 +265,6 @@ const placeholderData = {
 type Industry = keyof typeof placeholderData;
 type Location = 'all-india' | 'mumbai' | 'bangalore' | 'delhi-ncr';
 
-const cardClass = "bg-background/80 backdrop-blur-sm border-border/20 shadow-lg hover:border-border/40 transition-all duration-300";
-
 
 export default function CareerDashboardPage() {
   const [selectedIndustry, setSelectedIndustry] = React.useState<Industry>('Information Technology');
@@ -291,7 +289,7 @@ export default function CareerDashboardPage() {
   
 
   return (
-    <div className="flex flex-col min-h-screen bg-background">
+    <div className="flex flex-col min-h-screen bg-secondary/20">
       <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container flex h-14 max-w-screen-xl items-center justify-between">
           <Link href="/" className="flex items-center" prefetch={false}>
@@ -310,7 +308,7 @@ export default function CareerDashboardPage() {
           <h1 className="text-3xl font-bold tracking-tighter sm:text-4xl font-headline ml-4">Career Dashboard</h1>
         </div>
 
-        <Card className={cn(cardClass, "mb-8 bg-gradient-to-br from-background/80 to-secondary/20")}>
+        <Card className="mb-8 shadow-lg">
             <CardHeader>
                 <CardTitle className="flex items-center gap-2"><Search className="text-primary"/> Dashboard Filters</CardTitle>
                 <CardDescription>Select an industry and location to see personalized insights.</CardDescription>
@@ -318,7 +316,7 @@ export default function CareerDashboardPage() {
             <CardContent className="flex flex-col md:flex-row gap-4">
                 <div className="flex-1">
                     <Select onValueChange={(value) => handleIndustryChange(value as Industry)} defaultValue={selectedIndustry}>
-                        <SelectTrigger className="bg-background"><SelectValue placeholder="Select an industry" /></SelectTrigger>
+                        <SelectTrigger><SelectValue placeholder="Select an industry" /></SelectTrigger>
                         <SelectContent>
                             {Object.keys(placeholderData).map(industry => <SelectItem key={industry} value={industry}>{industry}</SelectItem>)}
                         </SelectContent>
@@ -326,7 +324,7 @@ export default function CareerDashboardPage() {
                 </div>
                 <div className="flex-1">
                     <Select onValueChange={(value) => setSelectedLocation(value as Location)} value={locationToShow}>
-                        <SelectTrigger className="bg-background"><SelectValue placeholder="Select a location" /></SelectTrigger>
+                        <SelectTrigger><SelectValue placeholder="Select a location" /></SelectTrigger>
                         <SelectContent>
                             <SelectItem value="all-india">All India</SelectItem>
                             <SelectItem value="mumbai">Mumbai</SelectItem>
@@ -339,7 +337,7 @@ export default function CareerDashboardPage() {
         </Card>
 
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            <Card className={cn(cardClass, "lg:col-span-2")}>
+            <Card className="lg:col-span-2 shadow-lg">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2"><BarChart className="text-primary"/> Top Job Trends</CardTitle>
                 <CardDescription>Projected annual growth for roles in {selectedIndustry}.</CardDescription>
@@ -361,7 +359,7 @@ export default function CareerDashboardPage() {
               </CardContent>
             </Card>
 
-             <Card className={cn(cardClass, "lg:col-span-2 xl:col-span-1")}>
+             <Card className="lg:col-span-2 xl:col-span-1 shadow-lg">
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2"><BrainCircuit className="text-primary"/> In-Demand Skills</CardTitle>
                      <CardDescription>Key skills for {selectedIndustry}.</CardDescription>
@@ -381,14 +379,14 @@ export default function CareerDashboardPage() {
                 </CardContent>
             </Card>
             
-            <Card className={cn(cardClass, "xl:col-span-1")}>
+            <Card className="xl:col-span-1 shadow-lg">
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2"><Building className="text-primary"/> Top Hiring Companies</CardTitle>
                     <CardDescription>Actively hiring in {selectedIndustry}.</CardDescription>
                 </CardHeader>
                 <CardContent className="grid grid-cols-2 gap-4">
                     {industryData.companies.map(company => (
-                        <div key={company.name} className="flex items-center gap-3 p-2 border rounded-lg bg-secondary/30">
+                        <div key={company.name} className="flex items-center gap-3 p-2 border rounded-lg bg-secondary/10">
                             <Image src={company.logo} alt={`${company.name} logo`} width={40} height={40} className="rounded-full bg-white" data-ai-hint={company.hint} />
                             <span className="font-medium text-sm">{company.name}</span>
                         </div>
@@ -396,7 +394,7 @@ export default function CareerDashboardPage() {
                 </CardContent>
             </Card>
 
-            <Card className={cn(cardClass, "lg:col-span-2")}>
+            <Card className="lg:col-span-2 shadow-lg">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2"><DollarSign className="text-primary"/> Salary Insights (Annual)</CardTitle>
                 <CardDescription>Average annual salary (INR) in {selectedIndustry}.</CardDescription>
@@ -418,7 +416,7 @@ export default function CareerDashboardPage() {
               </CardContent>
             </Card>
            
-            <Card className={cn(cardClass)}>
+            <Card className="shadow-lg">
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2"><Target className="text-primary"/> Skill Gap Analysis</CardTitle>
                     <CardDescription>Your skills vs. target role: <strong>{industryData.skillGap.targetRole}</strong></CardDescription>
@@ -433,7 +431,7 @@ export default function CareerDashboardPage() {
                 </CardContent>
             </Card>
             
-            <Card className={cn(cardClass, "lg:col-span-full xl:col-span-2")}>
+            <Card className="lg:col-span-full xl:col-span-2 shadow-lg">
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2"><Sparkles className="text-primary"/> AI-Suggested Career Path</CardTitle>
                     <CardDescription>From your current role: <strong>{industryData.careerPath.currentRole}</strong></CardDescription>
@@ -455,12 +453,12 @@ export default function CareerDashboardPage() {
                 </CardContent>
             </Card>
 
-             <Card className={cn(cardClass, "lg:col-span-full xl:col-span-2")}>
+             <Card className="lg:col-span-full xl:col-span-2 shadow-lg">
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2"><Map className="text-primary"/> Location-Based Opportunities</CardTitle>
                     <CardDescription>Job hotspots for the {selectedIndustry} industry.</CardDescription>
                 </CardHeader>
-                <CardContent className="p-0 overflow-hidden">
+                <CardContent className="p-0 overflow-hidden rounded-b-lg">
                    <iframe
                         src={industryData.mapUrl}
                         width="100%"
@@ -469,7 +467,7 @@ export default function CareerDashboardPage() {
                         allowFullScreen={false}
                         loading="lazy"
                         referrerPolicy="no-referrer-when-downgrade"
-                        className="w-full h-[400px] rounded-b-lg -mb-1"
+                        className="w-full h-[400px] -mb-1"
                     ></iframe>
                 </CardContent>
             </Card>
