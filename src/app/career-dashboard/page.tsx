@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
 import { BarChart as RechartsBarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, LabelList, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, Legend } from 'recharts';
 import { Progress } from '@/components/ui/progress';
+import { cn } from '@/lib/utils';
 
 const placeholderData = {
   'Information Technology': {
@@ -264,6 +265,8 @@ const placeholderData = {
 type Industry = keyof typeof placeholderData;
 type Location = 'all-india' | 'mumbai' | 'bangalore' | 'delhi-ncr';
 
+const cardClass = "bg-background/80 backdrop-blur-sm border-border/20 shadow-lg hover:border-border/40 transition-all duration-300";
+
 
 export default function CareerDashboardPage() {
   const [selectedIndustry, setSelectedIndustry] = React.useState<Industry>('Information Technology');
@@ -307,7 +310,7 @@ export default function CareerDashboardPage() {
           <h1 className="text-3xl font-bold tracking-tighter sm:text-4xl font-headline ml-4">Career Dashboard</h1>
         </div>
 
-        <Card className="mb-8 bg-secondary/50">
+        <Card className={cn(cardClass, "mb-8 bg-gradient-to-br from-background/80 to-secondary/20")}>
             <CardHeader>
                 <CardTitle className="flex items-center gap-2"><Search className="text-primary"/> Dashboard Filters</CardTitle>
                 <CardDescription>Select an industry and location to see personalized insights.</CardDescription>
@@ -336,7 +339,7 @@ export default function CareerDashboardPage() {
         </Card>
 
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            <Card className="lg:col-span-2">
+            <Card className={cn(cardClass, "lg:col-span-2")}>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2"><BarChart className="text-primary"/> Top Job Trends</CardTitle>
                 <CardDescription>Projected annual growth for roles in {selectedIndustry}.</CardDescription>
@@ -345,7 +348,7 @@ export default function CareerDashboardPage() {
                  <ChartContainer config={jobTrendsConfig} className="min-h-[300px] w-full">
                     <ResponsiveContainer width="100%" height={300}>
                         <RechartsBarChart data={industryData.jobTrends} accessibilityLayer layout="vertical" margin={{ left: 25, right: 30 }}>
-                            <CartesianGrid horizontal={false} />
+                            <CartesianGrid horizontal={false} stroke="hsl(var(--border) / 0.5)" />
                             <YAxis dataKey="name" type="category" tickLine={false} tickMargin={10} axisLine={false} width={130} />
                             <XAxis dataKey="growth" type="number" hide />
                             <RechartsTooltip cursor={false} content={<ChartTooltipContent indicator="dot" />} />
@@ -358,7 +361,7 @@ export default function CareerDashboardPage() {
               </CardContent>
             </Card>
 
-             <Card className="lg:col-span-2 xl:col-span-1">
+             <Card className={cn(cardClass, "lg:col-span-2 xl:col-span-1")}>
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2"><BrainCircuit className="text-primary"/> In-Demand Skills</CardTitle>
                      <CardDescription>Key skills for {selectedIndustry}.</CardDescription>
@@ -367,7 +370,7 @@ export default function CareerDashboardPage() {
                    <ChartContainer config={skillsConfig} className="min-h-[300px] w-full">
                      <ResponsiveContainer width="100%" height={300}>
                        <RadarChart data={industryData.skills}>
-                         <CartesianGrid gridType="circle" />
+                         <CartesianGrid gridType="circle" stroke="hsl(var(--border) / 0.5)" />
                          <PolarAngleAxis dataKey="skill" />
                          <PolarRadiusAxis angle={30} domain={[0, 100]} tick={false} axisLine={false} />
                          <Radar name="Demand" dataKey="demand" stroke="hsl(var(--primary))" fill="hsl(var(--primary))" fillOpacity={0.6} />
@@ -378,14 +381,14 @@ export default function CareerDashboardPage() {
                 </CardContent>
             </Card>
             
-            <Card className="xl:col-span-1">
+            <Card className={cn(cardClass, "xl:col-span-1")}>
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2"><Building className="text-primary"/> Top Hiring Companies</CardTitle>
                     <CardDescription>Actively hiring in {selectedIndustry}.</CardDescription>
                 </CardHeader>
                 <CardContent className="grid grid-cols-2 gap-4">
                     {industryData.companies.map(company => (
-                        <div key={company.name} className="flex items-center gap-3 p-2 border rounded-lg bg-secondary/50">
+                        <div key={company.name} className="flex items-center gap-3 p-2 border rounded-lg bg-secondary/30">
                             <Image src={company.logo} alt={`${company.name} logo`} width={40} height={40} className="rounded-full bg-white" data-ai-hint={company.hint} />
                             <span className="font-medium text-sm">{company.name}</span>
                         </div>
@@ -393,7 +396,7 @@ export default function CareerDashboardPage() {
                 </CardContent>
             </Card>
 
-            <Card className="lg:col-span-2">
+            <Card className={cn(cardClass, "lg:col-span-2")}>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2"><DollarSign className="text-primary"/> Salary Insights (Annual)</CardTitle>
                 <CardDescription>Average annual salary (INR) in {selectedIndustry}.</CardDescription>
@@ -402,7 +405,7 @@ export default function CareerDashboardPage() {
                  <ChartContainer config={salaryConfig} className="min-h-[300px] w-full">
                     <ResponsiveContainer width="100%" height={300}>
                         <RechartsBarChart data={industryData.salary} accessibilityLayer margin={{ top: 20 }}>
-                            <CartesianGrid vertical={false} />
+                            <CartesianGrid vertical={false} stroke="hsl(var(--border) / 0.5)"/>
                             <XAxis dataKey="level" tickLine={false} tickMargin={10} axisLine={false} />
                             <YAxis tickFormatter={(value) => `₹${new Intl.NumberFormat('en-IN', { notation: 'compact', compactDisplay: 'short' }).format(value)}`} />
                             <RechartsTooltip cursor={false} content={<ChartTooltipContent indicator="dot" />} />
@@ -415,7 +418,7 @@ export default function CareerDashboardPage() {
               </CardContent>
             </Card>
            
-            <Card>
+            <Card className={cn(cardClass)}>
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2"><Target className="text-primary"/> Skill Gap Analysis</CardTitle>
                     <CardDescription>Your skills vs. target role: <strong>{industryData.skillGap.targetRole}</strong></CardDescription>
@@ -430,7 +433,7 @@ export default function CareerDashboardPage() {
                 </CardContent>
             </Card>
             
-            <Card className="lg:col-span-full xl:col-span-2">
+            <Card className={cn(cardClass, "lg:col-span-full xl:col-span-2")}>
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2"><Sparkles className="text-primary"/> AI-Suggested Career Path</CardTitle>
                     <CardDescription>From your current role: <strong>{industryData.careerPath.currentRole}</strong></CardDescription>
@@ -439,25 +442,25 @@ export default function CareerDashboardPage() {
                    {industryData.careerPath.nextRoles.map((role, index) => (
                      <React.Fragment key={role}>
                         <div className="flex flex-col items-center">
-                            <div className={`p-3 bg-primary/10 rounded-full ${index === 0 ? 'border-2 border-primary' : ''}`}>
+                            <div className={cn("p-3 bg-primary/10 rounded-full", index === 0 ? 'border-2 border-primary shadow-lg shadow-primary/30' : 'border-2 border-transparent')}>
                                 <Briefcase className="h-6 w-6 text-primary" />
                             </div>
-                            <p className="font-semibold mt-2" dangerouslySetInnerHTML={{ __html: role.replace(/\s/g, '<br/>') }}></p>
+                            <p className="font-semibold mt-2 text-sm" dangerouslySetInnerHTML={{ __html: role.replace(/\s/g, '<br/>') }}></p>
                         </div>
                         {index < industryData.careerPath.nextRoles.length - 1 && (
-                           <div className="flex-1 border-t-2 border-dashed mx-4"></div>
+                           <div className="flex-1 border-t-2 border-dashed border-border/50 mx-4"></div>
                         )}
                      </React.Fragment>
                    ))}
                 </CardContent>
             </Card>
 
-             <Card className="lg:col-span-full xl:col-span-2">
+             <Card className={cn(cardClass, "lg:col-span-full xl:col-span-2")}>
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2"><Map className="text-primary"/> Location-Based Opportunities</CardTitle>
                     <CardDescription>Job hotspots for the {selectedIndustry} industry.</CardDescription>
                 </CardHeader>
-                <CardContent className="p-0">
+                <CardContent className="p-0 overflow-hidden">
                    <iframe
                         src={industryData.mapUrl}
                         width="100%"
@@ -466,7 +469,7 @@ export default function CareerDashboardPage() {
                         allowFullScreen={false}
                         loading="lazy"
                         referrerPolicy="no-referrer-when-downgrade"
-                        className="w-full h-[400px] rounded-b-lg"
+                        className="w-full h-[400px] rounded-b-lg -mb-1"
                     ></iframe>
                 </CardContent>
             </Card>
