@@ -14,127 +14,173 @@ import { Progress } from '@/components/ui/progress';
 
 const placeholderData = {
   'Information Technology': {
-    jobTrends: [
-      { name: 'AI/ML Engineer', growth: 25 },
-      { name: 'Data Scientist', growth: 22 },
-      { name: 'Cybersecurity Analyst', growth: 18 },
-      { name: 'Cloud Architect', growth: 20 },
-      { name: 'DevOps Engineer', growth: 15 },
-    ],
-    salary: [
-        { level: 'Entry-Level', salary: 700000 },
-        { level: 'Mid-Level', salary: 1400000 },
-        { level: 'Senior-Level', salary: 2500000 },
-    ],
-    skills: [
-        { skill: 'Python', demand: 95 },
-        { skill: 'Cloud (AWS/Azure)', demand: 90 },
-        { skill: 'Communication', demand: 85 },
-        { skill: 'Kubernetes', demand: 80 },
-        { skill: 'Problem Solving', demand: 90 },
-        { skill: 'SQL', demand: 75 },
-    ],
-    companies: [
-        { name: 'Google', logo: 'https://placehold.co/40x40.png', hint: 'google logo' },
-        { name: 'Amazon', logo: 'https://placehold.co/40x40.png', hint: 'amazon logo' },
-        { name: 'Microsoft', logo: 'https://placehold.co/40x40.png', hint: 'microsoft logo' },
-        { name: 'TCS', logo: 'https://placehold.co/40x40.png', hint: 'tcs logo' },
-    ]
+    'all-india': {
+      jobTrends: [
+        { name: 'AI/ML Engineer', growth: 25 },
+        { name: 'Data Scientist', growth: 22 },
+        { name: 'Cybersecurity Analyst', growth: 18 },
+        { name: 'Cloud Architect', growth: 20 },
+        { name: 'DevOps Engineer', growth: 15 },
+      ],
+      salary: [
+          { level: 'Entry-Level', salary: 700000 },
+          { level: 'Mid-Level', salary: 1400000 },
+          { level: 'Senior-Level', salary: 2500000 },
+      ],
+      skills: [
+          { skill: 'Python', demand: 95 },
+          { skill: 'Cloud (AWS/Azure)', demand: 90 },
+          { skill: 'Communication', demand: 85 },
+          { skill: 'Kubernetes', demand: 80 },
+          { skill: 'Problem Solving', demand: 90 },
+          { skill: 'SQL', demand: 75 },
+      ],
+      companies: [
+          { name: 'Google', logo: 'https://placehold.co/40x40.png', hint: 'google logo' },
+          { name: 'Amazon', logo: 'https://placehold.co/40x40.png', hint: 'amazon logo' },
+          { name: 'Microsoft', logo: 'https://placehold.co/40x40.png', hint: 'microsoft logo' },
+          { name: 'TCS', logo: 'https://placehold.co/40x40.png', hint: 'tcs logo' },
+      ]
+    },
+    'bangalore': {
+        jobTrends: [ { name: 'AI/ML Engineer', growth: 30 }, { name: 'SDE', growth: 25 }, { name: 'Cloud Architect', growth: 22 } ],
+        salary: [ { level: 'Entry-Level', salary: 800000 }, { level: 'Mid-Level', salary: 1600000 }, { level: 'Senior-Level', salary: 2800000 } ],
+        skills: [ { skill: 'Python', demand: 98 }, { skill: 'Cloud', demand: 95 }, { skill: 'System Design', demand: 90 } ],
+        companies: [ { name: 'Flipkart', logo: 'https://placehold.co/40x40.png', hint: 'flipkart logo' }, { name: 'Swiggy', logo: 'https://placehold.co/40x40.png', hint: 'swiggy logo' } ]
+    }
   },
   'Healthcare': {
-    jobTrends: [
-      { name: 'Nurse Practitioner', growth: 22 },
-      { name: 'Health Manager', growth: 20 },
-      { name: 'Physical Therapist', growth: 18 },
-      { name: 'Medical Assistant', growth: 16 },
-    ],
-     salary: [
-        { level: 'Entry-Level', salary: 600000 },
-        { level: 'Mid-Level', salary: 900000 },
-        { level: 'Senior-Level', salary: 1500000 },
-    ],
-    skills: [
-        { skill: 'Patient Care', demand: 98 },
-        { skill: 'EMR Systems', demand: 90 },
-        { skill: 'Empathy', demand: 95 },
-        { skill: 'Medical Billing', demand: 80 },
-        { skill: 'Critical Thinking', demand: 88 },
-        { skill: 'Pharmacology', demand: 75 },
-    ],
-    companies: [
-        { name: 'Apollo Hospitals', logo: 'https://placehold.co/40x40.png', hint: 'hospital logo' },
-        { name: 'Fortis Healthcare', logo: 'https://placehold.co/40x40.png', hint: 'hospital building' },
-        { name: 'Max Healthcare', logo: 'https://placehold.co/40x40.png', hint: 'healthcare logo' },
-        { name: 'AIIMS', logo: 'https://placehold.co/40x40.png', hint: 'government building' },
-    ]
+    'all-india': {
+      jobTrends: [
+        { name: 'Nurse Practitioner', growth: 22 },
+        { name: 'Health Manager', growth: 20 },
+        { name: 'Physical Therapist', growth: 18 },
+        { name: 'Medical Assistant', growth: 16 },
+      ],
+       salary: [
+          { level: 'Entry-Level', salary: 600000 },
+          { level: 'Mid-Level', salary: 900000 },
+          { level: 'Senior-Level', salary: 1500000 },
+      ],
+      skills: [
+          { skill: 'Patient Care', demand: 98 },
+          { skill: 'EMR Systems', demand: 90 },
+          { skill: 'Empathy', demand: 95 },
+          { skill: 'Medical Billing', demand: 80 },
+          { skill: 'Critical Thinking', demand: 88 },
+          { skill: 'Pharmacology', demand: 75 },
+      ],
+      companies: [
+          { name: 'Apollo Hospitals', logo: 'https://placehold.co/40x40.png', hint: 'hospital logo' },
+          { name: 'Fortis Healthcare', logo: 'https://placehold.co/40x40.png', hint: 'hospital building' },
+          { name: 'Max Healthcare', logo: 'https://placehold.co/40x40.png', hint: 'healthcare logo' },
+          { name: 'AIIMS', logo: 'https://placehold.co/40x40.png', hint: 'government building' },
+      ]
+    },
+     'mumbai': {
+        jobTrends: [ { name: 'Health Manager', growth: 25 }, { name: 'Pharma Sales', growth: 20 }, { name: 'Medical Officer', growth: 18 } ],
+        salary: [ { level: 'Entry-Level', salary: 650000 }, { level: 'Mid-Level', salary: 1000000 }, { level: 'Senior-Level', salary: 1700000 } ],
+        skills: [ { skill: 'Patient Care', demand: 99 }, { skill: 'Sales', demand: 85 }, { skill: 'Empathy', demand: 96 } ],
+        companies: [ { name: 'Sun Pharma', logo: 'https://placehold.co/40x40.png', hint: 'pharma logo' }, { name: 'Cipla', logo: 'https://placehold.co/40x40.png', hint: 'pharma company' } ]
+    }
   },
   'Finance': {
-    jobTrends: [
-      { name: 'Fintech Specialist', growth: 24 },
-      { name: 'Financial Analyst', growth: 15 },
-      { name: 'Wealth Manager', growth: 12 },
-      { name: 'Accountant', growth: 8 },
-    ],
-    salary: [
-        { level: 'Entry-Level', salary: 800000 },
-        { level: 'Mid-Level', salary: 1500000 },
-        { level: 'Senior-Level', salary: 2800000 },
-    ],
-    skills: [
-        { skill: 'Financial Modeling', demand: 95 },
-        { skill: 'MS Excel', demand: 92 },
-        { skill: 'Attention to Detail', demand: 98 },
-        { skill: 'Risk Analysis', demand: 85 },
-        { skill: 'Communication', demand: 88 },
-        { skill: 'QuickBooks/Tally', demand: 80 },
-    ],
-     companies: [
-        { name: 'HDFC Bank', logo: 'https://placehold.co/40x40.png', hint: 'bank logo' },
-        { name: 'ICICI Bank', logo: 'https://placehold.co/40x40.png', hint: 'bank building' },
-        { name: 'Goldman Sachs', logo: 'https://placehold.co/40x40.png', hint: 'investment bank' },
-        { name: 'Deloitte', logo: 'https://placehold.co/40x40.png', hint: 'corporate building' },
-    ]
+    'all-india': {
+      jobTrends: [
+        { name: 'Fintech Specialist', growth: 24 },
+        { name: 'Financial Analyst', growth: 15 },
+        { name: 'Wealth Manager', growth: 12 },
+        { name: 'Accountant', growth: 8 },
+      ],
+      salary: [
+          { level: 'Entry-Level', salary: 800000 },
+          { level: 'Mid-Level', salary: 1500000 },
+          { level: 'Senior-Level', salary: 2800000 },
+      ],
+      skills: [
+          { skill: 'Financial Modeling', demand: 95 },
+          { skill: 'MS Excel', demand: 92 },
+          { skill: 'Attention to Detail', demand: 98 },
+          { skill: 'Risk Analysis', demand: 85 },
+          { skill: 'Communication', demand: 88 },
+          { skill: 'QuickBooks/Tally', demand: 80 },
+      ],
+       companies: [
+          { name: 'HDFC Bank', logo: 'https://placehold.co/40x40.png', hint: 'bank logo' },
+          { name: 'ICICI Bank', logo: 'https://placehold.co/40x40.png', hint: 'bank building' },
+          { name: 'Goldman Sachs', logo: 'https://placehold.co/40x40.png', hint: 'investment bank' },
+          { name: 'Deloitte', logo: 'https://placehold.co/40x40.png', hint: 'corporate building' },
+      ]
+    },
+    'delhi-ncr': {
+        jobTrends: [ { name: 'Fintech Specialist', growth: 28 }, { name: 'Investment Banker', growth: 20 }, { name: 'Auditor', growth: 15 } ],
+        salary: [ { level: 'Entry-Level', salary: 850000 }, { level: 'Mid-Level', salary: 1600000 }, { level: 'Senior-Level', salary: 3000000 } ],
+        skills: [ { skill: 'Financial Modeling', demand: 97 }, { skill: 'Valuation', demand: 90 }, { skill: 'Audit', demand: 88 } ],
+        companies: [ { name: 'Paytm', logo: 'https://placehold.co/40x40.png', hint: 'fintech logo' }, { name: 'American Express', logo: 'https://placehold.co/40x40.png', hint: 'credit card' } ]
+    }
   },
   'Law': {
-    jobTrends: [
-        { name: 'Corporate Lawyer', growth: 15 },
-        { name: 'Cyber Law Expert', growth: 25 },
-        { name: 'IPR Attorney', growth: 18 },
-        { name: 'Legal Tech Consultant', growth: 20 },
-    ],
-    salary: [
-        { level: 'Entry-Level', salary: 600000 },
-        { level: 'Mid-Level', salary: 1200000 },
-        { level: 'Senior-Level', salary: 2200000 },
-    ],
-    skills: [
-        { skill: 'Legal Research', demand: 98 },
-        { skill: 'Drafting', demand: 95 },
-        { skill: 'Analytical Skills', demand: 92 },
-        { skill: 'Negotiation', demand: 90 },
-        { skill: 'Client Counseling', demand: 85 },
-        { skill: 'Tech Law', demand: 80 },
-    ],
-    companies: [
-        { name: 'Cyril Amarchand', logo: 'https://placehold.co/40x40.png', hint: 'law firm' },
-        { name: 'AZB & Partners', logo: 'https://placehold.co/40x40.png', hint: 'law building' },
-        { name: 'Khaitan & Co', logo: 'https://placehold.co/40x40.png', hint: 'gavel justice' },
-        { name: 'Shardul Amarchand', logo: 'https://placehold.co/40x40.png', hint: 'law books' },
-    ]
+    'all-india': {
+      jobTrends: [
+          { name: 'Corporate Lawyer', growth: 15 },
+          { name: 'Cyber Law Expert', growth: 25 },
+          { name: 'IPR Attorney', growth: 18 },
+          { name: 'Legal Tech Consultant', growth: 20 },
+      ],
+      salary: [
+          { level: 'Entry-Level', salary: 600000 },
+          { level: 'Mid-Level', salary: 1200000 },
+          { level: 'Senior-Level', salary: 2200000 },
+      ],
+      skills: [
+          { skill: 'Legal Research', demand: 98 },
+          { skill: 'Drafting', demand: 95 },
+          { skill: 'Analytical Skills', demand: 92 },
+          { skill: 'Negotiation', demand: 90 },
+          { skill: 'Client Counseling', demand: 85 },
+          { skill: 'Tech Law', demand: 80 },
+      ],
+      companies: [
+          { name: 'Cyril Amarchand', logo: 'https://placehold.co/40x40.png', hint: 'law firm' },
+          { name: 'AZB & Partners', logo: 'https://placehold.co/40x40.png', hint: 'law building' },
+          { name: 'Khaitan & Co', logo: 'https://placehold.co/40x40.png', hint: 'gavel justice' },
+          { name: 'Shardul Amarchand', logo: 'https://placehold.co/40x40.png', hint: 'law books' },
+      ]
+    },
+    'mumbai': {
+        jobTrends: [ { name: 'Corporate Lawyer', growth: 20 }, { name: 'IPR Attorney', growth: 22 }, { name: 'Arbitration', growth: 15 } ],
+        salary: [ { level: 'Entry-Level', salary: 700000 }, { level: 'Mid-Level', salary: 1400000 }, { level: 'Senior-Level', salary: 2500000 } ],
+        skills: [ { skill: 'Legal Research', demand: 99 }, { skill: 'Drafting', demand: 98 }, { skill: 'Negotiation', demand: 95 } ],
+        companies: [ { name: 'Trilegal', logo: 'https://placehold.co/40x40.png', hint: 'law building' }, { name: 'J. Sagar Associates', logo: 'https://placehold.co/40x40.png', hint: 'law office' } ]
+    }
   }
 };
 
 
 type Industry = keyof typeof placeholderData;
+type Location = 'all-india' | 'mumbai' | 'bangalore' | 'delhi-ncr';
+
 
 export default function CareerDashboardPage() {
   const [selectedIndustry, setSelectedIndustry] = React.useState<Industry>('Information Technology');
-
-  const industryData = placeholderData[selectedIndustry];
+  const [selectedLocation, setSelectedLocation] = React.useState<Location>('all-india');
+  
+  const industryLocations = Object.keys(placeholderData[selectedIndustry]);
+  const locationToShow = industryLocations.includes(selectedLocation) ? selectedLocation : 'all-india';
+  
+  const industryData = placeholderData[selectedIndustry][locationToShow];
   
   const jobTrendsConfig = { growth: { label: 'Growth (%)', color: 'hsl(var(--primary))' } };
   const salaryConfig = { salary: { label: 'Salary (INR)', color: 'hsl(var(--accent))' } };
   const skillsConfig = { demand: { label: 'Demand Score', color: 'hsl(var(--primary))' } };
+  
+  const handleIndustryChange = (value: Industry) => {
+    setSelectedIndustry(value);
+    const newIndustryLocations = Object.keys(placeholderData[value]);
+    if (!newIndustryLocations.includes(selectedLocation)) {
+        setSelectedLocation('all-india');
+    }
+  };
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
@@ -163,7 +209,7 @@ export default function CareerDashboardPage() {
             </CardHeader>
             <CardContent className="flex flex-col md:flex-row gap-4">
                 <div className="flex-1">
-                    <Select onValueChange={(value) => setSelectedIndustry(value as Industry)} defaultValue={selectedIndustry}>
+                    <Select onValueChange={(value) => handleIndustryChange(value as Industry)} defaultValue={selectedIndustry}>
                         <SelectTrigger className="bg-background"><SelectValue placeholder="Select an industry" /></SelectTrigger>
                         <SelectContent>
                             {Object.keys(placeholderData).map(industry => <SelectItem key={industry} value={industry}>{industry}</SelectItem>)}
@@ -171,7 +217,7 @@ export default function CareerDashboardPage() {
                     </Select>
                 </div>
                 <div className="flex-1">
-                    <Select defaultValue="all-india">
+                    <Select onValueChange={(value) => setSelectedLocation(value as Location)} value={locationToShow}>
                         <SelectTrigger className="bg-background"><SelectValue placeholder="Select a location" /></SelectTrigger>
                         <SelectContent>
                             <SelectItem value="all-india">All India</SelectItem>
@@ -331,4 +377,3 @@ export default function CareerDashboardPage() {
   );
 }
 
-    
