@@ -3,60 +3,98 @@
 
 import Link from 'next/link';
 import * as React from 'react';
-import { Bot, ArrowLeft, BarChart, LineChart, DollarSign, BrainCircuit, Search } from 'lucide-react';
+import Image from 'next/image';
+import { Bot, ArrowLeft, BarChart, DollarSign, BrainCircuit, Search, Building } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
-import { BarChart as RechartsBarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer } from 'recharts';
+import { BarChart as RechartsBarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, LabelList } from 'recharts';
 
-const placeholderJobData = {
-  'Information Technology': [
-    { name: 'Data Scientist', growth: 18 },
-    { name: 'Cybersecurity', growth: 15 },
-    { name: 'Cloud Engineer', growth: 14 },
-    { name: 'AI/ML Engineer', growth: 20 },
-    { name: 'DevOps Engineer', growth: 12 },
-  ],
-  'Healthcare': [
-    { name: 'Nurse Practitioner', growth: 22 },
-    { name: 'Physical Therapist', growth: 18 },
-    { name: 'Medical Assistant', growth: 16 },
-    { name: 'Health Manager', growth: 20 },
-  ],
-  'Finance': [
-    { name: 'Financial Analyst', growth: 11 },
-    { name: 'Accountant', growth: 7 },
-    { name: 'Portfolio Manager', growth: 9 },
-    { name: 'Fintech Specialist', growth: 19 },
-  ]
+const placeholderData = {
+  'Information Technology': {
+    jobTrends: [
+      { name: 'AI/ML Engineer', growth: 20 },
+      { name: 'Data Scientist', growth: 18 },
+      { name: 'Cybersecurity', growth: 15 },
+      { name: 'Cloud Engineer', growth: 14 },
+      { name: 'DevOps Engineer', growth: 12 },
+    ],
+    salary: [
+        { level: 'Entry-Level', salary: 60000 },
+        { level: 'Mid-Level', salary: 95000 },
+        { level: 'Senior-Level', salary: 150000 },
+    ],
+    skills: ['Python', 'AWS', 'Kubernetes', 'Terraform', 'SQL', 'React', 'Go'],
+    companies: [
+        { name: 'Google', logo: 'https://placehold.co/40x40.png' },
+        { name: 'Amazon', logo: 'https://placehold.co/40x40.png' },
+        { name: 'Microsoft', logo: 'https://placehold.co/40x40.png' },
+        { name: 'TCS', logo: 'https://placehold.co/40x40.png' },
+        { name: 'Infosys', logo: 'https://placehold.co/40x40.png' },
+    ]
+  },
+  'Healthcare': {
+    jobTrends: [
+      { name: 'Nurse Practitioner', growth: 22 },
+      { name: 'Health Manager', growth: 20 },
+      { name: 'Physical Therapist', growth: 18 },
+      { name: 'Medical Assistant', growth: 16 },
+    ],
+     salary: [
+        { level: 'Entry-Level', salary: 55000 },
+        { level: 'Mid-Level', salary: 80000 },
+        { level: 'Senior-Level', salary: 120000 },
+    ],
+    skills: ['Patient Care', 'EMR Systems', 'Medical Billing', 'HIPAA', 'Pharmacology'],
+    companies: [
+        { name: 'Apollo Hospitals', logo: 'https://placehold.co/40x40.png' },
+        { name: 'Fortis Healthcare', logo: 'https://placehold.co/40x40.png' },
+        { name: 'Max Healthcare', logo: 'https://placehold.co/40x40.png' },
+        { name: 'AIIMS', logo: 'https://placehold.co/40x40.png' },
+    ]
+  },
+  'Finance': {
+    jobTrends: [
+      { name: 'Fintech Specialist', growth: 19 },
+      { name: 'Financial Analyst', growth: 11 },
+      { name: 'Portfolio Manager', growth: 9 },
+      { name: 'Accountant', growth: 7 },
+    ],
+    salary: [
+        { level: 'Entry-Level', salary: 65000 },
+        { level: 'Mid-Level', salary: 100000 },
+        { level: 'Senior-Level', salary: 160000 },
+    ],
+    skills: ['Financial Modeling', 'Excel', 'QuickBooks', 'Risk Analysis', 'Bloomberg'],
+     companies: [
+        { name: 'HDFC Bank', logo: 'https://placehold.co/40x40.png' },
+        { name: 'ICICI Bank', logo: 'https://placehold.co/40x40.png' },
+        { name: 'Goldman Sachs', logo: 'https://placehold.co/40x40.png' },
+        { name: 'Deloitte', logo: 'https://placehold.co/40x40.png' },
+    ]
+  }
 };
 
-const placeholderSalaryData = {
-    'Information Technology': { entry: '60,000', mid: '95,000', senior: '150,000' },
-    'Healthcare': { entry: '55,000', mid: '80,000', senior: '120,000' },
-    'Finance': { entry: '65,000', mid: '100,000', senior: '160,000' },
-};
 
-const placeholderSkillsData = {
-    'Information Technology': ['Python', 'AWS', 'Kubernetes', 'Terraform', 'SQL', 'React'],
-    'Healthcare': ['Patient Care', 'EMR Systems', 'Medical Billing', 'HIPAA'],
-    'Finance': ['Financial Modeling', 'Excel', 'QuickBooks', 'Risk Analysis'],
-};
-
-type Industry = keyof typeof placeholderJobData;
+type Industry = keyof typeof placeholderData;
 
 export default function CareerDashboardPage() {
   const [selectedIndustry, setSelectedIndustry] = React.useState<Industry>('Information Technology');
 
-  const chartData = placeholderJobData[selectedIndustry];
-  const salaryData = placeholderSalaryData[selectedIndustry];
-  const skillsData = placeholderSkillsData[selectedIndustry];
+  const industryData = placeholderData[selectedIndustry];
   
-  const chartConfig = {
+  const jobTrendsConfig = {
       growth: {
         label: 'Growth (%)',
         color: 'hsl(var(--primary))',
+      },
+  }
+
+  const salaryConfig = {
+      salary: {
+        label: 'Salary (INR)',
+        color: 'hsl(var(--accent))',
       },
   }
 
@@ -121,47 +159,72 @@ export default function CareerDashboardPage() {
                 <CardDescription>Projected annual growth for roles in {selectedIndustry}.</CardDescription>
               </CardHeader>
               <CardContent>
-                 <ChartContainer config={chartConfig} className="min-h-[250px] w-full">
+                 <ChartContainer config={jobTrendsConfig} className="min-h-[300px] w-full">
                     <ResponsiveContainer width="100%" height={300}>
-                        <RechartsBarChart data={chartData} accessibilityLayer>
-                            <CartesianGrid vertical={false} />
-                            <XAxis dataKey="name" tickLine={false} tickMargin={10} axisLine={false} />
-                            <YAxis />
+                        <RechartsBarChart data={industryData.jobTrends} accessibilityLayer layout="vertical" margin={{ left: 20 }}>
+                            <CartesianGrid horizontal={false} />
+                            <YAxis dataKey="name" type="category" tickLine={false} tickMargin={10} axisLine={false} width={120} />
+                            <XAxis dataKey="growth" type="number" hide />
                             <RechartsTooltip cursor={false} content={<ChartTooltipContent indicator="dot" />} />
-                            <Bar dataKey="growth" fill="var(--color-growth)" radius={4} />
+                            <Bar dataKey="growth" fill="var(--color-growth)" radius={4}>
+                                <LabelList dataKey="growth" position="right" offset={8} className="fill-foreground" fontSize={12} formatter={(value: number) => `${value}%`} />
+                            </Bar>
                         </RechartsBarChart>
                     </ResponsiveContainer>
                 </ChartContainer>
               </CardContent>
             </Card>
 
-            <div className="space-y-8">
-                <Card>
-                    <CardHeader>
-                        <CardTitle className="flex items-center gap-2"><DollarSign className="text-primary"/> Salary Insights</CardTitle>
-                        <CardDescription>Average annual salary (INR).</CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                        <div className="flex justify-between"><span>Entry-Level</span> <strong>₹{salaryData.entry}</strong></div>
-                        <div className="flex justify-between"><span>Mid-Level</span> <strong>₹{salaryData.mid}</strong></div>
-                        <div className="flex justify-between"><span>Senior-Level</span> <strong>₹{salaryData.senior}</strong></div>
-                    </CardContent>
-                </Card>
-                 <Card>
-                    <CardHeader>
-                        <CardTitle className="flex items-center gap-2"><BrainCircuit className="text-primary"/> Top In-Demand Skills</CardTitle>
-                         <CardDescription>Skills to focus on for {selectedIndustry}.</CardDescription>
-                    </CardHeader>
-                    <CardContent className="flex flex-wrap gap-2">
-                        {skillsData.map(skill => <div key={skill} className="bg-secondary text-secondary-foreground text-sm font-medium px-3 py-1 rounded-full">{skill}</div>)}
-                    </CardContent>
-                </Card>
-            </div>
+             <Card>
+                <CardHeader>
+                    <CardTitle className="flex items-center gap-2"><BrainCircuit className="text-primary"/> Top In-Demand Skills</CardTitle>
+                     <CardDescription>Skills to focus on for {selectedIndustry}.</CardDescription>
+                </CardHeader>
+                <CardContent className="flex flex-wrap gap-2">
+                    {industryData.skills.map(skill => <div key={skill} className="bg-secondary text-secondary-foreground text-sm font-medium px-3 py-1 rounded-full">{skill}</div>)}
+                </CardContent>
+            </Card>
+            
+            <Card className="lg:col-span-2">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2"><DollarSign className="text-primary"/> Salary Insights</CardTitle>
+                <CardDescription>Average annual salary (INR) in {selectedIndustry}.</CardDescription>
+              </CardHeader>
+              <CardContent>
+                 <ChartContainer config={salaryConfig} className="min-h-[300px] w-full">
+                    <ResponsiveContainer width="100%" height={300}>
+                        <RechartsBarChart data={industryData.salary} accessibilityLayer>
+                            <CartesianGrid vertical={false} />
+                            <XAxis dataKey="level" tickLine={false} tickMargin={10} axisLine={false} />
+                            <YAxis tickFormatter={(value) => `₹${new Intl.NumberFormat('en-IN', { maximumSignificantDigits: 3 }).format(value)}`} />
+                            <RechartsTooltip cursor={false} content={<ChartTooltipContent indicator="dot" />} />
+                            <Bar dataKey="salary" fill="var(--color-salary)" radius={4}>
+                               <LabelList dataKey="salary" position="top" offset={8} className="fill-foreground" fontSize={12} formatter={(value: number) => `₹${new Intl.NumberFormat('en-IN').format(value)}`} />
+                            </Bar>
+                        </RechartsBarChart>
+                    </ResponsiveContainer>
+                </ChartContainer>
+              </CardContent>
+            </Card>
+
+            <Card>
+                <CardHeader>
+                    <CardTitle className="flex items-center gap-2"><Building className="text-primary"/> Top Companies Hiring</CardTitle>
+                     <CardDescription>Actively hiring companies in {selectedIndustry}.</CardDescription>
+                </CardHeader>
+                <CardContent className="grid grid-cols-2 gap-4">
+                    {industryData.companies.map(company => (
+                        <div key={company.name} className="flex items-center gap-3 p-2 border rounded-md bg-secondary/50">
+                            <Image src={company.logo} alt={`${company.name} logo`} width={40} height={40} className="rounded-full" data-ai-hint="company logo" />
+                            <span className="font-medium text-sm">{company.name}</span>
+                        </div>
+                    ))}
+                </CardContent>
+            </Card>
+
         </div>
 
       </main>
     </div>
   );
 }
-
-    
