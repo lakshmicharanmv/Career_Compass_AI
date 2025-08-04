@@ -93,10 +93,29 @@ const recommendDegreeCoursesFlow = ai.defineFlow(
     inputSchema: RecommendDegreeCoursesInputSchema,
     outputSchema: RecommendDegreeCoursesOutputSchema,
   },
-  async input => {
-    const {output} = await recommendDegreeCoursesPrompt(input, {
-      model: googleAI.model('gemini-1.5-flash'),
-    });
-    return output!;
+  async (input) => {
+    const primaryModel = googleAI.model('gemini-1.5-pro');
+    const fallbackModel = googleAI.model('gemini-1.5-flash');
+
+    try {
+      console.log('Attempting to use primary model for degree courses: gemini-1.5-pro');
+      const { output } = await recommendDegreeCoursesPrompt(input, { model: primaryModel });
+      return output!;
+    } catch (error: any) {
+      const errorMessage = error.message || '';
+      if (errorMessage.includes('503') || errorMessage.includes('overloaded') || errorMessage.includes('429')) {
+        console.warn('Primary degree courses model failed or was rate-limited. Switching to fallback model: gemini-1.5-flash');
+        try {
+           const { output } = await recommendDegreeCoursesPrompt(input, { model: fallbackModel });
+           return output!;
+        } catch (fallbackError: any) {
+            console.error("Fallback degree courses model also failed:", fallbackError);
+            throw fallbackError;
+        }
+      } else {
+         console.error("An unexpected error occurred during degree courses generation:", error);
+         throw error;
+      }
+    }
   }
 );

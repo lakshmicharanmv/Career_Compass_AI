@@ -1,4 +1,3 @@
-
 'use server';
 
 /**
@@ -80,10 +79,29 @@ const recommendStreamFlow = ai.defineFlow(
     inputSchema: RecommendStreamInputSchema,
     outputSchema: RecommendStreamOutputSchema,
   },
-  async input => {
-    const {output} = await recommendStreamPrompt(input, {
-      model: googleAI.model('gemini-1.5-flash'),
-    });
-    return output!;
+  async (input) => {
+    const primaryModel = googleAI.model('gemini-1.5-pro');
+    const fallbackModel = googleAI.model('gemini-1.5-flash');
+
+    try {
+      console.log('Attempting to use primary model for stream recommendation: gemini-1.5-pro');
+      const { output } = await recommendStreamPrompt(input, { model: primaryModel });
+      return output!;
+    } catch (error: any) {
+      const errorMessage = error.message || '';
+      if (errorMessage.includes('503') || errorMessage.includes('overloaded') || errorMessage.includes('429')) {
+        console.warn('Primary stream recommendation model failed or was rate-limited. Switching to fallback model: gemini-1.5-flash');
+        try {
+           const { output } = await recommendStreamPrompt(input, { model: fallbackModel });
+           return output!;
+        } catch (fallbackError: any) {
+            console.error("Fallback stream recommendation model also failed:", fallbackError);
+            throw fallbackError;
+        }
+      } else {
+         console.error("An unexpected error occurred during stream recommendation generation:", error);
+         throw error;
+      }
+    }
   }
 );

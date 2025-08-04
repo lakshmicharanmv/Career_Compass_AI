@@ -1,4 +1,3 @@
-// src/ai/flows/ai-career-chatbot.ts
 'use server';
 
 /**
@@ -10,6 +9,7 @@
  */
 
 import {ai} from '@/ai/genkit';
+import {googleAI} from '@genkit-ai/googleai';
 import {z} from 'genkit';
 
 const AICareerChatbotInputSchema = z.object({
@@ -46,8 +46,29 @@ const aiCareerChatbotFlow = ai.defineFlow(
     inputSchema: AICareerChatbotInputSchema,
     outputSchema: AICareerChatbotOutputSchema,
   },
-  async input => {
-    const {output} = await prompt(input);
-    return output!;
+  async (input) => {
+    const primaryModel = googleAI.model('gemini-1.5-pro');
+    const fallbackModel = googleAI.model('gemini-1.5-flash');
+
+    try {
+      console.log('Attempting to use primary model for chatbot: gemini-1.5-pro');
+      const { output } = await prompt(input, { model: primaryModel });
+      return output!;
+    } catch (error: any) {
+      const errorMessage = error.message || '';
+      if (errorMessage.includes('503') || errorMessage.includes('overloaded') || errorMessage.includes('429')) {
+        console.warn('Primary chatbot model failed or was rate-limited. Switching to fallback model: gemini-1.5-flash');
+        try {
+           const { output } = await prompt(input, { model: fallbackModel });
+           return output!;
+        } catch (fallbackError: any) {
+            console.error("Fallback chatbot model also failed:", fallbackError);
+            throw fallbackError;
+        }
+      } else {
+         console.error("An unexpected error occurred during chatbot response generation:", error);
+         throw error;
+      }
+    }
   }
 );

@@ -9,6 +9,7 @@
  */
 
 import {ai} from '@/ai/genkit';
+import {googleAI} from '@genkit-ai/googleai';
 import {z} from 'genkit';
 
 const AICareerSuggestionsInputSchema = z.object({
@@ -60,8 +61,29 @@ const aiCareerSuggestionsFlow = ai.defineFlow(
     inputSchema: AICareerSuggestionsInputSchema,
     outputSchema: AICareerSuggestionsOutputSchema,
   },
-  async input => {
-    const {output} = await prompt(input);
-    return output!;
+  async (input) => {
+    const primaryModel = googleAI.model('gemini-1.5-pro');
+    const fallbackModel = googleAI.model('gemini-1.5-flash');
+
+    try {
+      console.log('Attempting to use primary model for career suggestions: gemini-1.5-pro');
+      const { output } = await prompt(input, { model: primaryModel });
+      return output!;
+    } catch (error: any) {
+      const errorMessage = error.message || '';
+      if (errorMessage.includes('503') || errorMessage.includes('overloaded') || errorMessage.includes('429')) {
+        console.warn('Primary career suggestions model failed or was rate-limited. Switching to fallback model: gemini-1.5-flash');
+        try {
+           const { output } = await prompt(input, { model: fallbackModel });
+           return output!;
+        } catch (fallbackError: any) {
+            console.error("Fallback career suggestions model also failed:", fallbackError);
+            throw fallbackError;
+        }
+      } else {
+         console.error("An unexpected error occurred during career suggestions generation:", error);
+         throw error;
+      }
+    }
   }
 );

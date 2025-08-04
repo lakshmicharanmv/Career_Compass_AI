@@ -1,4 +1,3 @@
-
 'use server';
 
 /**
@@ -84,10 +83,29 @@ const recommendUndergraduateOptionsFlow = ai.defineFlow(
     inputSchema: UndergraduateOptionsInputSchema,
     outputSchema: UndergraduateOptionsOutputSchema,
   },
-  async input => {
-    const {output} = await recommendUndergraduateOptionsPrompt(input, {
-      model: googleAI.model('gemini-1.5-flash'),
-    });
-    return output!;
+  async (input) => {
+    const primaryModel = googleAI.model('gemini-1.5-pro');
+    const fallbackModel = googleAI.model('gemini-1.5-flash');
+
+    try {
+      console.log('Attempting to use primary model for undergraduate options: gemini-1.5-pro');
+      const { output } = await recommendUndergraduateOptionsPrompt(input, { model: primaryModel });
+      return output!;
+    } catch (error: any) {
+      const errorMessage = error.message || '';
+      if (errorMessage.includes('503') || errorMessage.includes('overloaded') || errorMessage.includes('429')) {
+        console.warn('Primary undergraduate options model failed or was rate-limited. Switching to fallback model: gemini-1.5-flash');
+        try {
+           const { output } = await recommendUndergraduateOptionsPrompt(input, { model: fallbackModel });
+           return output!;
+        } catch (fallbackError: any) {
+            console.error("Fallback undergraduate options model also failed:", fallbackError);
+            throw fallbackError;
+        }
+      } else {
+         console.error("An unexpected error occurred during undergraduate options generation:", error);
+         throw error;
+      }
+    }
   }
 );

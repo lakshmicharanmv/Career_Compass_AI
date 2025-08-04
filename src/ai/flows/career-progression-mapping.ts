@@ -9,6 +9,7 @@
  */
 
 import {ai} from '@/ai/genkit';
+import {googleAI} from '@genkit-ai/googleai';
 import {z} from 'genkit';
 
 const CareerProgressionInputSchema = z.object({
@@ -56,8 +57,29 @@ const careerProgressionFlow = ai.defineFlow(
     inputSchema: CareerProgressionInputSchema,
     outputSchema: CareerProgressionOutputSchema,
   },
-  async input => {
-    const {output} = await careerProgressionPrompt(input);
-    return output!;
+  async (input) => {
+    const primaryModel = googleAI.model('gemini-1.5-pro');
+    const fallbackModel = googleAI.model('gemini-1.5-flash');
+
+    try {
+      console.log('Attempting to use primary model for career progression: gemini-1.5-pro');
+      const { output } = await careerProgressionPrompt(input, { model: primaryModel });
+      return output!;
+    } catch (error: any) {
+      const errorMessage = error.message || '';
+      if (errorMessage.includes('503') || errorMessage.includes('overloaded') || errorMessage.includes('429')) {
+        console.warn('Primary career progression model failed or was rate-limited. Switching to fallback model: gemini-1.5-flash');
+        try {
+           const { output } = await careerProgressionPrompt(input, { model: fallbackModel });
+           return output!;
+        } catch (fallbackError: any) {
+            console.error("Fallback career progression model also failed:", fallbackError);
+            throw fallbackError;
+        }
+      } else {
+         console.error("An unexpected error occurred during career progression generation:", error);
+         throw error;
+      }
+    }
   }
 );
