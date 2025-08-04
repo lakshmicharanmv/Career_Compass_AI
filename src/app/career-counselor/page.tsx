@@ -116,7 +116,7 @@ export default function CareerCounselorPage() {
                       )}
                       <div className={cn(
                         'p-3 rounded-lg max-w-[80%]',
-                        message.role === 'user' ? 'bg-primary text-primary-foreground' : 'bg-secondary'
+                        message.role === 'user' ? 'bg-primary text-primary-foreground' : 'bg-muted'
                       )}>
                         <p className="text-sm whitespace-pre-wrap">{message.content}</p>
                       </div>
@@ -132,7 +132,7 @@ export default function CareerCounselorPage() {
                         <div className="p-2 bg-primary/10 rounded-full">
                            <Bot className="h-6 w-6 text-primary" />
                         </div>
-                        <div className="p-3 rounded-lg bg-secondary flex items-center gap-2">
+                        <div className="p-3 rounded-lg bg-muted flex items-center gap-2">
                           <Loader2 className="h-4 w-4 animate-spin" />
                           <p className="text-sm text-muted-foreground">Thinking...</p>
                         </div>
@@ -167,5 +167,3 @@ export default function CareerCounselorPage() {
     </div>
   );
 }
-
-    
