@@ -4,34 +4,41 @@
 import Link from 'next/link';
 import * as React from 'react';
 import Image from 'next/image';
-import { Bot, ArrowLeft, BarChart, DollarSign, BrainCircuit, Search, Building } from 'lucide-react';
+import { Bot, ArrowLeft, BarChart, DollarSign, BrainCircuit, Search, Building, Briefcase, Target, Map, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
-import { BarChart as RechartsBarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, LabelList } from 'recharts';
+import { BarChart as RechartsBarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, LabelList, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, Legend } from 'recharts';
+import { Progress } from '@/components/ui/progress';
 
 const placeholderData = {
   'Information Technology': {
     jobTrends: [
-      { name: 'AI/ML Engineer', growth: 20 },
-      { name: 'Data Scientist', growth: 18 },
-      { name: 'Cybersecurity', growth: 15 },
-      { name: 'Cloud Engineer', growth: 14 },
-      { name: 'DevOps Engineer', growth: 12 },
+      { name: 'AI/ML Engineer', growth: 25 },
+      { name: 'Data Scientist', growth: 22 },
+      { name: 'Cybersecurity Analyst', growth: 18 },
+      { name: 'Cloud Architect', growth: 20 },
+      { name: 'DevOps Engineer', growth: 15 },
     ],
     salary: [
-        { level: 'Entry-Level', salary: 60000 },
-        { level: 'Mid-Level', salary: 95000 },
-        { level: 'Senior-Level', salary: 150000 },
+        { level: 'Entry-Level', salary: 700000 },
+        { level: 'Mid-Level', salary: 1400000 },
+        { level: 'Senior-Level', salary: 2500000 },
     ],
-    skills: ['Python', 'AWS', 'Kubernetes', 'Terraform', 'SQL', 'React', 'Go'],
+    skills: [
+        { skill: 'Python', demand: 95 },
+        { skill: 'Cloud (AWS/Azure)', demand: 90 },
+        { skill: 'Communication', demand: 85 },
+        { skill: 'Kubernetes', demand: 80 },
+        { skill: 'Problem Solving', demand: 90 },
+        { skill: 'SQL', demand: 75 },
+    ],
     companies: [
-        { name: 'Google', logo: 'https://placehold.co/40x40.png' },
-        { name: 'Amazon', logo: 'https://placehold.co/40x40.png' },
-        { name: 'Microsoft', logo: 'https://placehold.co/40x40.png' },
-        { name: 'TCS', logo: 'https://placehold.co/40x40.png' },
-        { name: 'Infosys', logo: 'https://placehold.co/40x40.png' },
+        { name: 'Google', logo: 'https://placehold.co/40x40.png', hint: 'google logo' },
+        { name: 'Amazon', logo: 'https://placehold.co/40x40.png', hint: 'amazon logo' },
+        { name: 'Microsoft', logo: 'https://placehold.co/40x40.png', hint: 'microsoft logo' },
+        { name: 'TCS', logo: 'https://placehold.co/40x40.png', hint: 'tcs logo' },
     ]
   },
   'Healthcare': {
@@ -42,36 +49,77 @@ const placeholderData = {
       { name: 'Medical Assistant', growth: 16 },
     ],
      salary: [
-        { level: 'Entry-Level', salary: 55000 },
-        { level: 'Mid-Level', salary: 80000 },
-        { level: 'Senior-Level', salary: 120000 },
+        { level: 'Entry-Level', salary: 600000 },
+        { level: 'Mid-Level', salary: 900000 },
+        { level: 'Senior-Level', salary: 1500000 },
     ],
-    skills: ['Patient Care', 'EMR Systems', 'Medical Billing', 'HIPAA', 'Pharmacology'],
+    skills: [
+        { skill: 'Patient Care', demand: 98 },
+        { skill: 'EMR Systems', demand: 90 },
+        { skill: 'Empathy', demand: 95 },
+        { skill: 'Medical Billing', demand: 80 },
+        { skill: 'Critical Thinking', demand: 88 },
+        { skill: 'Pharmacology', demand: 75 },
+    ],
     companies: [
-        { name: 'Apollo Hospitals', logo: 'https://placehold.co/40x40.png' },
-        { name: 'Fortis Healthcare', logo: 'https://placehold.co/40x40.png' },
-        { name: 'Max Healthcare', logo: 'https://placehold.co/40x40.png' },
-        { name: 'AIIMS', logo: 'https://placehold.co/40x40.png' },
+        { name: 'Apollo Hospitals', logo: 'https://placehold.co/40x40.png', hint: 'hospital logo' },
+        { name: 'Fortis Healthcare', logo: 'https://placehold.co/40x40.png', hint: 'hospital building' },
+        { name: 'Max Healthcare', logo: 'https://placehold.co/40x40.png', hint: 'healthcare logo' },
+        { name: 'AIIMS', logo: 'https://placehold.co/40x40.png', hint: 'government building' },
     ]
   },
   'Finance': {
     jobTrends: [
-      { name: 'Fintech Specialist', growth: 19 },
-      { name: 'Financial Analyst', growth: 11 },
-      { name: 'Portfolio Manager', growth: 9 },
-      { name: 'Accountant', growth: 7 },
+      { name: 'Fintech Specialist', growth: 24 },
+      { name: 'Financial Analyst', growth: 15 },
+      { name: 'Wealth Manager', growth: 12 },
+      { name: 'Accountant', growth: 8 },
     ],
     salary: [
-        { level: 'Entry-Level', salary: 65000 },
-        { level: 'Mid-Level', salary: 100000 },
-        { level: 'Senior-Level', salary: 160000 },
+        { level: 'Entry-Level', salary: 800000 },
+        { level: 'Mid-Level', salary: 1500000 },
+        { level: 'Senior-Level', salary: 2800000 },
     ],
-    skills: ['Financial Modeling', 'Excel', 'QuickBooks', 'Risk Analysis', 'Bloomberg'],
+    skills: [
+        { skill: 'Financial Modeling', demand: 95 },
+        { skill: 'MS Excel', demand: 92 },
+        { skill: 'Attention to Detail', demand: 98 },
+        { skill: 'Risk Analysis', demand: 85 },
+        { skill: 'Communication', demand: 88 },
+        { skill: 'QuickBooks/Tally', demand: 80 },
+    ],
      companies: [
-        { name: 'HDFC Bank', logo: 'https://placehold.co/40x40.png' },
-        { name: 'ICICI Bank', logo: 'https://placehold.co/40x40.png' },
-        { name: 'Goldman Sachs', logo: 'https://placehold.co/40x40.png' },
-        { name: 'Deloitte', logo: 'https://placehold.co/40x40.png' },
+        { name: 'HDFC Bank', logo: 'https://placehold.co/40x40.png', hint: 'bank logo' },
+        { name: 'ICICI Bank', logo: 'https://placehold.co/40x40.png', hint: 'bank building' },
+        { name: 'Goldman Sachs', logo: 'https://placehold.co/40x40.png', hint: 'investment bank' },
+        { name: 'Deloitte', logo: 'https://placehold.co/40x40.png', hint: 'corporate building' },
+    ]
+  },
+  'Law': {
+    jobTrends: [
+        { name: 'Corporate Lawyer', growth: 15 },
+        { name: 'Cyber Law Expert', growth: 25 },
+        { name: 'IPR Attorney', growth: 18 },
+        { name: 'Legal Tech Consultant', growth: 20 },
+    ],
+    salary: [
+        { level: 'Entry-Level', salary: 600000 },
+        { level: 'Mid-Level', salary: 1200000 },
+        { level: 'Senior-Level', salary: 2200000 },
+    ],
+    skills: [
+        { skill: 'Legal Research', demand: 98 },
+        { skill: 'Drafting', demand: 95 },
+        { skill: 'Analytical Skills', demand: 92 },
+        { skill: 'Negotiation', demand: 90 },
+        { skill: 'Client Counseling', demand: 85 },
+        { skill: 'Tech Law', demand: 80 },
+    ],
+    companies: [
+        { name: 'Cyril Amarchand', logo: 'https://placehold.co/40x40.png', hint: 'law firm' },
+        { name: 'AZB & Partners', logo: 'https://placehold.co/40x40.png', hint: 'law building' },
+        { name: 'Khaitan & Co', logo: 'https://placehold.co/40x40.png', hint: 'gavel justice' },
+        { name: 'Shardul Amarchand', logo: 'https://placehold.co/40x40.png', hint: 'law books' },
     ]
   }
 };
@@ -84,19 +132,9 @@ export default function CareerDashboardPage() {
 
   const industryData = placeholderData[selectedIndustry];
   
-  const jobTrendsConfig = {
-      growth: {
-        label: 'Growth (%)',
-        color: 'hsl(var(--primary))',
-      },
-  }
-
-  const salaryConfig = {
-      salary: {
-        label: 'Salary (INR)',
-        color: 'hsl(var(--accent))',
-      },
-  }
+  const jobTrendsConfig = { growth: { label: 'Growth (%)', color: 'hsl(var(--primary))' } };
+  const salaryConfig = { salary: { label: 'Salary (INR)', color: 'hsl(var(--accent))' } };
+  const skillsConfig = { demand: { label: 'Demand Score', color: 'hsl(var(--primary))' } };
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
@@ -118,29 +156,23 @@ export default function CareerDashboardPage() {
           <h1 className="text-3xl font-bold tracking-tighter sm:text-4xl font-headline ml-4">Career Dashboard</h1>
         </div>
 
-        <Card className="mb-8">
+        <Card className="mb-8 bg-secondary/50">
             <CardHeader>
-                <CardTitle className="flex items-center gap-2"><Search className="text-primary"/> Filters</CardTitle>
+                <CardTitle className="flex items-center gap-2"><Search className="text-primary"/> Dashboard Filters</CardTitle>
                 <CardDescription>Select an industry and location to see personalized insights.</CardDescription>
             </CardHeader>
             <CardContent className="flex flex-col md:flex-row gap-4">
                 <div className="flex-1">
                     <Select onValueChange={(value) => setSelectedIndustry(value as Industry)} defaultValue={selectedIndustry}>
-                        <SelectTrigger>
-                            <SelectValue placeholder="Select an industry" />
-                        </SelectTrigger>
+                        <SelectTrigger className="bg-background"><SelectValue placeholder="Select an industry" /></SelectTrigger>
                         <SelectContent>
-                            <SelectItem value="Information Technology">Information Technology</SelectItem>
-                            <SelectItem value="Healthcare">Healthcare</SelectItem>
-                            <SelectItem value="Finance">Finance</SelectItem>
+                            {Object.keys(placeholderData).map(industry => <SelectItem key={industry} value={industry}>{industry}</SelectItem>)}
                         </SelectContent>
                     </Select>
                 </div>
                 <div className="flex-1">
                     <Select defaultValue="all-india">
-                        <SelectTrigger>
-                            <SelectValue placeholder="Select a location" />
-                        </SelectTrigger>
+                        <SelectTrigger className="bg-background"><SelectValue placeholder="Select a location" /></SelectTrigger>
                         <SelectContent>
                             <SelectItem value="all-india">All India</SelectItem>
                             <SelectItem value="mumbai">Mumbai</SelectItem>
@@ -152,7 +184,7 @@ export default function CareerDashboardPage() {
             </CardContent>
         </Card>
 
-        <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             <Card className="lg:col-span-2">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2"><BarChart className="text-primary"/> Top Job Trends</CardTitle>
@@ -161,13 +193,13 @@ export default function CareerDashboardPage() {
               <CardContent>
                  <ChartContainer config={jobTrendsConfig} className="min-h-[300px] w-full">
                     <ResponsiveContainer width="100%" height={300}>
-                        <RechartsBarChart data={industryData.jobTrends} accessibilityLayer layout="vertical" margin={{ left: 20 }}>
+                        <RechartsBarChart data={industryData.jobTrends} accessibilityLayer layout="vertical" margin={{ left: 25, right: 30 }}>
                             <CartesianGrid horizontal={false} />
-                            <YAxis dataKey="name" type="category" tickLine={false} tickMargin={10} axisLine={false} width={120} />
+                            <YAxis dataKey="name" type="category" tickLine={false} tickMargin={10} axisLine={false} width={130} />
                             <XAxis dataKey="growth" type="number" hide />
                             <RechartsTooltip cursor={false} content={<ChartTooltipContent indicator="dot" />} />
-                            <Bar dataKey="growth" fill="var(--color-growth)" radius={4}>
-                                <LabelList dataKey="growth" position="right" offset={8} className="fill-foreground" fontSize={12} formatter={(value: number) => `${value}%`} />
+                            <Bar dataKey="growth" fill="var(--color-growth)" radius={5}>
+                                <LabelList dataKey="growth" position="right" offset={8} className="fill-foreground font-semibold" fontSize={12} formatter={(value: number) => `${value}%`} />
                             </Bar>
                         </RechartsBarChart>
                     </ResponsiveContainer>
@@ -175,50 +207,120 @@ export default function CareerDashboardPage() {
               </CardContent>
             </Card>
 
-             <Card>
+             <Card className="lg:col-span-2 xl:col-span-1">
                 <CardHeader>
-                    <CardTitle className="flex items-center gap-2"><BrainCircuit className="text-primary"/> Top In-Demand Skills</CardTitle>
-                     <CardDescription>Skills to focus on for {selectedIndustry}.</CardDescription>
+                    <CardTitle className="flex items-center gap-2"><BrainCircuit className="text-primary"/> In-Demand Skills</CardTitle>
+                     <CardDescription>Key skills for {selectedIndustry}.</CardDescription>
                 </CardHeader>
-                <CardContent className="flex flex-wrap gap-2">
-                    {industryData.skills.map(skill => <div key={skill} className="bg-secondary text-secondary-foreground text-sm font-medium px-3 py-1 rounded-full">{skill}</div>)}
+                <CardContent>
+                   <ChartContainer config={skillsConfig} className="min-h-[300px] w-full">
+                     <ResponsiveContainer width="100%" height={300}>
+                       <RadarChart data={industryData.skills}>
+                         <CartesianGrid gridType="circle" />
+                         <PolarAngleAxis dataKey="skill" />
+                         <PolarRadiusAxis angle={30} domain={[0, 100]} tick={false} axisLine={false} />
+                         <Radar name="Demand" dataKey="demand" stroke="hsl(var(--primary))" fill="hsl(var(--primary))" fillOpacity={0.6} />
+                         <RechartsTooltip content={<ChartTooltipContent indicator="dot" />} />
+                       </RadarChart>
+                     </ResponsiveContainer>
+                   </ChartContainer>
                 </CardContent>
             </Card>
             
+            <Card className="xl:col-span-1">
+                <CardHeader>
+                    <CardTitle className="flex items-center gap-2"><Building className="text-primary"/> Top Hiring Companies</CardTitle>
+                    <CardDescription>Actively hiring in {selectedIndustry}.</CardDescription>
+                </CardHeader>
+                <CardContent className="grid grid-cols-2 gap-4">
+                    {industryData.companies.map(company => (
+                        <div key={company.name} className="flex items-center gap-3 p-2 border rounded-lg bg-secondary/50">
+                            <Image src={company.logo} alt={`${company.name} logo`} width={40} height={40} className="rounded-full bg-white" data-ai-hint={company.hint} />
+                            <span className="font-medium text-sm">{company.name}</span>
+                        </div>
+                    ))}
+                </CardContent>
+            </Card>
+
             <Card className="lg:col-span-2">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2"><DollarSign className="text-primary"/> Salary Insights</CardTitle>
+                <CardTitle className="flex items-center gap-2"><DollarSign className="text-primary"/> Salary Insights (Annual)</CardTitle>
                 <CardDescription>Average annual salary (INR) in {selectedIndustry}.</CardDescription>
               </CardHeader>
               <CardContent>
                  <ChartContainer config={salaryConfig} className="min-h-[300px] w-full">
                     <ResponsiveContainer width="100%" height={300}>
-                        <RechartsBarChart data={industryData.salary} accessibilityLayer>
+                        <RechartsBarChart data={industryData.salary} accessibilityLayer margin={{ top: 20 }}>
                             <CartesianGrid vertical={false} />
                             <XAxis dataKey="level" tickLine={false} tickMargin={10} axisLine={false} />
-                            <YAxis tickFormatter={(value) => `₹${new Intl.NumberFormat('en-IN', { maximumSignificantDigits: 3 }).format(value)}`} />
+                            <YAxis tickFormatter={(value) => `₹${new Intl.NumberFormat('en-IN', { notation: 'compact', compactDisplay: 'short' }).format(value)}`} />
                             <RechartsTooltip cursor={false} content={<ChartTooltipContent indicator="dot" />} />
-                            <Bar dataKey="salary" fill="var(--color-salary)" radius={4}>
-                               <LabelList dataKey="salary" position="top" offset={8} className="fill-foreground" fontSize={12} formatter={(value: number) => `₹${new Intl.NumberFormat('en-IN').format(value)}`} />
+                            <Bar dataKey="salary" fill="var(--color-salary)" radius={[5, 5, 0, 0]}>
+                               <LabelList dataKey="salary" position="top" offset={8} className="fill-foreground font-semibold" fontSize={12} formatter={(value: number) => `₹${new Intl.NumberFormat('en-IN', { notation: 'compact', compactDisplay: 'short' }).format(value)}`} />
                             </Bar>
                         </RechartsBarChart>
                     </ResponsiveContainer>
                 </ChartContainer>
               </CardContent>
             </Card>
-
+           
             <Card>
                 <CardHeader>
-                    <CardTitle className="flex items-center gap-2"><Building className="text-primary"/> Top Companies Hiring</CardTitle>
-                     <CardDescription>Actively hiring companies in {selectedIndustry}.</CardDescription>
+                    <CardTitle className="flex items-center gap-2"><Target className="text-primary"/> Skill Gap Analysis</CardTitle>
+                    <CardDescription>Your skills vs. target role: <strong>AI/ML Engineer</strong></CardDescription>
                 </CardHeader>
-                <CardContent className="grid grid-cols-2 gap-4">
-                    {industryData.companies.map(company => (
-                        <div key={company.name} className="flex items-center gap-3 p-2 border rounded-md bg-secondary/50">
-                            <Image src={company.logo} alt={`${company.name} logo`} width={40} height={40} className="rounded-full" data-ai-hint="company logo" />
-                            <span className="font-medium text-sm">{company.name}</span>
+                <CardContent className="space-y-4">
+                    <div className="space-y-2">
+                        <label className="text-sm font-medium">Python & Libraries</label>
+                        <Progress value={90} />
+                    </div>
+                    <div className="space-y-2">
+                        <label className="text-sm font-medium">Machine Learning Frameworks</label>
+                        <Progress value={75} />
+                    </div>
+                    <div className="space-y-2">
+                        <label className="text-sm font-medium">Cloud Platforms (AWS/GCP)</label>
+                        <Progress value={60} />
+                    </div>
+                </CardContent>
+            </Card>
+            
+            <Card className="lg:col-span-full xl:col-span-2">
+                <CardHeader>
+                    <CardTitle className="flex items-center gap-2"><Sparkles className="text-primary"/> AI-Suggested Career Path</CardTitle>
+                    <CardDescription>From your current role: <strong>Software Engineer</strong></CardDescription>
+                </CardHeader>
+                <CardContent className="flex items-center justify-around text-center">
+                    <div className="flex flex-col items-center">
+                        <div className="p-3 bg-primary/10 rounded-full border-2 border-primary">
+                            <Briefcase className="h-6 w-6 text-primary" />
                         </div>
-                    ))}
+                        <p className="font-semibold mt-2">Senior<br/>Engineer</p>
+                    </div>
+                     <div className="flex-1 border-t-2 border-dashed mx-4"></div>
+                    <div className="flex flex-col items-center">
+                       <div className="p-3 bg-primary/10 rounded-full">
+                            <Briefcase className="h-6 w-6 text-primary" />
+                        </div>
+                        <p className="font-semibold mt-2">Tech<br/>Lead</p>
+                    </div>
+                     <div className="flex-1 border-t-2 border-dashed mx-4"></div>
+                    <div className="flex flex-col items-center">
+                       <div className="p-3 bg-primary/10 rounded-full">
+                            <Briefcase className="h-6 w-6 text-primary" />
+                        </div>
+                        <p className="font-semibold mt-2">Engineering<br/>Manager</p>
+                    </div>
+                </CardContent>
+            </Card>
+
+             <Card className="lg:col-span-full xl:col-span-2">
+                <CardHeader>
+                    <CardTitle className="flex items-center gap-2"><Map className="text-primary"/> Location-Based Opportunities</CardTitle>
+                    <CardDescription>Job hotspots for the {selectedIndustry} industry.</CardDescription>
+                </CardHeader>
+                <CardContent className="p-0">
+                    <Image src="https://placehold.co/600x400.png" width={600} height={400} alt="Map of job opportunities" className="w-full h-auto rounded-b-lg" data-ai-hint="world map" />
                 </CardContent>
             </Card>
 
@@ -228,3 +330,5 @@ export default function CareerDashboardPage() {
     </div>
   );
 }
+
+    
