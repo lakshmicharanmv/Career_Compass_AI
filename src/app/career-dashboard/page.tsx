@@ -269,15 +269,6 @@ export default function CareerDashboardPage() {
   const [selectedIndustry, setSelectedIndustry] = React.useState<Industry>('Information Technology');
   const [selectedLocation, setSelectedLocation] = React.useState<Location>('all-india');
   
-  const industryLocations = Object.keys(placeholderData[selectedIndustry]);
-  const locationToShow = industryLocations.includes(selectedLocation) ? selectedLocation : 'all-india';
-  
-  const industryData = placeholderData[selectedIndustry][locationToShow];
-  
-  const jobTrendsConfig = { growth: { label: 'Growth (%)', color: 'hsl(var(--primary))' } };
-  const salaryConfig = { salary: { label: 'Salary (INR)', color: 'hsl(var(--accent))' } };
-  const skillsConfig = { demand: { label: 'Demand Score', color: 'hsl(var(--primary))' } };
-  
   const handleIndustryChange = (value: Industry) => {
     setSelectedIndustry(value);
     const newIndustryLocations = Object.keys(placeholderData[value]);
@@ -285,6 +276,16 @@ export default function CareerDashboardPage() {
         setSelectedLocation('all-india');
     }
   };
+
+  const industryLocations = Object.keys(placeholderData[selectedIndustry]);
+  const locationToShow = industryLocations.includes(selectedLocation) ? selectedLocation : 'all-india';
+  
+  const industryData = placeholderData[selectedIndustry][locationToShow as keyof typeof placeholderData[Industry]];
+  
+  const jobTrendsConfig = { growth: { label: 'Growth (%)', color: 'hsl(var(--primary))' } };
+  const salaryConfig = { salary: { label: 'Salary (INR)', color: 'hsl(var(--accent))' } };
+  const skillsConfig = { demand: { label: 'Demand Score', color: 'hsl(var(--primary))' } };
+  
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
