@@ -40,13 +40,37 @@ const placeholderData = {
           { name: 'Amazon', logo: 'https://placehold.co/40x40.png', hint: 'amazon logo' },
           { name: 'Microsoft', logo: 'https://placehold.co/40x40.png', hint: 'microsoft logo' },
           { name: 'TCS', logo: 'https://placehold.co/40x40.png', hint: 'tcs logo' },
-      ]
+      ],
+      skillGap: {
+        targetRole: 'AI/ML Engineer',
+        skills: [
+          { name: 'Python & Libraries', value: 90 },
+          { name: 'Machine Learning Frameworks', value: 75 },
+          { name: 'Cloud Platforms (AWS/GCP)', value: 60 },
+        ],
+      },
+      careerPath: {
+        currentRole: 'Software Engineer',
+        nextRoles: ['Senior Engineer', 'Tech Lead', 'Engineering Manager'],
+      },
     },
     'bangalore': {
         jobTrends: [ { name: 'AI/ML Engineer', growth: 30 }, { name: 'SDE', growth: 25 }, { name: 'Cloud Architect', growth: 22 } ],
         salary: [ { level: 'Entry-Level', salary: 800000 }, { level: 'Mid-Level', salary: 1600000 }, { level: 'Senior-Level', salary: 2800000 } ],
         skills: [ { skill: 'Python', demand: 98 }, { skill: 'Cloud', demand: 95 }, { skill: 'System Design', demand: 90 } ],
-        companies: [ { name: 'Flipkart', logo: 'https://placehold.co/40x40.png', hint: 'flipkart logo' }, { name: 'Swiggy', logo: 'https://placehold.co/40x40.png', hint: 'swiggy logo' } ]
+        companies: [ { name: 'Flipkart', logo: 'https://placehold.co/40x40.png', hint: 'flipkart logo' }, { name: 'Swiggy', logo: 'https://placehold.co/40x40.png', hint: 'swiggy logo' } ],
+        skillGap: {
+          targetRole: 'Senior SDE',
+          skills: [
+            { name: 'System Design', value: 80 },
+            { name: 'Advanced Algorithms', value: 65 },
+            { name: 'Mentorship', value: 50 },
+          ],
+        },
+        careerPath: {
+          currentRole: 'SDE-1',
+          nextRoles: ['SDE-2', 'SDE-3', 'Principal Engineer'],
+        },
     }
   },
   'Healthcare': {
@@ -75,13 +99,37 @@ const placeholderData = {
           { name: 'Fortis Healthcare', logo: 'https://placehold.co/40x40.png', hint: 'hospital building' },
           { name: 'Max Healthcare', logo: 'https://placehold.co/40x40.png', hint: 'healthcare logo' },
           { name: 'AIIMS', logo: 'https://placehold.co/40x40.png', hint: 'government building' },
-      ]
+      ],
+      skillGap: {
+        targetRole: 'Hospital Administrator',
+        skills: [
+          { name: 'Healthcare Management', value: 85 },
+          { name: 'Financial Acumen', value: 70 },
+          { name: 'EMR/EHR Systems', value: 90 },
+        ],
+      },
+      careerPath: {
+        currentRole: 'Senior Nurse',
+        nextRoles: ['Head Nurse', 'Nursing Supervisor', 'Hospital Administrator'],
+      },
     },
      'mumbai': {
         jobTrends: [ { name: 'Health Manager', growth: 25 }, { name: 'Pharma Sales', growth: 20 }, { name: 'Medical Officer', growth: 18 } ],
         salary: [ { level: 'Entry-Level', salary: 650000 }, { level: 'Mid-Level', salary: 1000000 }, { level: 'Senior-Level', salary: 1700000 } ],
         skills: [ { skill: 'Patient Care', demand: 99 }, { skill: 'Sales', demand: 85 }, { skill: 'Empathy', demand: 96 } ],
-        companies: [ { name: 'Sun Pharma', logo: 'https://placehold.co/40x40.png', hint: 'pharma logo' }, { name: 'Cipla', logo: 'https://placehold.co/40x40.png', hint: 'pharma company' } ]
+        companies: [ { name: 'Sun Pharma', logo: 'https://placehold.co/40x40.png', hint: 'pharma logo' }, { name: 'Cipla', logo: 'https://placehold.co/40x40.png', hint: 'pharma company' } ],
+        skillGap: {
+          targetRole: 'Medical Science Liaison',
+          skills: [
+            { name: 'Clinical Research', value: 70 },
+            { name: 'Scientific Communication', value: 80 },
+            { name: 'Relationship Building', value: 90 },
+          ],
+        },
+        careerPath: {
+          currentRole: 'Medical Representative',
+          nextRoles: ['Area Sales Manager', 'Medical Advisor', 'Marketing Manager'],
+        },
     }
   },
   'Finance': {
@@ -110,13 +158,37 @@ const placeholderData = {
           { name: 'ICICI Bank', logo: 'https://placehold.co/40x40.png', hint: 'bank building' },
           { name: 'Goldman Sachs', logo: 'https://placehold.co/40x40.png', hint: 'investment bank' },
           { name: 'Deloitte', logo: 'https://placehold.co/40x40.png', hint: 'corporate building' },
-      ]
+      ],
+      skillGap: {
+        targetRole: 'Financial Analyst',
+        skills: [
+          { name: 'Financial Modeling', value: 80 },
+          { name: 'Valuation Techniques', value: 65 },
+          { name: 'Advanced Excel', value: 90 },
+        ],
+      },
+      careerPath: {
+        currentRole: 'Accountant',
+        nextRoles: ['Senior Accountant', 'Financial Analyst', 'Finance Manager'],
+      },
     },
     'delhi-ncr': {
         jobTrends: [ { name: 'Fintech Specialist', growth: 28 }, { name: 'Investment Banker', growth: 20 }, { name: 'Auditor', growth: 15 } ],
         salary: [ { level: 'Entry-Level', salary: 850000 }, { level: 'Mid-Level', salary: 1600000 }, { level: 'Senior-Level', salary: 3000000 } ],
         skills: [ { skill: 'Financial Modeling', demand: 97 }, { skill: 'Valuation', demand: 90 }, { skill: 'Audit', demand: 88 } ],
-        companies: [ { name: 'Paytm', logo: 'https://placehold.co/40x40.png', hint: 'fintech logo' }, { name: 'American Express', logo: 'https://placehold.co/40x40.png', hint: 'credit card' } ]
+        companies: [ { name: 'Paytm', logo: 'https://placehold.co/40x40.png', hint: 'fintech logo' }, { name: 'American Express', logo: 'https://placehold.co/40x40.png', hint: 'credit card' } ],
+        skillGap: {
+          targetRole: 'Investment Banker',
+          skills: [
+            { name: 'Valuation', value: 85 },
+            { name: 'Mergers & Acquisitions', value: 70 },
+            { name: 'Pitchbook Creation', value: 75 },
+          ],
+        },
+        careerPath: {
+          currentRole: 'Financial Analyst',
+          nextRoles: ['Associate', 'Vice President', 'Director'],
+        },
     }
   },
   'Law': {
@@ -145,13 +217,37 @@ const placeholderData = {
           { name: 'AZB & Partners', logo: 'https://placehold.co/40x40.png', hint: 'law building' },
           { name: 'Khaitan & Co', logo: 'https://placehold.co/40x40.png', hint: 'gavel justice' },
           { name: 'Shardul Amarchand', logo: 'https://placehold.co/40x40.png', hint: 'law books' },
-      ]
+      ],
+      skillGap: {
+        targetRole: 'Corporate Lawyer',
+        skills: [
+          { name: 'Contract Drafting', value: 90 },
+          { name: 'Due Diligence', value: 70 },
+          { name: 'Negotiation', value: 80 },
+        ],
+      },
+      careerPath: {
+        currentRole: 'Junior Associate',
+        nextRoles: ['Associate', 'Senior Associate', 'Partner'],
+      },
     },
     'mumbai': {
         jobTrends: [ { name: 'Corporate Lawyer', growth: 20 }, { name: 'IPR Attorney', growth: 22 }, { name: 'Arbitration', growth: 15 } ],
         salary: [ { level: 'Entry-Level', salary: 700000 }, { level: 'Mid-Level', salary: 1400000 }, { level: 'Senior-Level', salary: 2500000 } ],
         skills: [ { skill: 'Legal Research', demand: 99 }, { skill: 'Drafting', demand: 98 }, { skill: 'Negotiation', demand: 95 } ],
-        companies: [ { name: 'Trilegal', logo: 'https://placehold.co/40x40.png', hint: 'law building' }, { name: 'J. Sagar Associates', logo: 'https://placehold.co/40x40.png', hint: 'law office' } ]
+        companies: [ { name: 'Trilegal', logo: 'https://placehold.co/40x40.png', hint: 'law building' }, { name: 'J. Sagar Associates', logo: 'https://placehold.co/40x40.png', hint: 'law office' } ],
+        skillGap: {
+          targetRole: 'IPR Attorney',
+          skills: [
+            { name: 'Patent Filing', value: 85 },
+            { name: 'Trademark Law', value: 90 },
+            { name: 'Litigation', value: 75 },
+          ],
+        },
+        careerPath: {
+          currentRole: 'Paralegal',
+          nextRoles: ['Lawyer', 'IPR Attorney', 'Senior Counsel'],
+        },
     }
   }
 };
@@ -313,50 +409,37 @@ export default function CareerDashboardPage() {
             <Card>
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2"><Target className="text-primary"/> Skill Gap Analysis</CardTitle>
-                    <CardDescription>Your skills vs. target role: <strong>AI/ML Engineer</strong></CardDescription>
+                    <CardDescription>Your skills vs. target role: <strong>{industryData.skillGap.targetRole}</strong></CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                    <div className="space-y-2">
-                        <label className="text-sm font-medium">Python & Libraries</label>
-                        <Progress value={90} />
-                    </div>
-                    <div className="space-y-2">
-                        <label className="text-sm font-medium">Machine Learning Frameworks</label>
-                        <Progress value={75} />
-                    </div>
-                    <div className="space-y-2">
-                        <label className="text-sm font-medium">Cloud Platforms (AWS/GCP)</label>
-                        <Progress value={60} />
-                    </div>
+                    {industryData.skillGap.skills.map(skill => (
+                      <div key={skill.name} className="space-y-2">
+                          <label className="text-sm font-medium">{skill.name}</label>
+                          <Progress value={skill.value} />
+                      </div>
+                    ))}
                 </CardContent>
             </Card>
             
             <Card className="lg:col-span-full xl:col-span-2">
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2"><Sparkles className="text-primary"/> AI-Suggested Career Path</CardTitle>
-                    <CardDescription>From your current role: <strong>Software Engineer</strong></CardDescription>
+                    <CardDescription>From your current role: <strong>{industryData.careerPath.currentRole}</strong></CardDescription>
                 </CardHeader>
                 <CardContent className="flex items-center justify-around text-center">
-                    <div className="flex flex-col items-center">
-                        <div className="p-3 bg-primary/10 rounded-full border-2 border-primary">
-                            <Briefcase className="h-6 w-6 text-primary" />
+                   {industryData.careerPath.nextRoles.map((role, index) => (
+                     <React.Fragment key={role}>
+                        <div className="flex flex-col items-center">
+                            <div className={`p-3 bg-primary/10 rounded-full ${index === 0 ? 'border-2 border-primary' : ''}`}>
+                                <Briefcase className="h-6 w-6 text-primary" />
+                            </div>
+                            <p className="font-semibold mt-2" dangerouslySetInnerHTML={{ __html: role.replace(/\s/g, '<br/>') }}></p>
                         </div>
-                        <p className="font-semibold mt-2">Senior<br/>Engineer</p>
-                    </div>
-                     <div className="flex-1 border-t-2 border-dashed mx-4"></div>
-                    <div className="flex flex-col items-center">
-                       <div className="p-3 bg-primary/10 rounded-full">
-                            <Briefcase className="h-6 w-6 text-primary" />
-                        </div>
-                        <p className="font-semibold mt-2">Tech<br/>Lead</p>
-                    </div>
-                     <div className="flex-1 border-t-2 border-dashed mx-4"></div>
-                    <div className="flex flex-col items-center">
-                       <div className="p-3 bg-primary/10 rounded-full">
-                            <Briefcase className="h-6 w-6 text-primary" />
-                        </div>
-                        <p className="font-semibold mt-2">Engineering<br/>Manager</p>
-                    </div>
+                        {index < industryData.careerPath.nextRoles.length - 1 && (
+                           <div className="flex-1 border-t-2 border-dashed mx-4"></div>
+                        )}
+                     </React.Fragment>
+                   ))}
                 </CardContent>
             </Card>
 
@@ -376,4 +459,3 @@ export default function CareerDashboardPage() {
     </div>
   );
 }
-
