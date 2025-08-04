@@ -39,6 +39,8 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 type Step = 'form' | 'assessmentChoice' | 'assessment' | 'results';
+type RecommendationOutput = ProfessionalCareerAdvisorOutput & { error?: boolean; message?: string };
+
 
 const industries = [ "Information Technology", "Healthcare", "Finance", "Education", "Manufacturing", "Retail", "Arts & Entertainment", "Legal", "Public Sector", "Engineering", "Construction & Trades" ];
 const goals = [
@@ -53,7 +55,7 @@ export default function ProfessionalPage() {
   const [isLoading, setIsLoading] = React.useState(false);
   const [formData, setFormData] = React.useState<FormValues | null>(null);
   const [assessment, setAssessment] = React.useState<AssessmentQuestionsOutput | null>(null);
-  const [recommendation, setRecommendation] = React.useState<ProfessionalCareerAdvisorOutput | null>(null);
+  const [recommendation, setRecommendation] = React.useState<RecommendationOutput | null>(null);
   const [currentQuestionIndex, setCurrentQuestionIndex] = React.useState(0);
   const [userAnswers, setUserAnswers] = React.useState<string[]>([]);
   const [testScore, setTestScore] = React.useState<number | null>(null);
@@ -124,14 +126,20 @@ export default function ProfessionalPage() {
     setIsLoading(true);
     setApiError(null);
     try {
-      const result = await getProfessionalAdvice({
+      const result: RecommendationOutput = await getProfessionalAdvice({
         ...formData,
         assessmentScore: score ?? undefined,
       });
-      setRecommendation(result);
+
+      if(result.error) {
+        setApiError(result.message || "Our AI is currently busy and both our primary and backup systems are overloaded. We apologize for the inconvenience. Please try again in a few moments.");
+        setRecommendation(null);
+      } else {
+        setRecommendation(result);
+      }
     } catch (error) {
       console.error("Failed to get recommendations:", error);
-      setApiError("Our AI is currently busy and both our primary and backup systems are overloaded. We apologize for the inconvenience. Please try again in a few moments.");
+      setApiError("An unexpected error occurred. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -300,7 +308,7 @@ export default function ProfessionalPage() {
               </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-destructive-foreground">{apiError}</p>
+            <p>{apiError}</p>
           </CardContent>
           <CardFooter>
               <Button onClick={startOver}>Start Over</Button>

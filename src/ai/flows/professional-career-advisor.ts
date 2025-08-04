@@ -96,7 +96,7 @@ const professionalCareerAdvisorFlow = ai.defineFlow(
   {
     name: 'professionalCareerAdvisorFlow',
     inputSchema: ProfessionalCareerAdvisorInputSchema,
-    outputSchema: ProfessionalCareerAdvisorOutputSchema,
+    outputSchema: z.union([ProfessionalCareerAdvisorOutputSchema, z.object({ error: z.boolean(), message: z.string() })]),
   },
   async (input) => {
     const primaryModel = googleAI.model('gemini-1.5-pro');
@@ -108,8 +108,8 @@ const professionalCareerAdvisorFlow = ai.defineFlow(
       return output!;
     } catch (error: any) {
       const errorMessage = error.message || '';
-      if (errorMessage.includes('503') || errorMessage.includes('overloaded')) {
-        console.warn('Primary model failed. Switching to fallback model: gemini-1.5-flash');
+      if (errorMessage.includes('503') || errorMessage.includes('overloaded') || errorMessage.includes('429')) {
+        console.warn('Primary model failed or was rate-limited. Switching to fallback model: gemini-1.5-flash');
         try {
            const { output } = await professionalCareerAdvisorPrompt(input, { model: fallbackModel });
            return output!;
@@ -124,4 +124,6 @@ const professionalCareerAdvisorFlow = ai.defineFlow(
     }
   }
 );
+    
+
     
