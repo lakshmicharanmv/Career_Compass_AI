@@ -38,15 +38,15 @@ const workExperienceSchema = z.object({
 const projectSchema = z.object({
   name: z.string().min(1, 'Project name is required'),
   description: z.string().min(1, 'Description is required'),
-  url: z.string().optional(),
+  url: z.string().url().optional().or(z.literal('')),
 });
 
 const formSchema = z.object({
   fullName: z.string().min(1, 'Full name is required.'),
   email: z.string().email(),
   phone: z.string().regex(/^\d{10}$/, 'Please enter a valid 10-digit phone number.'),
-  linkedin: z.string().url().optional(),
-  github: z.string().url().optional(),
+  linkedin: z.string().url().optional().or(z.literal('')),
+  github: z.string().url().optional().or(z.literal('')),
   professionalTitle: z.string().min(1, 'A professional title is required.'),
   careerObjective: z.string().min(1, 'A career objective is required.'),
   education: z.array(educationSchema).min(1, 'At least one education entry is required.'),
@@ -70,9 +70,18 @@ export default function ResumeBuilderPage() {
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      education: [{ degree: '', institution: '', year: '', score: '' }],
+      fullName: '',
+      email: '',
+      phone: '',
+      linkedin: '',
+      github: '',
+      professionalTitle: '',
+      careerObjective: '',
+      education: [],
       workExperience: [],
       projects: [],
+      technicalSkills: '',
+      softSkills: '',
       extracurricular: '',
     },
   });
@@ -85,15 +94,17 @@ export default function ResumeBuilderPage() {
   React.useEffect(() => {
     const user = JSON.parse(localStorage.getItem('currentUser') || '{}');
     if (user && user.email) {
+      const defaultEducation = user.education || [{ degree: '', institution: '', year: '', score: '' }];
+
       form.reset({
-        fullName: user.fullName || '',
+        fullName: user.name || user.fullName || '',
         email: user.email || '',
         phone: user.phone || '',
         linkedin: user.linkedin || '',
         github: user.github || '',
         professionalTitle: user.professionalTitle || (flowType === 'professional' ? 'Experienced Professional' : 'Aspiring Graduate'),
-        careerObjective: user.careerObjective || 'Seeking a challenging role in a dynamic organization...',
-        education: user.education || [{ degree: '', institution: '', year: '', score: '' }],
+        careerObjective: user.careerObjective || 'Seeking a challenging role in a dynamic organization to leverage my skills.',
+        education: defaultEducation.length > 0 ? defaultEducation : [{ degree: '', institution: '', year: '', score: '' }],
         workExperience: user.workExperience || [],
         projects: user.projects || [],
         technicalSkills: user.skills?.technical || '',
@@ -108,9 +119,18 @@ export default function ResumeBuilderPage() {
 
   // ----------------------- SAVE DETAILS -----------------------
   const saveDetails = (data: FormValues) => {
-    const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
-    const updatedUser = { ...currentUser, ...data, skills: { technical: data.technicalSkills, soft: data.softSkills } };
-    localStorage.setItem('currentUser', JSON.stringify(updatedUser));
+    try {
+      const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+      const updatedUser = { 
+        ...currentUser, 
+        ...data, 
+        skills: { technical: data.technicalSkills, soft: data.softSkills } 
+      };
+      localStorage.setItem('currentUser', JSON.stringify(updatedUser));
+      toast({ title: 'Details Saved!', description: 'Your information has been successfully saved.' });
+    } catch (error) {
+       toast({ variant: 'destructive', title: 'Error Saving!', description: 'Could not save your details.' });
+    }
   };
 
   // ----------------------- PDF GENERATOR -----------------------
@@ -118,11 +138,10 @@ export default function ResumeBuilderPage() {
     const doc = new jsPDF('p', 'pt', 'a4');
     const margin = 36;
     const pageWidth = doc.internal.pageSize.getWidth();
-    const contentWidth = pageWidth - margin * 2;
     let y = margin;
 
     const addSection = (title: string) => {
-      y += 15;
+      y += 10; // Space before section
       doc.setFont('helvetica', 'bold').setFontSize(11);
       doc.text(title.toUpperCase(), margin, y);
       doc.line(margin, y + 2, pageWidth - margin, y + 2);
@@ -130,38 +149,36 @@ export default function ResumeBuilderPage() {
     };
 
     // HEADER
-    doc.setFont('helvetica', 'bold').setFontSize(22);
-    doc.text(data.fullName.toUpperCase(), margin, y);
-    y += 18;
+    doc.setFont('helvetica', 'bold').setFontSize(24).text(data.fullName.toUpperCase(), margin, y);
+    const nameWidth = doc.getTextWidth(data.fullName.toUpperCase());
+    y += 20;
+    
     doc.setFont('helvetica', 'normal').setFontSize(10);
-    doc.text(data.professionalTitle, margin, y);
-    y += 14;
-
-    const contactInfo: any[] = [];
-    if (data.phone) contactInfo.push(`+91 ${data.phone}`);
-    if (data.email) contactInfo.push(data.email);
-    if (data.linkedin) contactInfo.push(data.linkedin);
-    if (data.github) contactInfo.push(data.github);
-    doc.text(contactInfo.join(' | '), margin, y);
-    y += 10;
-    doc.line(margin, y, pageWidth - margin, y);
+    const contactInfo = [data.phone, data.email, data.linkedin, data.github].filter(Boolean).join(' | ');
+    doc.text(contactInfo, margin, y);
     y += 15;
+    doc.line(margin, y, pageWidth - margin, y);
 
     // CAREER OBJECTIVE
     addSection('Career Objective');
-    const summaryLines = doc.splitTextToSize(data.careerObjective, contentWidth);
-    doc.text(summaryLines, margin, y, { align: 'justify' });
-    y += summaryLines.length * 12;
+    const summaryLines = doc.splitTextToSize(data.careerObjective, pageWidth - margin * 2);
+    doc.text(summaryLines, margin, y, { align: 'left' });
+    y += summaryLines.length * 12 + 5;
 
     // EDUCATION
     if (data.education?.length) {
-      addSection('Education');
+      addSection('Educational Qualifications');
       data.education.forEach(edu => {
-        doc.setFont('helvetica', 'bold').setFontSize(10).text(edu.degree, margin, y);
-        doc.setFont('helvetica', 'normal').setFontSize(10).text(edu.year, pageWidth - margin, y, { align: 'right' });
+        doc.setFont('helvetica', 'bold').setFontSize(10);
+        doc.text(edu.degree, margin, y);
+        doc.setFont('helvetica', 'normal').setFontSize(10);
+        doc.text(edu.year, pageWidth - margin, y, { align: 'right' });
         y += 12;
+
         doc.text(edu.institution, margin, y);
-        if (edu.score) doc.text(edu.score, pageWidth - margin, y, { align: 'right' });
+        if (edu.score) {
+          doc.text(`Score: ${edu.score}`, pageWidth - margin, y, { align: 'right' });
+        }
         y += 18;
       });
     }
@@ -180,11 +197,14 @@ export default function ResumeBuilderPage() {
       addSection('Projects');
       data.projects.forEach(proj => {
         doc.setFont('helvetica', 'bold').setFontSize(10).text(proj.name, margin, y);
-        if (proj.url) doc.setTextColor(41, 128, 185).textWithLink('Link', pageWidth - margin, y, { url: proj.url });
-        doc.setTextColor(0, 0, 0);
+        if (proj.url) {
+            doc.setFontSize(10).setTextColor(41, 128, 185).textWithLink('Link', pageWidth - margin, y, { url: proj.url, align: 'right' });
+            doc.setTextColor(0);
+        }
         y += 12;
-        const descLines = doc.splitTextToSize(proj.description, contentWidth);
-        doc.setFont('helvetica', 'normal').text(descLines, margin, y, { align: 'justify' });
+
+        const descLines = doc.splitTextToSize(proj.description, pageWidth - margin * 2);
+        doc.setFont('helvetica', 'normal').text(descLines, margin, y, { align: 'left' });
         y += descLines.length * 12 + 5;
       });
     }
@@ -198,22 +218,27 @@ export default function ResumeBuilderPage() {
         y += 12;
         doc.setFont('helvetica', 'normal').text(exp.company, margin, y);
         y += 12;
-        exp.achievements?.split('\n').forEach(ach => {
-          doc.circle(margin + 2, y - 3, 1.5, 'F');
-          doc.text(doc.splitTextToSize(ach, contentWidth - 15), margin + 10, y);
-          y += 12;
-        });
+        
+        if (exp.achievements) {
+          exp.achievements.split('\n').forEach(ach => {
+            const achievementLines = doc.splitTextToSize(ach, pageWidth - margin * 2 - 15);
+            doc.circle(margin + 2, y - 3.5, 1.5, 'F');
+            doc.text(achievementLines, margin + 10, y);
+            y += achievementLines.length * 12;
+          });
+        }
         y += 5;
       });
     }
 
     // ACHIEVEMENTS
     if (data.extracurricular) {
-      addSection('Achievements & Extracurricular');
+      addSection('Achievements & Extracurricular Activities');
       data.extracurricular.split('\n').forEach(item => {
-        doc.circle(margin + 2, y - 3, 1.5, 'F');
-        doc.text(doc.splitTextToSize(item, contentWidth - 15), margin + 10, y);
-        y += 12;
+        const itemLines = doc.splitTextToSize(item, pageWidth - margin * 2 - 15);
+        doc.circle(margin + 2, y - 3.5, 1.5, 'F');
+        doc.text(itemLines, margin + 10, y);
+        y += itemLines.length * 12;
       });
     }
 
@@ -224,21 +249,22 @@ export default function ResumeBuilderPage() {
   const handleGeneratePdf = async (data: FormValues) => {
     setIsLoading(true);
     saveDetails(data);
-    toast({ title: 'Enhancing resume with AI...', description: 'Please wait.' });
+    toast({ title: 'Enhancing resume with AI...', description: 'Our expert AI is polishing your resume. Please wait.' });
     try {
-      const enhancedDataRaw = await enhanceResumeDetails({
-        ...data,
-        instruction: "Correct false/missing info, make ATS-friendly, justify text, add missing achievements."
-      } as ResumeDetailsInput);
+      const enhancedData = await enhanceResumeDetails(data as ResumeDetailsInput);
 
-      const enhancedData = formSchema.parse({ ...data, ...enhancedDataRaw });
-      form.reset(enhancedData);
-      saveDetails(enhancedData);
-      generatePdf(enhancedData);
-      toast({ title: 'Resume Generated!', description: 'Your AI-enhanced PDF has been downloaded.' });
+      if (enhancedData) {
+        const validatedData = formSchema.parse({ ...data, ...enhancedData });
+        form.reset(validatedData);
+        saveDetails(validatedData);
+        generatePdf(validatedData);
+        toast({ title: 'Resume Generated!', description: 'Your AI-enhanced PDF has been downloaded.' });
+      } else {
+        throw new Error("AI enhancement returned no data.");
+      }
     } catch (err) {
       console.error(err);
-      toast({ variant: 'destructive', title: 'Error', description: 'Could not generate resume.' });
+      toast({ variant: 'destructive', title: 'Error', description: 'Could not generate the resume. Please check the console for details.' });
     } finally {
       setIsLoading(false);
     }
@@ -251,18 +277,18 @@ export default function ResumeBuilderPage() {
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
-      <header className="sticky top-0 z-50 w-full border-b bg-background">
+      <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container flex h-14 max-w-screen-xl items-center justify-between">
-          <Link href="/" className="flex items-center"><Bot className="h-6 w-6 text-primary" /><span className="ml-2 font-bold">Career Compass AI</span></Link>
+          <Link href="/" className="flex items-center" prefetch={false}><Bot className="h-6 w-6 text-primary" /><span className="ml-2 font-bold font-headline text-lg">Career Compass AI</span></Link>
         </div>
       </header>
 
-      <main className="flex-1 container py-12">
+      <main className="flex-1 container py-12 md:py-16">
         <div className="flex items-center mb-8">
           <Link href={flowType === 'professional' ? '/professional' : '/undergraduate'}>
             <Button variant="outline" size="icon"><ArrowLeft className="h-4 w-4" /></Button>
           </Link>
-          <h1 className="text-3xl font-bold ml-4">Resume Builder</h1>
+          <h1 className="text-3xl font-bold tracking-tighter sm:text-4xl font-headline ml-4">Resume Builder</h1>
         </div>
         <Card className="max-w-5xl mx-auto">
           <Form {...form}>
@@ -272,10 +298,104 @@ export default function ResumeBuilderPage() {
                 <CardDescription>Review, enhance with AI, and download your ATS-friendly resume.</CardDescription>
               </CardHeader>
               <CardContent className="space-y-8">
-                {/* Your existing input fields here, unchanged for brevity */}
+                 {/* Personal Details */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-medium">Personal Information</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormField control={form.control} name="fullName" render={({ field }) => ( <FormItem><FormLabel>Full Name</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem> )} />
+                    <FormField control={form.control} name="email" render={({ field }) => ( <FormItem><FormLabel>Email</FormLabel><FormControl><Input {...field} disabled /></FormControl><FormMessage /></FormItem> )} />
+                    <FormField control={form.control} name="phone" render={({ field }) => ( <FormItem><FormLabel>Phone</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem> )} />
+                    <FormField control={form.control} name="linkedin" render={({ field }) => ( <FormItem><FormLabel>LinkedIn URL</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem> )} />
+                    <FormField control={form.control} name="github" render={({ field }) => ( <FormItem className="md:col-span-2"><FormLabel>GitHub URL</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem> )} />
+                  </div>
+                </div>
+                <Separator />
+                {/* Professional Title, Career Objective */}
+                 <div className="space-y-4">
+                  <FormField control={form.control} name="professionalTitle" render={({ field }) => ( <FormItem><FormLabel>Professional Title</FormLabel><FormControl><Input placeholder="e.g., Aspiring Software Engineer" {...field} /></FormControl><FormMessage /></FormItem> )} />
+                  <FormField control={form.control} name="careerObjective" render={({ field }) => ( <FormItem><FormLabel>Career Objective</FormLabel><FormControl><Textarea placeholder="A brief 2-3 sentence summary of your career goals." {...field} /></FormControl><FormMessage /></FormItem> )} />
+                 </div>
+                <Separator />
+                {/* Education */}
+                 <div className="space-y-4">
+                   <div className="flex items-center justify-between">
+                     <h3 className="text-lg font-medium">Education</h3>
+                      <Button type="button" variant="outline" size="sm" onClick={() => appendEducation({ degree: '', institution: '', year: '', score: '' })}>
+                        <Plus className="mr-2 h-4 w-4" /> Add Education
+                      </Button>
+                   </div>
+                    {educationFields.map((field, index) => (
+                      <div key={field.id} className="p-4 border rounded-lg relative space-y-4">
+                         <Button type="button" variant="ghost" size="icon" className="absolute top-1 right-1" onClick={() => removeEducation(index)}><Trash2 className="h-4 w-4" /></Button>
+                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <FormField control={form.control} name={`education.${index}.degree`} render={({ field }) => ( <FormItem><FormLabel>Degree</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem> )} />
+                            <FormField control={form.control} name={`education.${index}.institution`} render={({ field }) => ( <FormItem><FormLabel>Institution</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem> )} />
+                            <FormField control={form.control} name={`education.${index}.year`} render={({ field }) => ( <FormItem><FormLabel>Year of Completion</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem> )} />
+                            <FormField control={form.control} name={`education.${index}.score`} render={({ field }) => ( <FormItem><FormLabel>Score (CGPA/%)</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem> )} />
+                         </div>
+                      </div>
+                    ))}
+                 </div>
+                 <Separator />
+                 {/* Skills */}
+                 <div className="space-y-4">
+                   <h3 className="text-lg font-medium">Skills</h3>
+                    <FormField control={form.control} name="technicalSkills" render={({ field }) => ( <FormItem><FormLabel>Technical Skills</FormLabel><FormControl><Input placeholder="Comma-separated skills, e.g., Java, Python, SQL" {...field} /></FormControl><FormMessage /></FormItem> )} />
+                    <FormField control={form.control} name="softSkills" render={({ field }) => ( <FormItem><FormLabel>Soft Skills</FormLabel><FormControl><Input placeholder="Comma-separated skills, e.g., Communication, Teamwork" {...field} /></FormControl><FormMessage /></FormItem> )} />
+                 </div>
+                <Separator />
+                 {/* Projects */}
+                 <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                     <h3 className="text-lg font-medium">Projects</h3>
+                      <Button type="button" variant="outline" size="sm" onClick={() => appendProject({ name: '', description: '', url: '' })}>
+                        <Plus className="mr-2 h-4 w-4" /> Add Project
+                      </Button>
+                   </div>
+                    {projectFields.map((field, index) => (
+                      <div key={field.id} className="p-4 border rounded-lg relative space-y-4">
+                         <Button type="button" variant="ghost" size="icon" className="absolute top-1 right-1" onClick={() => removeProject(index)}><Trash2 className="h-4 w-4" /></Button>
+                         <FormField control={form.control} name={`projects.${index}.name`} render={({ field }) => ( <FormItem><FormLabel>Project Name</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem> )} />
+                         <FormField control={form.control} name={`projects.${index}.description`} render={({ field }) => ( <FormItem><FormLabel>Description</FormLabel><FormControl><Textarea {...field} /></FormControl><FormMessage /></FormItem> )} />
+                         <FormField control={form.control} name={`projects.${index}.url`} render={({ field }) => ( <FormItem><FormLabel>Project URL</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem> )} />
+                      </div>
+                    ))}
+                 </div>
+                <Separator />
+                 {/* Experience */}
+                 <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                     <h3 className="text-lg font-medium">Work Experience</h3>
+                      <Button type="button" variant="outline" size="sm" onClick={() => appendExperience({ role: '', company: '', duration: '', achievements: '' })}>
+                        <Plus className="mr-2 h-4 w-4" /> Add Experience
+                      </Button>
+                   </div>
+                    {experienceFields.map((field, index) => (
+                      <div key={field.id} className="p-4 border rounded-lg relative space-y-4">
+                         <Button type="button" variant="ghost" size="icon" className="absolute top-1 right-1" onClick={() => removeExperience(index)}><Trash2 className="h-4 w-4" /></Button>
+                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                           <FormField control={form.control} name={`workExperience.${index}.role`} render={({ field }) => ( <FormItem><FormLabel>Role</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem> )} />
+                           <FormField control={form.control} name={`workExperience.${index}.company`} render={({ field }) => ( <FormItem><FormLabel>Company</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem> )} />
+                         </div>
+                         <FormField control={form.control} name={`workExperience.${index}.duration`} render={({ field }) => ( <FormItem><FormLabel>Duration</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem> )} />
+                         <FormField control={form.control} name={`workExperience.${index}.achievements`} render={({ field }) => ( <FormItem><FormLabel>Achievements/Responsibilities</FormLabel><FormControl><Textarea placeholder="List achievements as bullet points, one per line." {...field} /></FormControl><FormMessage /></FormItem> )} />
+                      </div>
+                    ))}
+                 </div>
+                 <Separator />
+                 {/* Achievements */}
+                 <div className="space-y-4">
+                    <FormField control={form.control} name="extracurricular" render={({ field }) => ( 
+                      <FormItem>
+                        <FormLabel>Achievements or Extracurricular Activities</FormLabel>
+                        <FormControl><Textarea placeholder="List items one per line." {...field} /></FormControl>
+                        <FormMessage />
+                      </FormItem> 
+                    )} />
+                 </div>
               </CardContent>
               <CardFooter className="flex justify-end gap-4">
-                <Button type="button" variant="secondary" onClick={form.handleSubmit(saveDetails)} disabled={isLoading}>
+                <Button type="button" variant="secondary" onClick={() => saveDetails(form.getValues())} disabled={isLoading}>
                   <Save className="mr-2 h-4 w-4" /> Save Details
                 </Button>
                 <Button type="submit" disabled={isLoading}>
