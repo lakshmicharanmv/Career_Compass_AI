@@ -140,13 +140,13 @@ export default function ResumeBuilderPage() {
     const margin = 40;
     const pageWidth = doc.internal.pageSize.getWidth();
     const contentWidth = pageWidth - margin * 2;
-    let y = 60; // Initial top margin
+    let y = 50; 
 
     const nameFontSize = 22;
-    const sectionTitleFontSize = 12;
+    const headingFontSize = 12;
     const bodyFontSize = 10;
-    const contactFontSize = 9;
-    const lineHeight = 1.3;
+    const contactFontSize = 10;
+    const lineHeight = 1.4;
 
     doc.setFont('helvetica');
 
@@ -154,7 +154,7 @@ export default function ResumeBuilderPage() {
     doc.setFontSize(nameFontSize).setFont('helvetica', 'bold');
     doc.text(data.fullName.toUpperCase(), margin, y);
 
-    // Contact info block
+    // --- Contact info block ---
     const contactInfo = [
       data.email,
       data.phone,
@@ -163,39 +163,25 @@ export default function ResumeBuilderPage() {
     ].filter(Boolean) as string[];
     
     doc.setFontSize(contactFontSize).setFont('helvetica', 'normal');
-    let contactY = y - (contactInfo.length - 1) * (contactFontSize * lineHeight); // Adjust start Y for right alignment
-    if (contactInfo.length === 0) {
-      contactY = y;
-    } else {
-       contactY = y - ( (contactInfo.length-1) * (contactFontSize * lineHeight) - doc.getTextDimensions(data.fullName).h );
-       if (contactInfo.length > 1) {
-         contactY = y - ( ( (contactInfo.length -1) * (contactFontSize) )/2 )
-       } else {
-         contactY = y;
-       }
-    }
-
-
-    let tempY = y - doc.getTextDimensions(data.fullName.toUpperCase()).h + contactFontSize;
+    let contactY = y - (contactFontSize * 0.5); 
     contactInfo.forEach((info) => {
-        doc.text(info, pageWidth - margin, tempY, { align: 'right' });
-        tempY += contactFontSize * lineHeight;
+        doc.text(info, pageWidth - margin, contactY, { align: 'right' });
+        contactY += contactFontSize * lineHeight;
     });
 
     const headerHeight = Math.max(doc.getTextDimensions(data.fullName.toUpperCase()).h, contactInfo.length * contactFontSize * lineHeight);
     y += headerHeight;
-    y += 10;
     
-    // --- HELPER FOR SECTIONS ---
     const addSection = (title: string) => {
-        if (y > doc.internal.pageSize.getHeight() - 80) { // check before adding section
+        y += 10; // spacing before section
+        if (y > doc.internal.pageSize.getHeight() - 80) { 
             doc.addPage();
             y = margin;
         }
-        doc.setFontSize(sectionTitleFontSize).setFont('helvetica', 'bold');
+        doc.setFontSize(headingFontSize).setFont('helvetica', 'bold');
         doc.text(title.toUpperCase(), margin, y);
-        y += 8;
-        doc.setDrawColor(0).setLineWidth(0.5).line(margin, y, pageWidth - margin, y);
+        y += 3;
+        doc.setDrawColor(0).setLineWidth(1).line(margin, y, pageWidth - margin, y);
         y += 15;
     };
     
@@ -205,7 +191,7 @@ export default function ResumeBuilderPage() {
         doc.setFontSize(bodyFontSize).setFont('helvetica', 'normal');
         const summaryLines = doc.splitTextToSize(data.careerObjective, contentWidth);
         doc.text(summaryLines, margin, y, { align: 'left' });
-        y += summaryLines.length * bodyFontSize * lineHeight + 15;
+        y += summaryLines.length * bodyFontSize * lineHeight;
     }
     
     // --- EDUCATION ---
@@ -225,35 +211,27 @@ export default function ResumeBuilderPage() {
           doc.text(`Score: ${edu.score}`, margin, y);
           y += bodyFontSize * lineHeight;
         }
-        y += 10;
+        y += 5; // Spacing after each entry
       });
     }
 
     // --- SKILLS ---
     if (data.technicalSkills || data.softSkills) {
-      addSection('SKILLS');
-       (doc as any).autoTable({
-            startY: y,
-            body: [
-                data.technicalSkills ? ['Technical Skills', data.technicalSkills] : null,
-                data.softSkills ? ['Soft Skills', data.softSkills] : null,
-            ].filter(Boolean),
-            theme: 'plain',
-            styles: {
-                font: 'helvetica',
-                fontSize: bodyFontSize,
-                lineColor: [0, 0, 0],
-                lineWidth: 0.5,
-                cellPadding: { top: 2, right: 0, bottom: 2, left: 0 },
-            },
-            columnStyles: {
-                0: { fontStyle: 'bold', cellWidth: 100 },
-                1: { cellWidth: contentWidth - 100 },
-            },
-            margin: { left: margin },
-            tableWidth: contentWidth,
-        });
-        y = (doc as any).lastAutoTable.finalY + 15;
+        addSection('SKILLS');
+        doc.setFontSize(bodyFontSize);
+
+        if (data.technicalSkills) {
+            doc.setFont('helvetica', 'bold').text('Technical Skills: ', margin, y);
+            const tsX = margin + doc.getTextWidth('Technical Skills: ');
+            doc.setFont('helvetica', 'normal').text(data.technicalSkills, tsX, y);
+            y += bodyFontSize * lineHeight;
+        }
+        if (data.softSkills) {
+            doc.setFont('helvetica', 'bold').text('Soft Skills: ', margin, y);
+            const ssX = margin + doc.getTextWidth('Soft Skills: ');
+            doc.setFont('helvetica', 'normal').text(data.softSkills, ssX, y);
+            y += bodyFontSize * lineHeight;
+        }
     }
 
     // --- PROJECTS ---
@@ -263,16 +241,16 @@ export default function ResumeBuilderPage() {
         if (y > doc.internal.pageSize.getHeight() - 60) { doc.addPage(); y = margin; }
         doc.setFontSize(bodyFontSize).setFont('helvetica', 'bold').text(proj.name, margin, y);
         if (proj.url) {
-            doc.setFontSize(bodyFontSize - 2).setTextColor(41, 128, 185).textWithLink('View Project', pageWidth - margin, y, { url: proj.url, align: 'right' });
+            doc.setFontSize(bodyFontSize - 1).setTextColor(41, 128, 185).textWithLink('View Project', pageWidth - margin, y, { url: proj.url, align: 'right' });
             doc.setTextColor(0);
         }
         y += bodyFontSize * lineHeight;
 
-        doc.setFont('helvetica', 'normal');
+        doc.setFont('helvetica', 'normal').setFontSize(bodyFontSize); // Ensure consistent font size
         const descLines = doc.splitTextToSize(proj.description, contentWidth);
         doc.text(descLines, margin, y, { align: 'left' });
         const descHeight = descLines.length * bodyFontSize * lineHeight;
-        y += descHeight + 10;
+        y += descHeight + 5; // Spacing after each project
       });
     }
 
@@ -287,19 +265,20 @@ export default function ResumeBuilderPage() {
         y += bodyFontSize * lineHeight;
 
         doc.setFont('helvetica', 'normal').text(exp.company, margin, y);
-        y += bodyFontSize * lineHeight + 5;
+        y += bodyFontSize * lineHeight;
         
         if (exp.achievements) {
           exp.achievements.split('\n').forEach(ach => {
-            if (ach.trim()) {
+            const trimmedAch = ach.trim().replace(/^•\s*/, '');
+            if (trimmedAch) {
                 if (y > doc.internal.pageSize.getHeight() - 30) { doc.addPage(); y = margin; }
-                const achievementLines = doc.splitTextToSize(ach.trim().replace(/^•\s*/, ''), contentWidth - 15);
+                const achievementLines = doc.splitTextToSize(trimmedAch, contentWidth - 10);
                 doc.text(achievementLines, margin + 10, y, { align: 'left' });
                 y += achievementLines.length * bodyFontSize * lineHeight;
             }
           });
         }
-        y += 10;
+        y += 5; // Spacing after each experience
       });
     }
 
@@ -308,9 +287,10 @@ export default function ResumeBuilderPage() {
       addSection('ACHIEVEMENTS & EXTRACURRICULAR ACTIVITIES');
       doc.setFont('helvetica', 'normal').setFontSize(bodyFontSize);
       data.extracurricular.split('\n').forEach(item => {
-        if (item.trim()) {
+        const trimmedItem = item.trim().replace(/^•\s*/, '');
+        if (trimmedItem) {
             if (y > doc.internal.pageSize.getHeight() - 30) { doc.addPage(); y = margin; }
-            const itemLines = doc.splitTextToSize(item.trim().replace(/^•\s*/, ''), contentWidth - 15);
+            const itemLines = doc.splitTextToSize(trimmedItem, contentWidth - 10);
             doc.text(itemLines, margin + 10, y, { align: 'left' });
             y += itemLines.length * bodyFontSize * lineHeight;
         }
