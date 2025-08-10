@@ -38,7 +38,7 @@ const workExperienceSchema = z.object({
 const projectSchema = z.object({
     name: z.string().min(1, 'Project name is required'),
     description: z.string().min(1, 'Description is required'),
-    url: z.string().url().optional().or(z.literal('')),
+    url: z.string().optional().or(z.literal('')),
 });
 
 const formSchema = z.object({
@@ -151,41 +151,39 @@ export default function ResumeBuilderPage() {
 
   const generatePdf = (data: ResumeDetailsOutput) => {
     const doc = new jsPDF('p', 'pt', 'a4');
-    const margin = 36; // 0.5 inch
+    const margin = 36;
     const pageWidth = doc.internal.pageSize.getWidth();
     const contentWidth = pageWidth - margin * 2;
-    let y = margin;
+    let y = margin + 10;
 
-    // Helper to add a section with a heading and a line
-    const addSection = (title: string, contentRenderer: () => void, isLast: boolean = false) => {
-        if (y > margin + 20) y += 20; 
+    const addSection = (title: string, contentRenderer: () => void) => {
+        if (y > margin + 20) y += 10;
         doc.setFont('helvetica', 'bold');
         doc.setFontSize(11);
         doc.text(title.toUpperCase(), margin, y);
         y += 4;
         doc.setDrawColor(0);
-        doc.setLineWidth(1);
+        doc.setLineWidth(0.5);
         doc.line(margin, y, pageWidth - margin, y);
         y += 15;
         contentRenderer();
-        if (!isLast) y += 5;
+        y += 5;
     };
     
     // --- Header ---
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(24);
     doc.text(data.fullName.toUpperCase(), pageWidth / 2, y, { align: 'center' });
-    y += 20;
+    y += 22;
     
     doc.setFont('helvetica', 'normal');
-    doc.setFontSize(11);
+    doc.setFontSize(10);
     doc.text(data.professionalTitle.toUpperCase(), pageWidth / 2, y, { align: 'center'});
-    y += 15;
+    y += 14;
     
-    const contactInfo = [data.phone, data.email, data.linkedin, data.github].filter(Boolean).join(' | ');
+    const contactInfo = [data.phone, data.email, data.linkedin, data.github].filter(Boolean).join('  |  ');
     doc.text(contactInfo, pageWidth / 2, y, { align: 'center' });
     y += 10;
-    doc.line(margin, y, pageWidth - margin, y);
 
     // --- Summary ---
     addSection('Summary', () => {
@@ -193,7 +191,7 @@ export default function ResumeBuilderPage() {
       doc.setFontSize(10);
       const summaryLines = doc.splitTextToSize(data.careerObjective, contentWidth);
       doc.text(summaryLines, margin, y, { align: 'justify' });
-      y += summaryLines.length * 12;
+      y += summaryLines.length * 12 + 5;
     });
     
     // --- Education ---
@@ -214,24 +212,25 @@ export default function ResumeBuilderPage() {
                     doc.setFont('helvetica', 'normal');
                     doc.text(edu.score, pageWidth - margin, y, { align: 'right' });
                 }
-                y += 20;
+                y += 18;
             });
-            y -= 10;
+            y -= 8;
         });
     }
-
+    
     // --- Skills ---
     if(data.technicalSkills || data.softSkills) {
         addSection('Skills', () => {
             doc.setFontSize(10);
-            doc.setFont('helvetica', 'normal');
             let skillsText = '';
             if (data.technicalSkills) skillsText += `Technical Skills: ${data.technicalSkills.split(',').map(s => s.trim()).join(' | ')}`;
             if (data.technicalSkills && data.softSkills) skillsText += '\n';
             if (data.softSkills) skillsText += `Soft Skills: ${data.softSkills.split(',').map(s => s.trim()).join(' | ')}`;
+            
+            doc.setFont('helvetica', 'bold');
             const skillLines = doc.splitTextToSize(skillsText, contentWidth);
-            doc.text(skillLines, margin, y);
-            y += skillLines.length * 12;
+            doc.text(skillLines, margin, y, { lineHeightFactor: 1.5 });
+            y += skillLines.length * 12 * 1.5;
         });
     }
 
@@ -258,7 +257,7 @@ export default function ResumeBuilderPage() {
             doc.text(descriptionLines, margin, y, { align: 'justify' });
             y += (descriptionLines.length * 12) + 10;
         });
-        y -= 10;
+        y -= 5;
       });
     }
 
@@ -282,12 +281,12 @@ export default function ResumeBuilderPage() {
             doc.setFontSize(10);
             const achievements = exp.achievements.split('\n').filter((line:string) => line.trim() !== '');
             achievements.forEach((ach: string) => {
-                doc.circle(margin + 5, y - 3, 2, 'F');
+                doc.circle(margin + 2, y - 3, 1.5, 'F');
                 const lines = doc.splitTextToSize(ach, contentWidth - 15);
-                doc.text(lines, margin + 15, y, { align: 'justify' });
-                y += lines.length * 12;
+                doc.text(lines, margin + 10, y, { align: 'justify' });
+                y += lines.length * 12 + 2;
             });
-            y += 10;
+            y += 8;
         });
         y-=10;
       });
@@ -300,12 +299,12 @@ export default function ResumeBuilderPage() {
           doc.setFontSize(10);
           const extraItems = data.extracurricular.split('\n').filter(line => line.trim() !== '');
           extraItems.forEach(item => {
-              doc.circle(margin + 5, y - 3, 2, 'F');
+              doc.circle(margin + 2, y - 3, 1.5, 'F');
               const lines = doc.splitTextToSize(item, contentWidth - 15);
-              doc.text(lines, margin + 15, y, { align: 'justify' });
-              y += (lines.length * 12);
+              doc.text(lines, margin + 10, y, { align: 'justify' });
+              y += (lines.length * 12) + 2;
           });
-      }, true);
+      });
     }
     doc.save(`${data.fullName.replace(/ /g, '_')}_Resume.pdf`);
   }
@@ -403,7 +402,7 @@ export default function ResumeBuilderPage() {
                         <Separator />
 
                         <div className="space-y-4">
-                            <h3 className="text-xl font-semibold">Professional Title</h3>
+                             <h3 className="text-xl font-semibold">Professional Title</h3>
                              <FormField name="professionalTitle" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Title</FormLabel><FormControl><Input placeholder="e.g., Software Engineer, Financial Analyst" {...field} /></FormControl><FormMessage /></FormItem> )} />
                         </div>
 
