@@ -55,7 +55,7 @@ export default function ForgotPasswordPage() {
     const [isLoading, setIsLoading] = React.useState(false);
     const [error, setError] = React.useState<string | null>(null);
     const [step, setStep] = React.useState<Step>("request");
-    const [email, setEmail] = React.useState("");
+    const [userEmail, setUserEmail] = React.useState("");
     const [showPassword, setShowPassword] = React.useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = React.useState(false);
 
@@ -78,7 +78,7 @@ export default function ForgotPasswordPage() {
             const userExists = users.some((u: any) => u.email === data.email);
 
             if (userExists) {
-                setEmail(data.email);
+                setUserEmail(data.email);
                 setStep("verify");
                 toast({
                     title: "OTP Sent!",
@@ -103,7 +103,7 @@ export default function ForgotPasswordPage() {
             }
 
             const users = JSON.parse(localStorage.getItem("users") || "[]");
-            const userIndex = users.findIndex((u: any) => u.email === email);
+            const userIndex = users.findIndex((u: any) => u.email === userEmail);
 
             if (userIndex !== -1) {
                 users[userIndex].password = data.password;
@@ -174,7 +174,7 @@ export default function ForgotPasswordPage() {
           <CardHeader className="text-center">
             <CardTitle className="text-2xl font-headline">Verify Your Identity</CardTitle>
             <CardDescription>
-                An OTP has been sent to <strong>{email}</strong>. Please enter it below to set a new password.
+                An OTP has been sent to <strong>{userEmail}</strong>. Please enter it below to set a new password.
             </CardDescription>
           </CardHeader>
           <CardContent>
