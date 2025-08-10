@@ -47,12 +47,18 @@ export default function Home() {
 
   React.useEffect(() => {
     const currentUser = JSON.parse(localStorage.getItem("currentUser") || "{}");
-    if (currentUser && currentUser.name) {
+    if (currentUser && currentUser.email) {
         setIsAuthenticated(true);
         setUserName(currentUser.name);
+        // Redirect to personal-information page if not completed
+        if (!currentUser.personalInfoCompleted) {
+          router.push('/personal-information');
+        }
+    } else {
+        setIsAuthenticated(false);
     }
     setYear(new Date().getFullYear());
-  }, []);
+  }, [router]);
 
   const handleSignOut = () => {
     localStorage.removeItem("currentUser");
@@ -349,6 +355,3 @@ export default function Home() {
       </footer>
     </div>
   );
-
-    
-
