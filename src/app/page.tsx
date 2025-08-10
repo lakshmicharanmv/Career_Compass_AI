@@ -23,6 +23,12 @@ import {
   Users,
   LogOut,
   User,
+  Mail,
+  Phone,
+  Linkedin,
+  Github,
+  Calendar,
+  Pencil,
 } from "lucide-react";
 import React from "react";
 import {
@@ -32,26 +38,28 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogFooter,
 } from "@/components/ui/dialog";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
+import { format } from "date-fns";
 
 
 export default function Home() {
   const [year, setYear] = React.useState<number | null>(null);
   const [isAuthenticated, setIsAuthenticated] = React.useState(false);
-  const [userName, setUserName] = React.useState("");
+  const [currentUser, setCurrentUser] = React.useState<any>(null);
   const [showLearnMore, setShowLearnMore] = React.useState(false);
   const router = useRouter();
   const { toast } = useToast();
 
   React.useEffect(() => {
-    const currentUser = JSON.parse(localStorage.getItem("currentUser") || "{}");
-    if (currentUser && currentUser.email) {
+    const user = JSON.parse(localStorage.getItem("currentUser") || "{}");
+    if (user && user.email) {
         setIsAuthenticated(true);
-        setUserName(currentUser.name);
+        setCurrentUser(user);
         // Redirect to personal-information page if not completed
-        if (!currentUser.personalInfoCompleted) {
+        if (!user.personalInfoCompleted) {
           router.push('/personal-information');
         }
     } else {
@@ -63,7 +71,7 @@ export default function Home() {
   const handleSignOut = () => {
     localStorage.removeItem("currentUser");
     setIsAuthenticated(false);
-    setUserName("");
+    setCurrentUser(null);
     router.push("/"); // Refresh the page to reflect signed-out state
   };
 
@@ -97,17 +105,66 @@ export default function Home() {
             </span>
           </Link>
            <nav className="flex items-center gap-4">
-            {isAuthenticated ? (
+            {isAuthenticated && currentUser ? (
+             <Dialog>
               <div className="flex items-center gap-4">
-                <div className="flex items-center gap-2">
-                    <User className="h-5 w-5 text-muted-foreground" />
-                    <span className="font-medium">{userName}</span>
-                </div>
+                  <DialogTrigger asChild>
+                    <div className="flex items-center gap-2 cursor-pointer p-2 rounded-md hover:bg-muted/50 transition-colors">
+                        <User className="h-5 w-5 text-muted-foreground" />
+                        <span className="font-medium">{currentUser.name}</span>
+                    </div>
+                  </DialogTrigger>
                 <Button variant="outline" size="sm" onClick={handleSignOut}>
                   <LogOut className="mr-2 h-4 w-4" />
                   Sign Out
                 </Button>
               </div>
+              <DialogContent className="sm:max-w-md">
+                <DialogHeader>
+                  <DialogTitle className="text-2xl font-headline">{currentUser.fullName}</DialogTitle>
+                  <DialogDescription>
+                    {currentUser.professionalTitle || "Your Profile"}
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="space-y-4 py-4">
+                    <div className="flex items-center gap-3">
+                        <Mail className="h-4 w-4 text-muted-foreground" />
+                        <span className="text-sm">{currentUser.email}</span>
+                    </div>
+                     {currentUser.phone && (
+                        <div className="flex items-center gap-3">
+                            <Phone className="h-4 w-4 text-muted-foreground" />
+                            <span className="text-sm">{currentUser.phone}</span>
+                        </div>
+                     )}
+                     {currentUser.dob && (
+                        <div className="flex items-center gap-3">
+                            <Calendar className="h-4 w-4 text-muted-foreground" />
+                            <span className="text-sm">{format(new Date(currentUser.dob), "PPP")}</span>
+                        </div>
+                     )}
+                     {currentUser.linkedin && (
+                        <div className="flex items-center gap-3">
+                            <Linkedin className="h-4 w-4 text-muted-foreground" />
+                            <a href={currentUser.linkedin} target="_blank" rel="noopener noreferrer" className="text-sm text-primary hover:underline truncate">{currentUser.linkedin}</a>
+                        </div>
+                     )}
+                     {currentUser.github && (
+                        <div className="flex items-center gap-3">
+                            <Github className="h-4 w-4 text-muted-foreground" />
+                             <a href={currentUser.github} target="_blank" rel="noopener noreferrer" className="text-sm text-primary hover:underline truncate">{currentUser.github}</a>
+                        </div>
+                     )}
+                </div>
+                 <DialogFooter>
+                    <Link href="/personal-information" passHref>
+                        <Button variant="outline">
+                           <Pencil className="mr-2 h-4 w-4" /> Edit Profile
+                        </Button>
+                    </Link>
+                 </DialogFooter>
+              </DialogContent>
+             </Dialog>
             ) : (
               <div className="flex items-center gap-2">
                 <Link href="/signin" passHref>
@@ -128,7 +185,7 @@ export default function Home() {
           <div className="absolute inset-0 bg-black/50" />
           <div className="relative container h-full flex flex-col items-center justify-center text-center text-white space-y-6 pt-16">
             <h1 className="font-headline text-4xl font-bold tracking-tighter sm:text-5xl md:text-6xl xl:text-7xl/none text-shadow-lg">
-              {isAuthenticated ? `Welcome, ${userName}! ` : ''}Navigate Your Future with AI
+              {isAuthenticated && currentUser ? `Welcome, ${currentUser.name}! ` : ''}Navigate Your Future with AI
             </h1>
             <p className="max-w-[600px] md:text-xl text-shadow">
               Career Compass AI provides personalized guidance for students
@@ -349,6 +406,8 @@ export default function Home() {
       </footer>
     </div>
   );
+
+    
 
     
 
