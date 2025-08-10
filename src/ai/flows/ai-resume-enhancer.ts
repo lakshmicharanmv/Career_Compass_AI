@@ -1,3 +1,4 @@
+
 'use server';
 
 /**
@@ -61,7 +62,7 @@ const enhanceResumePrompt = ai.definePrompt({
   name: 'enhanceResumePrompt',
   input: {schema: ResumeDetailsInputSchema},
   output: {schema: ResumeDetailsOutputSchema},
-  prompt: `You are an expert resume writer. Your task is to take the provided resume data and enhance it to create a professional, polished, and complete resume.
+  prompt: `You are an expert resume writer and ATS optimization expert. Your task is to take the provided resume data and enhance it to create a professional, polished, and complete resume.
 
   USER'S RESUME DATA:
   - Full Name: {{{fullName}}}
@@ -96,8 +97,8 @@ const enhanceResumePrompt = ai.definePrompt({
 
   INSTRUCTIONS:
   1.  **Review All Sections**: Carefully analyze all the provided data.
-  2.  **Identify and Fill Gaps**: If any information is missing, incomplete, or looks like a placeholder (e.g., "My School," "My College/University," "Completion Year"), fill it in with reasonable, professional-sounding, and relevant details. For example, if a user has a B.Tech in Computer Science but hasn't listed skills, add standard skills like 'Java, Python, SQL, Git'. If achievements are weak, rewrite them using action verbs.
-  3.  **Correct and Refine**: If there are any inconsistencies or poorly written parts, correct them. Rewrite sentences to be more professional and impactful. Ensure the career objective is concise and tailored.
+  2.  **Identify and Fill Gaps**: If any information is missing, incomplete, or looks like a placeholder (e.g., "My School," "My College/University," "Completion Year"), fill it in with reasonable, professional-sounding, and relevant details. For example, if a user has a B.Tech in Computer Science but hasn't listed skills, add standard skills like 'Java, Python, SQL, Git'.
+  3.  **Correct and Refine**: If there are any inconsistencies or poorly written parts, correct them. Rewrite sentences to be more professional and impactful. For the 'achievements' field in work experience, ensure each point starts with a strong action verb. Ensure the career objective is concise and tailored.
   4.  **Do Not Remove Data**: Do not remove any data the user has provided. Your goal is to enhance, not delete.
   5.  **Return Full Object**: Return a complete JSON object in the specified output format, including both the original and the newly generated information. Ensure all fields are populated correctly. The output structure must exactly match the input structure.
   `,

@@ -43,10 +43,10 @@ const projectSchema = z.object({
 
 const formSchema = z.object({
   fullName: z.string().min(1, 'Full name is required.'),
-  email: z.string().email(),
+  email: z.string(),
   phone: z.string().regex(/^\d{10}$/, 'Please enter a valid 10-digit phone number.'),
-  linkedin: z.string().url().optional().or(z.literal('')),
-  github: z.string().url().optional().or(z.literal('')),
+  linkedin: z.string().optional().or(z.literal('')),
+  github: z.string().optional().or(z.literal('')),
   
   professionalTitle: z.string().min(1, 'A professional title is required.'),
   careerObjective: z.string().min(1, 'A career objective or summary is required.'),
@@ -151,19 +151,19 @@ export default function ResumeBuilderPage() {
 
   const generatePdf = (data: ResumeDetailsOutput) => {
     const doc = new jsPDF('p', 'pt', 'a4');
-    const margin = 36;
+    const margin = 36; // 0.5 inch
     const pageWidth = doc.internal.pageSize.getWidth();
     const contentWidth = pageWidth - margin * 2;
     let y = margin + 10;
 
-    const addSection = (title: string, contentRenderer: () => void) => {
-        if (y > margin + 20) y += 10;
+    const addSection = (title: string, contentRenderer: () => void, topSpace = 20) => {
+        if (y > margin + 20) y += topSpace;
         doc.setFont('helvetica', 'bold');
         doc.setFontSize(11);
         doc.text(title.toUpperCase(), margin, y);
         y += 4;
         doc.setDrawColor(0);
-        doc.setLineWidth(0.5);
+        doc.setLineWidth(1);
         doc.line(margin, y, pageWidth - margin, y);
         y += 15;
         contentRenderer();
@@ -172,27 +172,27 @@ export default function ResumeBuilderPage() {
     
     // --- Header ---
     doc.setFont('helvetica', 'bold');
-    doc.setFontSize(24);
+    doc.setFontSize(26);
     doc.text(data.fullName.toUpperCase(), pageWidth / 2, y, { align: 'center' });
-    y += 22;
+    y += 24;
     
     doc.setFont('helvetica', 'normal');
-    doc.setFontSize(10);
+    doc.setFontSize(11);
     doc.text(data.professionalTitle.toUpperCase(), pageWidth / 2, y, { align: 'center'});
-    y += 14;
+    y += 16;
     
     const contactInfo = [data.phone, data.email, data.linkedin, data.github].filter(Boolean).join('  |  ');
     doc.text(contactInfo, pageWidth / 2, y, { align: 'center' });
     y += 10;
-
+    
     // --- Summary ---
     addSection('Summary', () => {
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(10);
       const summaryLines = doc.splitTextToSize(data.careerObjective, contentWidth);
       doc.text(summaryLines, margin, y, { align: 'justify' });
-      y += summaryLines.length * 12 + 5;
-    });
+      y += summaryLines.length * 12;
+    }, 10);
     
     // --- Education ---
     if(data.education && data.education.length > 0) {
@@ -384,7 +384,7 @@ export default function ResumeBuilderPage() {
                 <form onSubmit={form.handleSubmit(handleGeneratePdf)}>
                     <CardHeader>
                         <CardTitle>Finalize Your Details</CardTitle>
-                        <CardDescription>Review and edit your information below. Click "Save" to update your details, or "Generate PDF" to download your AI-enhanced resume.</CardDescription>
+                        <CardDescription>Review and edit your information below. Click "Save" to update your details, or "Enhance &amp; Generate PDF" to download your AI-powered resume.</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-8">
                         
@@ -394,23 +394,17 @@ export default function ResumeBuilderPage() {
                                 <FormField name="fullName" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Full Name</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem> )} />
                                 <FormField name="email" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Email</FormLabel><FormControl><Input disabled {...field} /></FormControl><FormMessage /></FormItem> )} />
                                 <FormField name="phone" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Phone</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem> )} />
-                                <FormField name="linkedin" control={form.control} render={({ field }) => ( <FormItem><FormLabel>LinkedIn URL</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem> )} />
-                                <FormField name="github" control={form.control} render={({ field }) => ( <FormItem className="md:col-span-2"><FormLabel>GitHub URL</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem> )} />
+                                <FormField name="linkedin" control={form.control} render={({ field }) => ( <FormItem><FormLabel>LinkedIn URL</FormLabel><FormControl><Input placeholder="https://linkedin.com/in/..." {...field} /></FormControl><FormMessage /></FormItem> )} />
+                                <FormField name="github" control={form.control} render={({ field }) => ( <FormItem className="md:col-span-2"><FormLabel>GitHub URL</FormLabel><FormControl><Input placeholder="https://github.com/..." {...field} /></FormControl><FormMessage /></FormItem> )} />
                            </div>
                         </div>
                         
                         <Separator />
 
                         <div className="space-y-4">
-                             <h3 className="text-xl font-semibold">Professional Title</h3>
+                             <h3 className="text-xl font-semibold">Professional Summary</h3>
                              <FormField name="professionalTitle" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Title</FormLabel><FormControl><Input placeholder="e.g., Software Engineer, Financial Analyst" {...field} /></FormControl><FormMessage /></FormItem> )} />
-                        </div>
-
-                        <Separator />
-
-                        <div className="space-y-4">
-                            <h3 className="text-xl font-semibold">Career Objective / Summary</h3>
-                             <FormField name="careerObjective" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Objective</FormLabel><FormControl><Textarea placeholder="e.g., A highly motivated individual seeking a challenging role..." {...field} /></FormControl><FormMessage /></FormItem> )} />
+                             <FormField name="careerObjective" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Career Objective</FormLabel><FormControl><Textarea placeholder="e.g., A highly motivated individual seeking a challenging role..." {...field} /></FormControl><FormMessage /></FormItem> )} />
                         </div>
 
                         <Separator />
@@ -453,7 +447,7 @@ export default function ResumeBuilderPage() {
                                 <div key={field.id} className="p-4 border rounded-lg relative">
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <FormField control={form.control} name={`projects.${index}.name`} render={({ field }) => ( <FormItem><FormLabel>Project Name</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem> )} />
-                                         <FormField control={form.control} name={`projects.${index}.url`} render={({ field }) => ( <FormItem><FormLabel>Project URL (Optional)</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem> )} />
+                                         <FormField control={form.control} name={`projects.${index}.url`} render={({ field }) => ( <FormItem><FormLabel>Project URL (Optional)</FormLabel><FormControl><Input placeholder="https://github.com/user/repo" {...field} /></FormControl><FormMessage /></FormItem> )} />
                                         <FormField control={form.control} name={`projects.${index}.description`} render={({ field }) => ( <FormItem className="md:col-span-2"><FormLabel>Description</FormLabel><FormControl><Textarea {...field} /></FormControl><FormMessage /></FormItem> )} />
                                     </div>
                                     <Button type="button" variant="ghost" size="icon" className="absolute top-2 right-2" onClick={() => removeProject(index)}> <Trash2 className="h-4 w-4" /> </Button>
@@ -473,7 +467,7 @@ export default function ResumeBuilderPage() {
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <FormField control={form.control} name={`workExperience.${index}.role`} render={({ field }) => ( <FormItem><FormLabel>Role / Job Title</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem> )} />
                                         <FormField control={form.control} name={`workExperience.${index}.company`} render={({ field }) => ( <FormItem><FormLabel>Company</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem> )} />
-                                        <FormField control={form.control} name={`workExperience.${index}.duration`} render={({ field }) => ( <FormItem><FormLabel>Duration</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem> )} />
+                                        <FormField control={form.control} name={`workExperience.${index}.duration`} render={({ field }) => ( <FormItem><FormLabel>Duration</FormLabel><FormControl><Input placeholder="e.g., Jan 2022 - Present" {...field} /></FormControl><FormMessage /></FormItem> )} />
                                         <FormField control={form.control} name={`workExperience.${index}.achievements`} render={({ field }) => ( <FormItem className="md:col-span-2"><FormLabel>Key Achievements (one per line)</FormLabel><FormControl><Textarea {...field} /></FormControl><FormMessage /></FormItem> )} />
                                     </div>
                                     <Button type="button" variant="ghost" size="icon" className="absolute top-2 right-2" onClick={() => removeExperience(index)}> <Trash2 className="h-4 w-4" /> </Button>
@@ -500,7 +494,7 @@ export default function ResumeBuilderPage() {
                         </Button>
                         <Button type="submit" disabled={isLoading}>
                             {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Wand2 className="mr-2 h-4 w-4" />}
-                            Enhance & Generate PDF
+                            Enhance &amp; Generate PDF
                         </Button>
                     </CardFooter>
                 </form>
