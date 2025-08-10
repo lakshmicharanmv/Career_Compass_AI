@@ -199,7 +199,7 @@ export default function Grade10Page() {
             </CardHeader>
             <CardContent className="p-8">
               <p className="text-lg font-semibold mb-6 leading-relaxed">{question.question}</p>
-              <RadioGroup onValueChange={handleAnswerSubmit} key={currentQuestionIndex} className="space-y-4">
+              <RadioGroup onValueChange={handleAnswerSubmit} key={currentQuestionIndex} className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {question.options.map((option, index) => (
                   <div key={index} className="flex items-center space-x-3 p-4 border rounded-lg has-[:checked]:bg-primary/10 has-[:checked]:border-primary">
                     <RadioGroupItem value={option} id={`q${currentQuestionIndex}-o${index}`} />
