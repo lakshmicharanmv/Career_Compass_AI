@@ -62,12 +62,12 @@ export default function Grade10Page() {
   const form = useForm<FormValues>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
-      math: undefined,
-      science: undefined,
-      english: undefined,
-      social_studies: undefined,
+      math: '' as any,
+      science: '' as any,
+      english: '' as any,
+      social_studies: '' as any,
       optional_subject: "",
-      optional_marks: undefined,
+      optional_marks: '' as any,
       takeTest: 'no',
     },
   });
