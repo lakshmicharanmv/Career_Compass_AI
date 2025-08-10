@@ -146,29 +146,24 @@ export default function ResumeBuilderPage() {
     doc.setFont('helvetica');
 
     // --- HEADER ---
-    doc.setFontSize(28).setFont('helvetica', 'bold');
+    doc.setFontSize(22).setFont('helvetica', 'bold');
     doc.text(data.fullName.toUpperCase(), margin, y);
 
-    const contactInfo = [data.phone, data.email, data.linkedin, data.github].filter(Boolean);
-    const contactInfoBlock = contactInfo.join('\n');
-    doc.setFontSize(10).setFont('helvetica', 'normal');
+    const contactInfo = [data.phone, data.email, data.linkedin, data.github].filter(Boolean).join(' | ');
+    const contactInfoBlock = doc.splitTextToSize(contactInfo, contentWidth / 2);
+    doc.setFontSize(9).setFont('helvetica', 'normal');
     doc.text(contactInfoBlock, pageWidth - margin, y, { align: 'right' });
     
     const nameLines = doc.splitTextToSize(data.fullName.toUpperCase(), contentWidth / 2);
     const contactLines = doc.splitTextToSize(contactInfoBlock, contentWidth / 2);
-    const headerHeight = Math.max(nameLines.length * 28 * 0.7, contactLines.length * 10 * lineHeight);
+    const headerHeight = Math.max(nameLines.length * 22 * 0.7, contactLines.length * 9 * lineHeight);
     
     y += headerHeight + 5;
-
-    doc.setFontSize(11).setFont('helvetica', 'bold');
-    doc.text(data.professionalTitle.toUpperCase(), margin, y);
-    y += 10;
-    doc.setDrawColor(0).setLineWidth(1).line(margin, y, pageWidth - margin, y);
-    y += 20;
+    y += 15;
 
     // --- HELPER FOR SECTIONS ---
-    const addSection = (title: string) => {
-        if (y > doc.internal.pageSize.getHeight() - 100) { // New page check
+    const addSection = (title: string, addSpace = true) => {
+        if (y > doc.internal.pageSize.getHeight() - 100) {
             doc.addPage();
             y = margin;
         }
@@ -176,7 +171,11 @@ export default function ResumeBuilderPage() {
         doc.text(title.toUpperCase(), margin, y);
         y += 8;
         doc.setDrawColor(0).setLineWidth(0.5).line(margin, y, pageWidth - margin, y);
-        y += 15;
+        if (addSpace) {
+          y += 15;
+        } else {
+          y += 5;
+        }
     };
 
     // --- CAREER OBJECTIVE ---
@@ -201,6 +200,7 @@ export default function ResumeBuilderPage() {
         doc.setFont('helvetica', 'normal');
         doc.text(edu.institution, margin, y);
         y += 10 * lineHeight;
+
         if (edu.score) {
           doc.text(`Score: ${edu.score}`, margin, y);
           y += 10 * lineHeight;
@@ -211,22 +211,27 @@ export default function ResumeBuilderPage() {
 
     // --- SKILLS ---
     if (data.technicalSkills || data.softSkills) {
-      addSection('SKILLS');
-      doc.setFontSize(10).setFont('helvetica', 'normal');
-      if (data.technicalSkills) {
-          doc.setFont('helvetica', 'bold').text('Technical Skills:', margin, y);
-          const techSkillsText = doc.splitTextToSize(data.technicalSkills, contentWidth - 80);
-          doc.setFont('helvetica', 'normal').text(techSkillsText, margin + 90, y);
-          y += techSkillsText.length * 10 * lineHeight;
-      }
-      y += 5;
-      if (data.softSkills) {
-          doc.setFont('helvetica', 'bold').text('Soft Skills:', margin, y);
-          const softSkillsText = doc.splitTextToSize(data.softSkills, contentWidth - 80);
-          doc.setFont('helvetica', 'normal').text(softSkillsText, margin + 90, y);
-          y += softSkillsText.length * 10 * lineHeight;
-      }
-      y += 10;
+      addSection('SKILLS', false);
+       (doc as any).autoTable({
+            startY: y,
+            body: [
+                data.technicalSkills ? ['Technical Skills', data.technicalSkills] : null,
+                data.softSkills ? ['Soft Skills', data.softSkills] : null,
+            ].filter(Boolean),
+            theme: 'plain',
+            styles: {
+                font: 'helvetica',
+                fontSize: 10,
+                cellPadding: { top: 2, right: 0, bottom: 2, left: 0 },
+            },
+            columnStyles: {
+                0: { fontStyle: 'bold', cellWidth: 100 },
+                1: { cellWidth: contentWidth - 100 },
+            },
+            margin: { left: margin },
+            tableWidth: contentWidth,
+        });
+        y = (doc as any).lastAutoTable.finalY + 10;
     }
 
     // --- PROJECTS ---
@@ -456,5 +461,3 @@ export default function ResumeBuilderPage() {
     </div>
   );
 }
-
-    
