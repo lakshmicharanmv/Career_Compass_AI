@@ -154,8 +154,8 @@ export default function ResumeBuilderPage() {
     doc.setFontSize(10).setFont('helvetica', 'normal');
     doc.text(contactInfoBlock, pageWidth - margin, y, { align: 'right' });
     
-    const nameLines = doc.splitTextToSize(data.fullName.toUpperCase(), contentWidth);
-    const contactLines = doc.splitTextToSize(contactInfoBlock, contentWidth);
+    const nameLines = doc.splitTextToSize(data.fullName.toUpperCase(), contentWidth / 2);
+    const contactLines = doc.splitTextToSize(contactInfoBlock, contentWidth / 2);
     const headerHeight = Math.max(nameLines.length * 28 * 0.7, contactLines.length * 10 * lineHeight);
     
     y += headerHeight + 5;
@@ -167,7 +167,7 @@ export default function ResumeBuilderPage() {
     y += 20;
 
     // --- HELPER FOR SECTIONS ---
-    const addSection = (title: string, spaceAfter: number = 20) => {
+    const addSection = (title: string) => {
         if (y > doc.internal.pageSize.getHeight() - 100) { // New page check
             doc.addPage();
             y = margin;
@@ -200,11 +200,12 @@ export default function ResumeBuilderPage() {
 
         doc.setFont('helvetica', 'normal');
         doc.text(edu.institution, margin, y);
+        y += 10 * lineHeight;
         if (edu.score) {
-          doc.text(`Score: ${edu.score}`, pageWidth - margin, y, { align: 'right' });
+          doc.text(`Score: ${edu.score}`, margin, y);
+          y += 10 * lineHeight;
         }
-        const eduLines = doc.splitTextToSize(edu.institution, (pageWidth/2) - margin);
-        y += eduLines.length * 10 * lineHeight + 8;
+        y += 8;
       });
     }
 
@@ -455,3 +456,5 @@ export default function ResumeBuilderPage() {
     </div>
   );
 }
+
+    
