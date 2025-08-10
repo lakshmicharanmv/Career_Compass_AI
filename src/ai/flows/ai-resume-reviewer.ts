@@ -27,7 +27,7 @@ const ReviewResumeOutputSchema = z.object({
 });
 export type ReviewResumeOutput = z.infer<typeof ReviewResumeOutputSchema>;
 
-export async function reviewResume(input: ReviewResumeInput): Promise<ReviewResumeOutput> {
+export async function reviewResume(input: ReviewResumeInput): Promise<ReviewResumeOutput | { error: true; message: string }> {
   return reviewResumeFlow(input);
 }
 
@@ -46,7 +46,7 @@ const reviewResumeFlow = ai.defineFlow(
   {
     name: 'reviewResumeFlow',
     inputSchema: ReviewResumeInputSchema,
-    outputSchema: ReviewResumeOutputSchema,
+    outputSchema: z.union([ReviewResumeOutputSchema, z.object({ error: z.literal(true), message: z.string() })]),
   },
   async (input) => {
     try {
@@ -61,7 +61,11 @@ const reviewResumeFlow = ai.defineFlow(
            const { output } = await prompt(input, { model: flashModel });
            return output!;
         } catch (fallbackError: any) {
+            const fallbackMessage = (fallbackError.message || '') as string;
             console.error("Fallback resume review model also failed:", fallbackError);
+             if (fallbackMessage.includes('503') || fallbackMessage.includes('overloaded') || fallbackMessage.includes('429')) {
+                return { error: true, message: 'Our AI is currently busy. Please try again in a few moments.' };
+            }
             throw fallbackError;
         }
       } else {
