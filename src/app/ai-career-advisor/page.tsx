@@ -9,7 +9,6 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { useToast } from '@/hooks/use-toast';
-import { FormLabel } from '@/components/ui/form';
 
 import Grade10Form from '@/app/grade10/page';
 import Grade12Form from '@/app/grade12/page';
@@ -33,31 +32,31 @@ export default function AICareerAdvisorPage() {
                         <RadioGroup onValueChange={(value) => setStage(value as Stage)} className="space-y-4">
                             <div className="flex items-center space-x-3 p-4 border rounded-lg has-[:checked]:bg-primary/10 has-[:checked]:border-primary">
                                 <RadioGroupItem value="10th" id="s-10th" />
-                                <FormLabel htmlFor="s-10th" className="text-base font-normal flex-1 cursor-pointer">
+                                <label htmlFor="s-10th" className="text-base font-normal flex-1 cursor-pointer">
                                     I am a 10th Grade Student
                                     <p className="text-sm text-muted-foreground">Get help choosing your academic stream (Science, Commerce, Arts).</p>
-                                </FormLabel>
+                                </label>
                             </div>
                             <div className="flex items-center space-x-3 p-4 border rounded-lg has-[:checked]:bg-primary/10 has-[:checked]:border-primary">
                                 <RadioGroupItem value="12th" id="s-12th" />
-                                <FormLabel htmlFor="s-12th" className="text-base font-normal flex-1 cursor-pointer">
+                                <label htmlFor="s-12th" className="text-base font-normal flex-1 cursor-pointer">
                                     I am a 12th Grade Student
                                      <p className="text-sm text-muted-foreground">Find the right degree and career path after school.</p>
-                                </FormLabel>
+                                </label>
                             </div>
                             <div className="flex items-center space-x-3 p-4 border rounded-lg has-[:checked]:bg-primary/10 has-[:checked]:border-primary">
                                 <RadioGroupItem value="UG" id="s-ug" />
-                                <FormLabel htmlFor="s-ug" className="text-base font-normal flex-1 cursor-pointer">
+                                <label htmlFor="s-ug" className="text-base font-normal flex-1 cursor-pointer">
                                     I am an Undergraduate Student
                                      <p className="text-sm text-muted-foreground">Prepare for jobs, internships, and higher studies.</p>
-                                </FormLabel>
+                                </label>
                             </div>
                             <div className="flex items-center space-x-3 p-4 border rounded-lg has-[:checked]:bg-primary/10 has-[:checked]:border-primary">
                                 <RadioGroupItem value="Pro" id="s-pro" />
-                                <FormLabel htmlFor="s-pro" className="text-base font-normal flex-1 cursor-pointer">
+                                <label htmlFor="s-pro" className="text-base font-normal flex-1 cursor-pointer">
                                     I am a Working Professional
                                      <p className="text-sm text-muted-foreground">Get advice on career growth, upskilling, and switching roles.</p>
-                                </FormLabel>
+                                </label>
                             </div>
                         </RadioGroup>
                     </CardContent>
@@ -88,9 +87,11 @@ export default function AICareerAdvisorPage() {
             </header>
             <main className="flex-1 container py-12 md:py-16">
                 <div className="flex items-center mb-8">
-                     <Button variant="outline" size="icon" onClick={() => setStage(null)}>
-                         <ArrowLeft className="h-4 w-4" />
-                     </Button>
+                     {stage !== null && (
+                        <Button variant="outline" size="icon" onClick={() => setStage(null)}>
+                            <ArrowLeft className="h-4 w-4" />
+                        </Button>
+                     )}
                     <h1 className="text-3xl font-bold tracking-tighter sm:text-4xl font-headline ml-4">
                         AI Career Advisor
                     </h1>
@@ -100,5 +101,3 @@ export default function AICareerAdvisorPage() {
         </div>
     );
 }
-
-    
