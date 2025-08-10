@@ -6,7 +6,7 @@ import * as React from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { z } from 'zod';
-import { Bot, ArrowLeft, Loader2, Save, Download, Plus, Trash2 } from 'lucide-react';
+import { Bot, ArrowLeft, Loader2, Save, Download, Plus, Trash2, Wand2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
@@ -19,6 +19,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { Separator } from '@/components/ui/separator';
+import { enhanceResumeDetails, ResumeDetailsInput } from '@/ai/flows/ai-resume-enhancer';
 
 const educationSchema = z.object({
   degree: z.string().min(1, 'Degree is required'),
@@ -59,7 +60,6 @@ const formSchema = z.object({
   workExperience: z.array(workExperienceSchema).optional(),
   
   extracurricular: z.string().optional(),
-
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -74,12 +74,9 @@ export default function ResumeBuilderPage() {
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      education: [],
+      education: [{ degree: '', institution: '', year: '', score: '' }],
       workExperience: [],
       projects: [],
-      careerObjective: '',
-      professionalTitle: '',
-      extracurricular: '',
     },
   });
 
@@ -94,24 +91,24 @@ export default function ResumeBuilderPage() {
       if (user.academics?.degreeName) {
         education.push({
             degree: `${user.academics.degreeName} in ${user.academics.specialization}`,
-            institution: 'My College/University', // Placeholder
-            year: 'Expected Graduation Year', // Placeholder
+            institution: 'My College/University', 
+            year: 'Expected Graduation Year', 
             score: `Current Grade: ${user.academics.currentGrade}`
         })
       }
        if (user.academics?.twelfthPercentage) {
         education.push({
             degree: `Class XII (${user.academics.twelfthStream})`,
-            institution: 'My School', // Placeholder
-            year: 'Completion Year', // Placeholder
+            institution: 'My School', 
+            year: 'Completion Year', 
             score: `Percentage: ${user.academics.twelfthPercentage}%`
         })
       }
        if (user.academics?.tenthPercentage) {
         education.push({
             degree: `Class X`,
-            institution: 'My School', // Placeholder
-            year: 'Completion Year', // Placeholder
+            institution: 'My School', 
+            year: 'Completion Year',
             score: `Percentage: ${user.academics.tenthPercentage}%`
         })
       }
@@ -122,7 +119,7 @@ export default function ResumeBuilderPage() {
         phone: user.phone || '',
         linkedin: user.linkedin || '',
         github: user.github || '',
-        professionalTitle: user.professionalTitle || '',
+        professionalTitle: user.professionalTitle || (flowType === 'professional' ? 'Experienced Professional' : 'Aspiring Graduate'),
         careerObjective: user.careerObjective || 'Seeking a challenging role in a dynamic organization to leverage my skills in [Your Key Skill] and contribute to organizational growth.',
         education: user.education && user.education.length > 0 ? user.education : (education.length > 0 ? education : [{ degree: '', institution: '', year: '', score: '' }]),
         workExperience: user.workExperience && user.workExperience.length > 0 ? user.workExperience : [],
@@ -135,13 +132,13 @@ export default function ResumeBuilderPage() {
     } else {
       router.push('/signin');
     }
-  }, [form, router]);
+  }, [form, router, flowType]);
 
   const saveDetails = (data: FormValues) => {
     const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
     const updatedUser = {
       ...currentUser,
-      ...data, // This will overwrite all form fields
+      ...data, 
       skills: {
         ...currentUser.skills,
         technical: data.technicalSkills,
@@ -151,198 +148,191 @@ export default function ResumeBuilderPage() {
     localStorage.setItem('currentUser', JSON.stringify(updatedUser));
   };
 
+  const generatePdf = (data: FormValues) => {
+    const doc = new jsPDF('p', 'pt', 'a4');
+    const margin = 36; // 0.5 inch
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const contentWidth = pageWidth - margin * 2;
+    let y = margin;
 
-  const handleGeneratePdf = (data: FormValues) => {
-    setIsLoading(true);
-    saveDetails(data);
-
-    try {
-      const doc = new jsPDF('p', 'pt', 'a4');
-      const margin = 36; // 0.5 inch
-      const pageWidth = doc.internal.pageSize.getWidth();
-      const contentWidth = pageWidth - margin * 2;
-      let y = margin + 10;
-
-      // --- Helper Functions ---
-      const checkPageBreak = (spaceNeeded: number) => {
-        if (y + spaceNeeded > doc.internal.pageSize.getHeight() - margin) {
-          // This is a simple single-page resume generator.
-          // In a real-world scenario, you might add logic to shrink fonts or reduce spacing.
-          // For now, we'll let it overflow to see where adjustments are needed.
-        }
-      };
-
-      const addSection = (title: string, contentRenderer: () => void) => {
-        if (y > margin + 20) { // Add space before new section, but not at the very top
-            y += 10;
-        }
-        checkPageBreak(30);
+    // Helper functions
+    const addSection = (title: string, contentRenderer: () => void, isLast: boolean = false) => {
+        if (y > margin) y += 20; 
         doc.setFont('helvetica', 'bold');
-        doc.setFontSize(12);
+        doc.setFontSize(11);
         doc.text(title.toUpperCase(), margin, y);
-        y += 5;
-        doc.setDrawColor(0, 0, 0);
+        y += 4;
+        doc.setDrawColor(0);
         doc.setLineWidth(1);
         doc.line(margin, y, pageWidth - margin, y);
         y += 15;
         contentRenderer();
-      };
-      
-      // --- Header ---
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(28);
-      doc.text(data.fullName.toUpperCase(), pageWidth / 2, y, { align: 'center' });
-      y += 22;
-      
+        if (!isLast) y += 5;
+    };
+    
+    // --- Header ---
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(24);
+    doc.text(data.fullName.toUpperCase(), pageWidth / 2, y, { align: 'center' });
+    y += 20;
+    
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(11);
+    doc.text(data.professionalTitle.toUpperCase(), pageWidth / 2, y, { align: 'center'});
+    y += 15;
+    
+    const contactInfo = [data.phone, data.email, data.linkedin, data.github].filter(Boolean).join(' | ');
+    doc.text(contactInfo, pageWidth / 2, y, { align: 'center' });
+    y += 10;
+    doc.line(margin, y, pageWidth - margin, y);
+    y+=5;
+
+
+    // --- Summary ---
+    addSection('Summary', () => {
       doc.setFont('helvetica', 'normal');
-      doc.setFontSize(11);
-      doc.text(data.professionalTitle.toUpperCase(), pageWidth / 2, y, { align: 'center'});
-      y += 15;
-      
-      const contactInfo = [data.phone, data.email].filter(Boolean).join(' | ');
-      doc.text(contactInfo, pageWidth / 2, y, { align: 'center' });
-      const socialLinks = [data.linkedin, data.github].filter(Boolean);
-      if(socialLinks.length > 0) {
-          y += 15;
-          doc.text(socialLinks.join(' | '), pageWidth / 2, y, { align: 'center' });
-      }
-      y += 15;
+      doc.setFontSize(10);
+      const summaryLines = doc.splitTextToSize(data.careerObjective, contentWidth);
+      doc.text(summaryLines, margin, y, { align: 'justify' });
+      y += summaryLines.length * 12;
+    });
+    
+    // --- Education ---
+    addSection('Education', () => {
+        data.education.forEach(edu => {
+            doc.setFontSize(11);
+            doc.setFont('helvetica', 'bold');
+            doc.text(edu.degree, margin, y);
 
+            doc.setFont('helvetica', 'normal');
+            doc.text(edu.year, pageWidth - margin, y, { align: 'right' });
+            y += 15;
 
-      // --- Professional Summary ---
-      addSection('Summary', () => {
-        doc.setFont('helvetica', 'normal');
-        doc.setFontSize(10);
-        const summaryLines = doc.splitTextToSize(data.careerObjective, contentWidth);
-        doc.text(summaryLines, margin, y, { align: 'justify' });
-        y += summaryLines.length * 12 + 5;
-      });
-
-      // --- Education ---
-      addSection('Education', () => {
-          data.education.forEach(edu => {
-              checkPageBreak(30);
-              doc.setFontSize(11);
-              doc.setFont('helvetica', 'bold');
-              doc.text(edu.degree, margin, y);
-
-              doc.setFont('helvetica', 'normal');
-              doc.text(edu.year, pageWidth - margin, y, { align: 'right' });
-              y += 15;
-
-              doc.setFont('helvetica', 'italic');
-              doc.text(edu.institution, margin, y);
-              if (edu.score) {
-                  doc.setFont('helvetica', 'normal');
-                  doc.text(edu.score, pageWidth - margin, y, { align: 'right' });
-              }
-              y += 20;
-          });
-      });
-      
-      // --- Skills ---
-      addSection('Skills', () => {
-          doc.setFontSize(10);
-          doc.setFont('helvetica', 'normal');
-          let skillsText = '';
-          if (data.technicalSkills) skillsText += `Technical Skills: ${data.technicalSkills.split(',').map(s => s.trim()).join(' | ')}`;
-          if (data.technicalSkills && data.softSkills) skillsText += '\n';
-          if (data.softSkills) skillsText += `Soft Skills: ${data.softSkills.split(',').map(s => s.trim()).join(' | ')}`;
-          const skillLines = doc.splitTextToSize(skillsText, contentWidth);
-          doc.text(skillLines, margin, y);
-          y += skillLines.length * 12 + 5;
-      });
-
-      // --- Projects ---
-      if (data.projects && data.projects.length > 0 && data.projects.some(p => p.name)) {
-        addSection('Projects', () => {
-            data.projects?.forEach(proj => {
-              if(!proj.name) return;
-
-              checkPageBreak(40);
-              doc.setFontSize(11);
-              doc.setFont('helvetica', 'bold');
-              doc.text(proj.name, margin, y);
-
-              if (proj.url) {
-                  doc.setFont('helvetica', 'normal');
-                  doc.setTextColor(0, 0, 255);
-                  doc.textWithLink('Project Link', pageWidth - margin, y, { align: 'right', url: proj.url });
-                  doc.setTextColor(0, 0, 0);
-              }
-              y += 15;
-              
-              doc.setFont('helvetica', 'normal');
-              doc.setFontSize(10);
-              const descriptionLines = doc.splitTextToSize(proj.description, contentWidth);
-              doc.text(descriptionLines, margin, y, { align: 'justify' });
-              y += descriptionLines.length * 12 + 10;
-          });
+            doc.setFont('helvetica', 'italic');
+            doc.text(edu.institution, margin, y);
+            if (edu.score) {
+                doc.setFont('helvetica', 'normal');
+                doc.text(edu.score, pageWidth - margin, y, { align: 'right' });
+            }
+            y += 20;
         });
-      }
-
-      // --- Work Experience ---
-      if (data.workExperience && data.workExperience.length > 0 && data.workExperience.some(e => e.role)) {
-        addSection('Experience', () => {
-          data.workExperience?.forEach(exp => {
-              if(!exp.role) return;
-
-              checkPageBreak(50);
-              doc.setFontSize(11);
-              doc.setFont('helvetica', 'bold');
-              doc.text(exp.company, margin, y);
-              
-              doc.setFont('helvetica', 'normal');
-              doc.text(exp.duration, pageWidth - margin, y, { align: 'right' });
-              y += 15;
-
-              doc.setFont('helvetica', 'italic');
-              doc.text(exp.role, margin, y);
-              y += 15;
-              
-              doc.setFontSize(10);
-              const achievements = exp.achievements.split('\n').filter((line:string) => line.trim() !== '');
-              achievements.forEach((ach: string) => {
-                  checkPageBreak(12);
-                  doc.circle(margin + 5, y - 3, 2, 'F');
-                  const lines = doc.splitTextToSize(ach, contentWidth - 15);
-                  doc.text(lines, margin + 15, y, { align: 'justify' });
-                  y += lines.length * 12;
-              });
-              y += 10;
-          });
+        y -= 10; // Reduce space after last entry
+    });
+    
+    // --- Skills ---
+    if(data.technicalSkills || data.softSkills) {
+        addSection('Skills', () => {
+            doc.setFontSize(10);
+            doc.setFont('helvetica', 'normal');
+            let skillsText = '';
+            if (data.technicalSkills) skillsText += `Technical Skills: ${data.technicalSkills.split(',').map(s => s.trim()).join(' | ')}`;
+            if (data.technicalSkills && data.softSkills) skillsText += '\n';
+            if (data.softSkills) skillsText += `Soft Skills: ${data.softSkills.split(',').map(s => s.trim()).join(' | ')}`;
+            const skillLines = doc.splitTextToSize(skillsText, contentWidth);
+            doc.text(skillLines, margin, y);
+            y += skillLines.length * 12;
         });
-      }
-      
-      // --- Achievements/Extracurricular ---
-      if (data.extracurricular) {
-        addSection('Achievements or Extracurricular Activities', () => {
+    }
+
+    // --- Projects ---
+    if (data.projects && data.projects.length > 0 && data.projects.some(p => p.name)) {
+      addSection('Projects', () => {
+          data.projects?.forEach(proj => {
+            if(!proj.name) return;
+            doc.setFontSize(11);
+            doc.setFont('helvetica', 'bold');
+            doc.text(proj.name, margin, y);
+
+            if (proj.url) {
+                doc.setFont('helvetica', 'normal');
+                doc.setTextColor(0, 0, 255);
+                doc.textWithLink('Link', pageWidth - margin, y, { align: 'right', url: proj.url });
+                doc.setTextColor(0, 0, 0);
+            }
+            y += 15;
+            
             doc.setFont('helvetica', 'normal');
             doc.setFontSize(10);
-            const extraItems = data.extracurricular.split('\n').filter(line => line.trim() !== '');
-            extraItems.forEach(item => {
-                checkPageBreak(12);
+            const descriptionLines = doc.splitTextToSize(proj.description, contentWidth);
+            doc.text(descriptionLines, margin, y, { align: 'justify' });
+            y += (descriptionLines.length * 12) + 10;
+        });
+        y -= 10;
+      });
+    }
+
+    // --- Work Experience ---
+    if (data.workExperience && data.workExperience.length > 0 && data.workExperience.some(e => e.role)) {
+      addSection('Experience', () => {
+        data.workExperience?.forEach(exp => {
+            if(!exp.role) return;
+            doc.setFontSize(11);
+            doc.setFont('helvetica', 'bold');
+            doc.text(exp.role, margin, y);
+            
+            doc.setFont('helvetica', 'normal');
+            doc.text(exp.duration, pageWidth - margin, y, { align: 'right' });
+            y += 15;
+
+            doc.setFont('helvetica', 'italic');
+            doc.text(exp.company, margin, y);
+            y += 15;
+            
+            doc.setFontSize(10);
+            const achievements = exp.achievements.split('\n').filter((line:string) => line.trim() !== '');
+            achievements.forEach((ach: string) => {
                 doc.circle(margin + 5, y - 3, 2, 'F');
-                const lines = doc.splitTextToSize(item, contentWidth - 15);
+                const lines = doc.splitTextToSize(ach, contentWidth - 15);
                 doc.text(lines, margin + 15, y, { align: 'justify' });
                 y += lines.length * 12;
             });
-            y += 5;
+            y += 10;
         });
-      }
+        y-=10;
+      });
+    }
+    
+    // --- Achievements/Extracurricular ---
+    if (data.extracurricular) {
+      addSection('Achievements & Extracurriculars', () => {
+          doc.setFont('helvetica', 'normal');
+          doc.setFontSize(10);
+          const extraItems = data.extracurricular.split('\n').filter(line => line.trim() !== '');
+          extraItems.forEach(item => {
+              doc.circle(margin + 5, y - 3, 2, 'F');
+              const lines = doc.splitTextToSize(item, contentWidth - 15);
+              doc.text(lines, margin + 15, y, { align: 'justify' });
+              y += (lines.length * 12);
+          });
+      }, true);
+    }
+    doc.save(`${data.fullName.replace(' ', '_')}_Resume.pdf`);
+  }
 
-      doc.save(`${data.fullName.replace(' ', '_')}_Resume.pdf`);
+  const handleGeneratePdf = async (data: FormValues) => {
+    setIsLoading(true);
+    saveDetails(data);
+    toast({
+        title: 'Enhancing your resume with AI...',
+        description: 'This may take a moment. Please wait.',
+    });
+
+    try {
+      const enhancedData = await enhanceResumeDetails(data);
+      form.reset(enhancedData); // Update the form with AI enhanced data
+      saveDetails(enhancedData); // Save the enhanced data to localStorage
+      generatePdf(enhancedData); // Generate PDF with enhanced data
 
       toast({
         title: 'Resume Generated!',
-        description: 'Your PDF has been downloaded.',
+        description: 'Your AI-enhanced PDF has been downloaded.',
       });
     } catch (e) {
       console.error(e);
       toast({
         variant: 'destructive',
         title: 'Error Generating PDF',
-        description: 'Something went wrong. Please try again.',
+        description: 'Something went wrong with the AI enhancement. Please try again.',
       });
     } finally {
       setIsLoading(false);
@@ -394,7 +384,7 @@ export default function ResumeBuilderPage() {
                 <form onSubmit={form.handleSubmit(handleGeneratePdf)}>
                     <CardHeader>
                         <CardTitle>Finalize Your Details</CardTitle>
-                        <CardDescription>Review and edit your information below. Click "Save" to update your details, or "Generate PDF" to download your resume.</CardDescription>
+                        <CardDescription>Review and edit your information below. Click "Save" to update your details, or "Generate PDF" to download your AI-enhanced resume.</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-8">
                         
@@ -408,10 +398,10 @@ export default function ResumeBuilderPage() {
                                 <FormField name="github" control={form.control} render={({ field }) => ( <FormItem className="md:col-span-2"><FormLabel>GitHub URL</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem> )} />
                            </div>
                         </div>
-
+                        
                         <Separator />
 
-                         <div className="space-y-4">
+                        <div className="space-y-4">
                             <h3 className="text-xl font-semibold">Professional Title</h3>
                              <FormField name="professionalTitle" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Title</FormLabel><FormControl><Input placeholder="e.g., Software Engineer, Financial Analyst" {...field} /></FormControl><FormMessage /></FormItem> )} />
                         </div>
@@ -441,6 +431,7 @@ export default function ResumeBuilderPage() {
                                 ))}
                             </div>
                             <Button type="button" variant="outline" size="sm" onClick={() => appendEducation({ degree: '', institution: '', year: '', score: '' })} className="mt-4"> <Plus className="mr-2 h-4 w-4" /> Add Education </Button>
+                             <FormMessage>{form.formState.errors.education?.message}</FormMessage>
                         </div>
 
                         <Separator />
@@ -463,7 +454,7 @@ export default function ResumeBuilderPage() {
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <FormField control={form.control} name={`projects.${index}.name`} render={({ field }) => ( <FormItem><FormLabel>Project Name</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem> )} />
                                          <FormField control={form.control} name={`projects.${index}.url`} render={({ field }) => ( <FormItem><FormLabel>Project URL (Optional)</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem> )} />
-                                        <FormField control={form.control} name={`projects.${index}.description`} render={({ field }) => ( <FormItem className="md:col-span-2"><FormLabel>Description (one achievement per line)</FormLabel><FormControl><Textarea {...field} /></FormControl><FormMessage /></FormItem> )} />
+                                        <FormField control={form.control} name={`projects.${index}.description`} render={({ field }) => ( <FormItem className="md:col-span-2"><FormLabel>Description</FormLabel><FormControl><Textarea {...field} /></FormControl><FormMessage /></FormItem> )} />
                                     </div>
                                     <Button type="button" variant="ghost" size="icon" className="absolute top-2 right-2" onClick={() => removeProject(index)}> <Trash2 className="h-4 w-4" /> </Button>
                                 </div>
@@ -508,8 +499,8 @@ export default function ResumeBuilderPage() {
                             Save Details
                         </Button>
                         <Button type="submit" disabled={isLoading}>
-                            {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
-                            Generate PDF
+                            {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Wand2 className="mr-2 h-4 w-4" />}
+                            Enhance & Generate PDF
                         </Button>
                     </CardFooter>
                 </form>
