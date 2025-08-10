@@ -1,3 +1,4 @@
+
 'use server';
 
 /**
@@ -16,7 +17,7 @@ const ReviewResumeInputSchema = z.object({
   resumeDataUri: z
     .string()
     .describe(
-      'The resume, as a data URI that must include a MIME type and use Base64 encoding. Expected format: \'data:<mimetype>;base64,<encoded_data>\'.' // Corrected typo here
+      "The resume, as a data URI that must include a MIME type and use Base64 encoding. Expected format: 'data:<mimetype>;base64,<encoded_data>'."
     ),
 });
 export type ReviewResumeInput = z.infer<typeof ReviewResumeInputSchema>;
@@ -74,3 +75,5 @@ const reviewResumeFlow = ai.defineFlow(
     }
   }
 );
+
+    
