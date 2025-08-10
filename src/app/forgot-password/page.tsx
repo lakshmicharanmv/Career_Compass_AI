@@ -193,7 +193,12 @@ export default function ForgotPasswordPage() {
                             <FormItem>
                                 <FormLabel>One-Time Password (OTP)</FormLabel>
                                 <FormControl>
-                                    <Input placeholder="Enter the 6-digit OTP" {...field} />
+                                    <Input 
+                                      type="text"
+                                      autoComplete="one-time-code"
+                                      placeholder="Enter the 6-digit OTP" 
+                                      {...field} 
+                                    />
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
