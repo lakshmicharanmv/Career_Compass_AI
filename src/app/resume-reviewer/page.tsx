@@ -6,7 +6,7 @@ import * as React from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
-import { Bot, ArrowLeft, Loader2, UploadCloud, FileCheck2, Wand2, CheckCircle } from 'lucide-react';
+import { Bot, ArrowLeft, Loader2, UploadCloud, FileCheck2, Wand2, CheckCircle, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Form,
@@ -40,11 +40,12 @@ const FormSchema = z.object({
 });
 
 type FormValues = z.infer<typeof FormSchema>;
+type ReviewResult = (ReviewResumeOutput | { error: true; message: string });
 
 export default function ResumeReviewerPage() {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = React.useState(false);
-  const [result, setResult] = React.useState<ReviewResumeOutput | null>(null);
+  const [result, setResult] = React.useState<ReviewResult | null>(null);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(FormSchema),
@@ -156,6 +157,29 @@ export default function ResumeReviewerPage() {
 
   const renderResult = () => {
     if (!result) return null;
+
+    if ('error' in result && result.error) {
+      return (
+        <Card className="max-w-2xl mx-auto border-destructive/50">
+           <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-destructive">
+                <AlertTriangle /> AI Service Unavailable
+              </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-destructive">{result.message || 'An unknown error occurred.'}</p>
+          </CardContent>
+          <CardContent>
+            <Button onClick={() => { setResult(null); form.reset(); }}>
+                Try Again
+            </Button>
+          </CardContent>
+        </Card>
+      );
+    }
+
+    const { atsScore, improvements } = result as ReviewResumeOutput;
+
     return (
       <div className="max-w-2xl mx-auto space-y-8">
         <Card>
@@ -170,13 +194,13 @@ export default function ResumeReviewerPage() {
           <CardContent className="space-y-6">
             <div className="text-center">
               <p className="text-muted-foreground">Your ATS Score</p>
-              <p className="text-6xl font-bold text-primary">{result.atsScore.toFixed(1)} <span className="text-2xl text-muted-foreground">/ 10</span></p>
-              <Progress value={result.atsScore * 10} className="mt-4" />
+              <p className="text-6xl font-bold text-primary">{atsScore.toFixed(1)} <span className="text-2xl text-muted-foreground">/ 10</span></p>
+              <Progress value={atsScore * 10} className="mt-4" />
             </div>
             <div>
               <h3 className="font-semibold mb-2">Key Improvements:</h3>
               <ul className="space-y-2 list-inside">
-                {result.improvements.map((item, index) => (
+                {improvements.map((item, index) => (
                   <li key={index} className="flex items-start gap-2">
                     <CheckCircle className="h-5 w-5 text-green-500 mt-0.5 shrink-0" />
                     <span>{item}</span>
@@ -235,5 +259,3 @@ export default function ResumeReviewerPage() {
     </div>
   );
 }
-
-    
