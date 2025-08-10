@@ -166,48 +166,47 @@ export default function ResumeBuilderPage() {
       // --- Helper Functions ---
       const checkPageBreak = (spaceNeeded: number) => {
         if (y + spaceNeeded > doc.internal.pageSize.getHeight() - margin) {
-            // This is a simple single-page resume generator, so we won't add a new page.
-            // In a more complex scenario, you would add doc.addPage() and reset y here.
+          // This is a simple single-page resume generator.
+          // In a real-world scenario, you might add logic to shrink fonts or reduce spacing.
+          // For now, we'll let it overflow to see where adjustments are needed.
         }
       };
 
       const addSection = (title: string, contentRenderer: () => void) => {
-        checkPageBreak(40);
+        if (y > margin + 20) { // Add space before new section, but not at the very top
+            y += 10;
+        }
+        checkPageBreak(30);
         doc.setFont('helvetica', 'bold');
         doc.setFontSize(12);
         doc.text(title.toUpperCase(), margin, y);
-        y += 8;
+        y += 5;
         doc.setDrawColor(0, 0, 0);
         doc.setLineWidth(1);
         doc.line(margin, y, pageWidth - margin, y);
-        y += 20;
+        y += 15;
         contentRenderer();
       };
       
       // --- Header ---
       doc.setFont('helvetica', 'bold');
-      doc.setFontSize(26);
+      doc.setFontSize(28);
       doc.text(data.fullName.toUpperCase(), pageWidth / 2, y, { align: 'center' });
-      y += 20;
+      y += 22;
       
       doc.setFont('helvetica', 'normal');
-      doc.setFontSize(10);
+      doc.setFontSize(11);
       doc.text(data.professionalTitle.toUpperCase(), pageWidth / 2, y, { align: 'center'});
       y += 15;
       
-      doc.setDrawColor(200, 200, 200);
-      doc.setLineWidth(0.5);
-      doc.line(margin, y, pageWidth - margin, y);
-      y += 15;
-
-      const contactInfo = [data.phone, data.email].filter(Boolean).join('  |  ');
+      const contactInfo = [data.phone, data.email].filter(Boolean).join(' | ');
       doc.text(contactInfo, pageWidth / 2, y, { align: 'center' });
-      const socialLinks = [data.linkedin, data.github].filter(Boolean).join('  |  ');
-      if(socialLinks) {
+      const socialLinks = [data.linkedin, data.github].filter(Boolean);
+      if(socialLinks.length > 0) {
           y += 15;
-          doc.text(socialLinks, pageWidth / 2, y, { align: 'center' });
+          doc.text(socialLinks.join(' | '), pageWidth / 2, y, { align: 'center' });
       }
-      y += 25;
+      y += 15;
 
 
       // --- Professional Summary ---
@@ -215,8 +214,8 @@ export default function ResumeBuilderPage() {
         doc.setFont('helvetica', 'normal');
         doc.setFontSize(10);
         const summaryLines = doc.splitTextToSize(data.careerObjective, contentWidth);
-        doc.text(summaryLines, margin, y);
-        y += summaryLines.length * 12 + 10;
+        doc.text(summaryLines, margin, y, { align: 'justify' });
+        y += summaryLines.length * 12 + 5;
       });
 
       // --- Education ---
@@ -246,12 +245,12 @@ export default function ResumeBuilderPage() {
           doc.setFontSize(10);
           doc.setFont('helvetica', 'normal');
           let skillsText = '';
-          if (data.technicalSkills) skillsText += `Technical: ${data.technicalSkills.split(',').map(s => s.trim()).join(' | ')}`;
+          if (data.technicalSkills) skillsText += `Technical Skills: ${data.technicalSkills.split(',').map(s => s.trim()).join(' | ')}`;
           if (data.technicalSkills && data.softSkills) skillsText += '\n';
           if (data.softSkills) skillsText += `Soft Skills: ${data.softSkills.split(',').map(s => s.trim()).join(' | ')}`;
           const skillLines = doc.splitTextToSize(skillsText, contentWidth);
           doc.text(skillLines, margin, y);
-          y += skillLines.length * 12 + 10;
+          y += skillLines.length * 12 + 5;
       });
 
       // --- Projects ---
@@ -268,21 +267,16 @@ export default function ResumeBuilderPage() {
               if (proj.url) {
                   doc.setFont('helvetica', 'normal');
                   doc.setTextColor(0, 0, 255);
-                  doc.textWithLink('Link', pageWidth - margin, y, { align: 'right', url: proj.url });
+                  doc.textWithLink('Project Link', pageWidth - margin, y, { align: 'right', url: proj.url });
                   doc.setTextColor(0, 0, 0);
               }
               y += 15;
               
+              doc.setFont('helvetica', 'normal');
               doc.setFontSize(10);
-              const descriptionLines = proj.description.split('\n').filter((line: string) => line.trim() !== '');
-              descriptionLines.forEach((desc: string) => {
-                  checkPageBreak(12);
-                  doc.circle(margin + 5, y - 4, 1.5, 'F');
-                  const lines = doc.splitTextToSize(desc, contentWidth - 15);
-                  doc.text(lines, margin + 15, y);
-                  y += lines.length * 12;
-              });
-              y += 10;
+              const descriptionLines = doc.splitTextToSize(proj.description, contentWidth);
+              doc.text(descriptionLines, margin, y, { align: 'justify' });
+              y += descriptionLines.length * 12 + 10;
           });
         });
       }
@@ -310,9 +304,9 @@ export default function ResumeBuilderPage() {
               const achievements = exp.achievements.split('\n').filter((line:string) => line.trim() !== '');
               achievements.forEach((ach: string) => {
                   checkPageBreak(12);
-                  doc.circle(margin + 5, y - 4, 1.5, 'F');
+                  doc.circle(margin + 5, y - 3, 2, 'F');
                   const lines = doc.splitTextToSize(ach, contentWidth - 15);
-                  doc.text(lines, margin + 15, y);
+                  doc.text(lines, margin + 15, y, { align: 'justify' });
                   y += lines.length * 12;
               });
               y += 10;
@@ -320,18 +314,23 @@ export default function ResumeBuilderPage() {
         });
       }
       
-      // --- Extracurricular ---
+      // --- Achievements/Extracurricular ---
       if (data.extracurricular) {
         addSection('Achievements or Extracurricular Activities', () => {
             doc.setFont('helvetica', 'normal');
             doc.setFontSize(10);
-            const extraLines = doc.splitTextToSize(data.extracurricular, contentWidth);
-            doc.text(extraLines, margin, y);
-            y += extraLines.length * 12 + 10;
+            const extraItems = data.extracurricular.split('\n').filter(line => line.trim() !== '');
+            extraItems.forEach(item => {
+                checkPageBreak(12);
+                doc.circle(margin + 5, y - 3, 2, 'F');
+                const lines = doc.splitTextToSize(item, contentWidth - 15);
+                doc.text(lines, margin + 15, y, { align: 'justify' });
+                y += lines.length * 12;
+            });
+            y += 5;
         });
       }
 
-      
       doc.save(`${data.fullName.replace(' ', '_')}_Resume.pdf`);
 
       toast({
@@ -349,6 +348,7 @@ export default function ResumeBuilderPage() {
       setIsLoading(false);
     }
   };
+
 
   const onSubmit = (data: FormValues) => {
     saveDetails(data);
@@ -411,7 +411,7 @@ export default function ResumeBuilderPage() {
 
                         <Separator />
 
-                        <div className="space-y-4">
+                         <div className="space-y-4">
                             <h3 className="text-xl font-semibold">Professional Title</h3>
                              <FormField name="professionalTitle" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Title</FormLabel><FormControl><Input placeholder="e.g., Software Engineer, Financial Analyst" {...field} /></FormControl><FormMessage /></FormItem> )} />
                         </div>
@@ -497,7 +497,7 @@ export default function ResumeBuilderPage() {
 
                         <div className="space-y-4">
                             <h3 className="text-xl font-semibold">Achievements or Extracurricular Activities</h3>
-                             <FormField name="extracurricular" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Activities</FormLabel><FormControl><Textarea placeholder="List any relevant activities, achievements, or awards..." {...field} /></FormControl><FormMessage /></FormItem> )} />
+                             <FormField name="extracurricular" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Activities (one per line)</FormLabel><FormControl><Textarea placeholder="List any relevant activities, achievements, or awards..." {...field} /></FormControl><FormMessage /></FormItem> )} />
                         </div>
 
 
@@ -519,5 +519,3 @@ export default function ResumeBuilderPage() {
     </div>
   );
 }
-
-    
