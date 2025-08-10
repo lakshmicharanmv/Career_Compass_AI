@@ -236,18 +236,18 @@ export default function Grade12Page() {
       <Form {...form}>
         <form>
           <Card>
-            <CardHeader>
-              <CardTitle>Aptitude Test</CardTitle>
+            <CardHeader className="p-8">
+              <CardTitle className="text-2xl">Aptitude Test</CardTitle>
               <CardDescription>Question {currentQuestionIndex + 1} of {assessment.questions.length}</CardDescription>
-              <Progress value={progress} className="mt-2" />
+              <Progress value={progress} className="mt-4" />
             </CardHeader>
-            <CardContent>
-              <p className="font-semibold mb-4">{question.question}</p>
-              <RadioGroup onValueChange={handleAnswerSubmit} key={currentQuestionIndex}>
+            <CardContent className="p-8">
+              <p className="text-lg font-semibold mb-6 leading-relaxed">{question.question}</p>
+              <RadioGroup onValueChange={handleAnswerSubmit} key={currentQuestionIndex} className="space-y-4">
                 {question.options.map((option, index) => (
-                  <div key={index} className="flex items-center space-x-2">
+                  <div key={index} className="flex items-center space-x-3 p-4 border rounded-lg has-[:checked]:bg-primary/10 has-[:checked]:border-primary">
                     <RadioGroupItem value={option} id={`q${currentQuestionIndex}-o${index}`} />
-                    <FormLabel htmlFor={`q${currentQuestionIndex}-o${index}`}>{option}</FormLabel>
+                    <FormLabel htmlFor={`q${currentQuestionIndex}-o${index}`} className="text-base font-normal flex-1 cursor-pointer">{option}</FormLabel>
                   </div>
                 ))}
               </RadioGroup>
@@ -460,7 +460,7 @@ export default function Grade12Page() {
             12th Grade - Find Your Major
           </h1>
         </div>
-        <div className="max-w-4xl mx-auto">
+        <div className="max-w-5xl mx-auto">
           {recommendation 
             ? renderRecommendation()
             : (assessment && !isLoading && testScore === null)
@@ -472,3 +472,5 @@ export default function Grade12Page() {
     </div>
   );
 }
+
+    
