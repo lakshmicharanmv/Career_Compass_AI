@@ -148,11 +148,11 @@ export default function UndergraduatePage() {
   const academicForm = useForm<AcademicFormValues>({ 
     resolver: zodResolver(academicSchema),
     defaultValues: {
-        tenthPercentage: undefined,
-        twelfthPercentage: undefined,
+        tenthPercentage: '' as any,
+        twelfthPercentage: '' as any,
         degreeName: '',
         specialization: '',
-        currentGrade: undefined,
+        currentGrade: '' as any,
     }
   });
   const skillsForm = useForm<SkillsFormValues>({ 
@@ -574,5 +574,3 @@ export default function UndergraduatePage() {
     </div>
   );
 }
-
-    
