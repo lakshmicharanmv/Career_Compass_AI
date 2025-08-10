@@ -34,7 +34,7 @@ const projectSchema = z.object({
 
 const ResumeDetailsInputSchema = z.object({
   fullName: z.string().describe('User\'s full name'),
-  email: z.string().email().describe('User\'s email address'),
+  email: z.string().describe('User\'s email address'),
   phone: z.string().describe('User\'s 10-digit phone number'),
   linkedin: z.string().optional().describe('LinkedIn profile URL'),
   github: z.string().optional().describe('GitHub profile URL'),
