@@ -8,8 +8,7 @@
  * - UndergraduateOptionsOutput - The return type for the recommendUndergraduateOptions function.
  */
 
-import {ai} from '@/ai/genkit';
-import {googleAI} from '@genkit-ai/googleai';
+import {ai, proModel, flashModel} from '@/ai/genkit';
 import {z} from 'genkit';
 
 const UndergraduateOptionsInputSchema = z.object({
@@ -84,19 +83,16 @@ const recommendUndergraduateOptionsFlow = ai.defineFlow(
     outputSchema: UndergraduateOptionsOutputSchema,
   },
   async (input) => {
-    const primaryModel = googleAI.model('gemini-1.5-pro');
-    const fallbackModel = googleAI.model('gemini-1.5-flash');
-
     try {
       console.log('Attempting to use primary model for undergraduate options: gemini-1.5-pro');
-      const { output } = await recommendUndergraduateOptionsPrompt(input, { model: primaryModel });
+      const { output } = await recommendUndergraduateOptionsPrompt(input, { model: proModel });
       return output!;
     } catch (error: any) {
       const errorMessage = error.message || '';
       if (errorMessage.includes('503') || errorMessage.includes('overloaded') || errorMessage.includes('429')) {
         console.warn('Primary undergraduate options model failed or was rate-limited. Switching to fallback model: gemini-1.5-flash');
         try {
-           const { output } = await recommendUndergraduateOptionsPrompt(input, { model: fallbackModel });
+           const { output } = await recommendUndergraduateOptionsPrompt(input, { model: flashModel });
            return output!;
         } catch (fallbackError: any) {
             console.error("Fallback undergraduate options model also failed:", fallbackError);

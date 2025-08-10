@@ -8,8 +8,7 @@
  * - CareerProgressionOutput - The return type for the getCareerProgressionMap function.
  */
 
-import {ai} from '@/ai/genkit';
-import {googleAI} from '@genkit-ai/googleai';
+import {ai, proModel, flashModel} from '@/ai/genkit';
 import {z} from 'genkit';
 
 const CareerProgressionInputSchema = z.object({
@@ -58,19 +57,16 @@ const careerProgressionFlow = ai.defineFlow(
     outputSchema: CareerProgressionOutputSchema,
   },
   async (input) => {
-    const primaryModel = googleAI.model('gemini-1.5-pro');
-    const fallbackModel = googleAI.model('gemini-1.5-flash');
-
     try {
       console.log('Attempting to use primary model for career progression: gemini-1.5-pro');
-      const { output } = await careerProgressionPrompt(input, { model: primaryModel });
+      const { output } = await careerProgressionPrompt(input, { model: proModel });
       return output!;
     } catch (error: any) {
       const errorMessage = error.message || '';
       if (errorMessage.includes('503') || errorMessage.includes('overloaded') || errorMessage.includes('429')) {
         console.warn('Primary career progression model failed or was rate-limited. Switching to fallback model: gemini-1.5-flash');
         try {
-           const { output } = await careerProgressionPrompt(input, { model: fallbackModel });
+           const { output } = await careerProgressionPrompt(input, { model: flashModel });
            return output!;
         } catch (fallbackError: any) {
             console.error("Fallback career progression model also failed:", fallbackError);

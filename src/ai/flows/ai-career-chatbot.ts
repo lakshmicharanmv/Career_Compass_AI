@@ -8,8 +8,7 @@
  * - AICareerChatbotOutput - The return type for the aiCareerChatbot function.
  */
 
-import {ai} from '@/ai/genkit';
-import {googleAI} from '@genkit-ai/googleai';
+import {ai, proModel, flashModel} from '@/ai/genkit';
 import {z} from 'genkit';
 
 const AICareerChatbotInputSchema = z.object({
@@ -47,19 +46,16 @@ const aiCareerChatbotFlow = ai.defineFlow(
     outputSchema: AICareerChatbotOutputSchema,
   },
   async (input) => {
-    const primaryModel = googleAI.model('gemini-1.5-pro');
-    const fallbackModel = googleAI.model('gemini-1.5-flash');
-
     try {
       console.log('Attempting to use primary model for chatbot: gemini-1.5-pro');
-      const { output } = await prompt(input, { model: primaryModel });
+      const { output } = await prompt(input, { model: proModel });
       return output!;
     } catch (error: any) {
       const errorMessage = error.message || '';
       if (errorMessage.includes('503') || errorMessage.includes('overloaded') || errorMessage.includes('429')) {
         console.warn('Primary chatbot model failed or was rate-limited. Switching to fallback model: gemini-1.5-flash');
         try {
-           const { output } = await prompt(input, { model: fallbackModel });
+           const { output } = await prompt(input, { model: flashModel });
            return output!;
         } catch (fallbackError: any) {
             console.error("Fallback chatbot model also failed:", fallbackError);

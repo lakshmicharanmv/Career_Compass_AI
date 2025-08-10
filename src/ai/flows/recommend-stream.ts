@@ -9,8 +9,7 @@
  * - RecommendStreamOutput - The return type for the recommendStream function.
  */
 
-import {ai} from '@/ai/genkit';
-import {googleAI} from '@genkit-ai/googleai';
+import {ai, proModel, flashModel} from '@/ai/genkit';
 import {z} from 'genkit';
 
 const RecommendStreamInputSchema = z.object({
@@ -80,19 +79,16 @@ const recommendStreamFlow = ai.defineFlow(
     outputSchema: RecommendStreamOutputSchema,
   },
   async (input) => {
-    const primaryModel = googleAI.model('gemini-1.5-pro');
-    const fallbackModel = googleAI.model('gemini-1.5-flash');
-
     try {
       console.log('Attempting to use primary model for stream recommendation: gemini-1.5-pro');
-      const { output } = await recommendStreamPrompt(input, { model: primaryModel });
+      const { output } = await recommendStreamPrompt(input, { model: proModel });
       return output!;
     } catch (error: any) {
       const errorMessage = error.message || '';
       if (errorMessage.includes('503') || errorMessage.includes('overloaded') || errorMessage.includes('429')) {
         console.warn('Primary stream recommendation model failed or was rate-limited. Switching to fallback model: gemini-1.5-flash');
         try {
-           const { output } = await recommendStreamPrompt(input, { model: fallbackModel });
+           const { output } = await recommendStreamPrompt(input, { model: flashModel });
            return output!;
         } catch (fallbackError: any) {
             console.error("Fallback stream recommendation model also failed:", fallbackError);

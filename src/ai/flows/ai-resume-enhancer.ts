@@ -9,8 +9,7 @@
  * - ResumeDetailsOutput - The return type for the enhanceResumeDetails function.
  */
 
-import {ai} from '@/ai/genkit';
-import {googleAI} from '@genkit-ai/googleai';
+import {ai, proModel, flashModel} from '@/ai/genkit';
 import {z} from 'genkit';
 
 const educationSchema = z.object({
@@ -112,19 +111,16 @@ const enhanceResumeDetailsFlow = ai.defineFlow(
     outputSchema: ResumeDetailsOutputSchema,
   },
   async (input) => {
-    const primaryModel = googleAI.model('gemini-1.5-pro');
-    const fallbackModel = googleAI.model('gemini-1.5-flash');
-
     try {
       console.log('Attempting to use primary model for resume enhancement: gemini-1.5-pro');
-      const { output } = await enhanceResumePrompt(input, { model: primaryModel });
+      const { output } = await enhanceResumePrompt(input, { model: proModel });
       return output!;
     } catch (error: any) {
       const errorMessage = error.message || '';
       if (errorMessage.includes('503') || errorMessage.includes('overloaded') || errorMessage.includes('429')) {
         console.warn('Primary resume enhancement model failed or was rate-limited. Switching to fallback model: gemini-1.5-flash');
         try {
-           const { output } = await enhanceResumePrompt(input, { model: fallbackModel });
+           const { output } = await enhanceResumePrompt(input, { model: flashModel });
            return output!;
         } catch (fallbackError: any) {
             console.error("Fallback resume enhancement model also failed:", fallbackError);

@@ -10,9 +10,8 @@
  * @exports ProfessionalCareerAdvisorOutput - The return type for the getProfessionalAdvice function.
  */
 
-import {ai} from '@/ai/genkit';
+import {ai, proModel, flashModel} from '@/ai/genkit';
 import {z} from 'genkit';
-import {googleAI} from '@genkit-ai/googleai';
 
 const ProfessionalCareerAdvisorInputSchema = z.object({
   workExperience: z.array(z.object({
@@ -45,7 +44,7 @@ const ProfessionalCareerAdvisorOutputSchema = z.object({
 export type ProfessionalCareerAdvisorOutput = z.infer<typeof ProfessionalCareerAdvisorOutputSchema>;
 
 
-export async function getProfessionalAdvice(input: ProfessionalCareerAdvisorInput): Promise<ProfessionalCareerAdvisorOutput> {
+export async function getProfessionalAdvice(input: ProfessionalCareerAdvisorInput): Promise<ProfessionalCareerAdvisorOutput | { error: true; message: string }> {
   return professionalCareerAdvisorFlow(input);
 }
 
@@ -96,25 +95,26 @@ const professionalCareerAdvisorFlow = ai.defineFlow(
   {
     name: 'professionalCareerAdvisorFlow',
     inputSchema: ProfessionalCareerAdvisorInputSchema,
-    outputSchema: z.union([ProfessionalCareerAdvisorOutputSchema, z.object({ error: z.boolean(), message: z.string() })]),
+    outputSchema: z.union([ProfessionalCareerAdvisorOutputSchema, z.object({ error: z.literal(true), message: z.string() })]),
   },
   async (input) => {
-    const primaryModel = googleAI.model('gemini-1.5-pro');
-    const fallbackModel = googleAI.model('gemini-1.5-flash');
-    
     try {
       console.log('Attempting to use primary model: gemini-1.5-pro');
-      const { output } = await professionalCareerAdvisorPrompt(input, { model: primaryModel });
+      const { output } = await professionalCareerAdvisorPrompt(input, { model: proModel });
       return output!;
     } catch (error: any) {
       const errorMessage = error.message || '';
       if (errorMessage.includes('503') || errorMessage.includes('overloaded') || errorMessage.includes('429')) {
         console.warn('Primary model failed or was rate-limited. Switching to fallback model: gemini-1.5-flash');
         try {
-           const { output } = await professionalCareerAdvisorPrompt(input, { model: fallbackModel });
+           const { output } = await professionalCareerAdvisorPrompt(input, { model: flashModel });
            return output!;
         } catch (fallbackError: any) {
+            const fallbackMessage = (fallbackError.message || '') as string;
             console.error("Fallback model also failed:", fallbackError);
+            if (fallbackMessage.includes('503') || fallbackMessage.includes('overloaded') || fallbackMessage.includes('429')) {
+                return { error: true, message: 'Our AI is currently busy. Please try again in a few moments.' };
+            }
             throw fallbackError;
         }
       } else {
@@ -124,6 +124,3 @@ const professionalCareerAdvisorFlow = ai.defineFlow(
     }
   }
 );
-    
-
-    

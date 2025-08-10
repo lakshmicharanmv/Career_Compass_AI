@@ -9,8 +9,7 @@
  * - ReviewResumeOutput - The return type for the reviewResume function.
  */
 
-import {ai} from '@/ai/genkit';
-import {googleAI} from '@genkit-ai/googleai';
+import {ai, proModel, flashModel} from '@/ai/genkit';
 import {z} from 'genkit';
 
 const ReviewResumeInputSchema = z.object({
@@ -50,19 +49,16 @@ const reviewResumeFlow = ai.defineFlow(
     outputSchema: ReviewResumeOutputSchema,
   },
   async (input) => {
-    const primaryModel = googleAI.model('gemini-1.5-pro');
-    const fallbackModel = googleAI.model('gemini-1.5-flash');
-
     try {
       console.log('Attempting to use primary model for resume review: gemini-1.5-pro');
-      const { output } = await prompt(input, { model: primaryModel });
+      const { output } = await prompt(input, { model: proModel });
       return output!;
     } catch (error: any) {
       const errorMessage = error.message || '';
       if (errorMessage.includes('503') || errorMessage.includes('overloaded') || errorMessage.includes('429')) {
         console.warn('Primary resume review model failed or was rate-limited. Switching to fallback model: gemini-1.5-flash');
         try {
-           const { output } = await prompt(input, { model: fallbackModel });
+           const { output } = await prompt(input, { model: flashModel });
            return output!;
         } catch (fallbackError: any) {
             console.error("Fallback resume review model also failed:", fallbackError);
@@ -75,5 +71,3 @@ const reviewResumeFlow = ai.defineFlow(
     }
   }
 );
-
-    
