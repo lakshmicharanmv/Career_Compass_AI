@@ -47,14 +47,18 @@ const formSchema = z.object({
   linkedin: z.string().url().optional().or(z.literal('')),
   github: z.string().url().optional().or(z.literal('')),
   
+  professionalTitle: z.string().min(1, 'Professional title is required.'),
   careerObjective: z.string().min(1, 'A career objective or summary is required.'),
   
   education: z.array(educationSchema).min(1, 'At least one education entry is required.'),
-  workExperience: z.array(workExperienceSchema).optional(),
-  projects: z.array(projectSchema).optional(),
-
+  
   technicalSkills: z.string().optional(),
   softSkills: z.string().optional(),
+
+  projects: z.array(projectSchema).optional(),
+  workExperience: z.array(workExperienceSchema).optional(),
+  
+  extracurricular: z.string().optional(),
 
 });
 
@@ -74,6 +78,8 @@ export default function ResumeBuilderPage() {
       workExperience: [],
       projects: [],
       careerObjective: '',
+      professionalTitle: '',
+      extracurricular: '',
     },
   });
 
@@ -116,12 +122,14 @@ export default function ResumeBuilderPage() {
         phone: user.phone || '',
         linkedin: user.linkedin || '',
         github: user.github || '',
+        professionalTitle: user.professionalTitle || '',
         careerObjective: user.careerObjective || 'Seeking a challenging role in a dynamic organization to leverage my skills in [Your Key Skill] and contribute to organizational growth.',
         education: user.education && user.education.length > 0 ? user.education : (education.length > 0 ? education : [{ degree: '', institution: '', year: '', score: '' }]),
         workExperience: user.workExperience && user.workExperience.length > 0 ? user.workExperience : [],
         projects: user.projects && user.projects.length > 0 ? user.projects : [],
         technicalSkills: user.skills?.technical || '',
         softSkills: user.skills?.soft || '',
+        extracurricular: user.extracurricular || '',
       });
       setIsDataLoaded(true);
     } else {
@@ -133,15 +141,7 @@ export default function ResumeBuilderPage() {
     const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
     const updatedUser = {
       ...currentUser,
-      fullName: data.fullName,
-      email: data.email,
-      phone: data.phone,
-      linkedin: data.linkedin,
-      github: data.github,
-      careerObjective: data.careerObjective,
-      education: data.education,
-      workExperience: data.workExperience,
-      projects: data.projects,
+      ...data, // This will overwrite all form fields
       skills: {
         ...currentUser.skills,
         technical: data.technicalSkills,
@@ -192,7 +192,7 @@ export default function ResumeBuilderPage() {
       
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(10);
-      doc.text('PROFESSIONAL TITLE', pageWidth / 2, y, { align: 'center'});
+      doc.text(data.professionalTitle.toUpperCase(), pageWidth / 2, y, { align: 'center'});
       y += 15;
       
       doc.setDrawColor(200, 200, 200);
@@ -211,7 +211,7 @@ export default function ResumeBuilderPage() {
 
 
       // --- Professional Summary ---
-      addSection('Professional Summary', () => {
+      addSection('Summary', () => {
         doc.setFont('helvetica', 'normal');
         doc.setFontSize(10);
         const summaryLines = doc.splitTextToSize(data.careerObjective, contentWidth);
@@ -219,42 +219,44 @@ export default function ResumeBuilderPage() {
         y += summaryLines.length * 12 + 10;
       });
 
-      // --- Work Experience ---
-      if (data.workExperience && data.workExperience.length > 0 && data.workExperience.some(e => e.role)) {
-        addSection('Work Experience', () => {
-          data.workExperience?.forEach(exp => {
-              if(!exp.role) return;
-
-              checkPageBreak(50);
+      // --- Education ---
+      addSection('Education', () => {
+          data.education.forEach(edu => {
+              checkPageBreak(30);
               doc.setFontSize(11);
               doc.setFont('helvetica', 'bold');
-              doc.text(exp.company, margin, y);
-              
+              doc.text(edu.degree, margin, y);
+
               doc.setFont('helvetica', 'normal');
-              doc.text(exp.duration, pageWidth - margin, y, { align: 'right' });
+              doc.text(edu.year, pageWidth - margin, y, { align: 'right' });
               y += 15;
 
               doc.setFont('helvetica', 'italic');
-              doc.text(exp.role, margin, y);
-              y += 15;
-              
-              doc.setFontSize(10);
-              const achievements = exp.achievements.split('\n').filter((line:string) => line.trim() !== '');
-              achievements.forEach((ach: string) => {
-                  checkPageBreak(12);
-                  doc.circle(margin + 5, y - 4, 1.5, 'F');
-                  const lines = doc.splitTextToSize(ach, contentWidth - 15);
-                  doc.text(lines, margin + 15, y);
-                  y += lines.length * 12;
-              });
-              y += 10;
+              doc.text(edu.institution, margin, y);
+              if (edu.score) {
+                  doc.setFont('helvetica', 'normal');
+                  doc.text(edu.score, pageWidth - margin, y, { align: 'right' });
+              }
+              y += 20;
           });
-        });
-      }
+      });
+      
+      // --- Skills ---
+      addSection('Skills', () => {
+          doc.setFontSize(10);
+          doc.setFont('helvetica', 'normal');
+          let skillsText = '';
+          if (data.technicalSkills) skillsText += `Technical: ${data.technicalSkills.split(',').map(s => s.trim()).join(' | ')}`;
+          if (data.technicalSkills && data.softSkills) skillsText += '\n';
+          if (data.softSkills) skillsText += `Soft Skills: ${data.softSkills.split(',').map(s => s.trim()).join(' | ')}`;
+          const skillLines = doc.splitTextToSize(skillsText, contentWidth);
+          doc.text(skillLines, margin, y);
+          y += skillLines.length * 12 + 10;
+      });
 
       // --- Projects ---
       if (data.projects && data.projects.length > 0 && data.projects.some(p => p.name)) {
-        addSection('Projects', (proj) => {
+        addSection('Projects', () => {
             data.projects?.forEach(proj => {
               if(!proj.name) return;
 
@@ -285,39 +287,50 @@ export default function ResumeBuilderPage() {
         });
       }
 
-      // --- Education ---
-      addSection('Education', () => {
-          data.education.forEach(edu => {
-              checkPageBreak(30);
+      // --- Work Experience ---
+      if (data.workExperience && data.workExperience.length > 0 && data.workExperience.some(e => e.role)) {
+        addSection('Experience', () => {
+          data.workExperience?.forEach(exp => {
+              if(!exp.role) return;
+
+              checkPageBreak(50);
               doc.setFontSize(11);
               doc.setFont('helvetica', 'bold');
-              doc.text(edu.degree, margin, y);
-
+              doc.text(exp.company, margin, y);
+              
               doc.setFont('helvetica', 'normal');
-              doc.text(edu.year, pageWidth - margin, y, { align: 'right' });
+              doc.text(exp.duration, pageWidth - margin, y, { align: 'right' });
               y += 15;
 
               doc.setFont('helvetica', 'italic');
-              doc.text(edu.institution, margin, y);
-              if (edu.score) {
-                  doc.setFont('helvetica', 'normal');
-                  doc.text(edu.score, pageWidth - margin, y, { align: 'right' });
-              }
+              doc.text(exp.role, margin, y);
               y += 15;
+              
+              doc.setFontSize(10);
+              const achievements = exp.achievements.split('\n').filter((line:string) => line.trim() !== '');
+              achievements.forEach((ach: string) => {
+                  checkPageBreak(12);
+                  doc.circle(margin + 5, y - 4, 1.5, 'F');
+                  const lines = doc.splitTextToSize(ach, contentWidth - 15);
+                  doc.text(lines, margin + 15, y);
+                  y += lines.length * 12;
+              });
+              y += 10;
           });
-      });
+        });
+      }
       
-      // --- Skills ---
-      addSection('Skills', () => {
-          doc.setFontSize(10);
-          doc.setFont('helvetica', 'normal');
-          let skillsText = '';
-          if (data.technicalSkills) skillsText += `Technical: ${data.technicalSkills.split(',').map(s => s.trim()).join(' | ')}`;
-          if (data.technicalSkills && data.softSkills) skillsText += '\n';
-          if (data.softSkills) skillsText += `Soft Skills: ${data.softSkills.split(',').map(s => s.trim()).join(' | ')}`;
-          const skillLines = doc.splitTextToSize(skillsText, contentWidth);
-          doc.text(skillLines, margin, y);
-      });
+      // --- Extracurricular ---
+      if (data.extracurricular) {
+        addSection('Achievements or Extracurricular Activities', () => {
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(10);
+            const extraLines = doc.splitTextToSize(data.extracurricular, contentWidth);
+            doc.text(extraLines, margin, y);
+            y += extraLines.length * 12 + 10;
+        });
+      }
+
       
       doc.save(`${data.fullName.replace(' ', '_')}_Resume.pdf`);
 
@@ -399,6 +412,13 @@ export default function ResumeBuilderPage() {
                         <Separator />
 
                         <div className="space-y-4">
+                            <h3 className="text-xl font-semibold">Professional Title</h3>
+                             <FormField name="professionalTitle" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Title</FormLabel><FormControl><Input placeholder="e.g., Software Engineer, Financial Analyst" {...field} /></FormControl><FormMessage /></FormItem> )} />
+                        </div>
+
+                        <Separator />
+
+                        <div className="space-y-4">
                             <h3 className="text-xl font-semibold">Career Objective / Summary</h3>
                              <FormField name="careerObjective" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Objective</FormLabel><FormControl><Textarea placeholder="e.g., A highly motivated individual seeking a challenging role..." {...field} /></FormControl><FormMessage /></FormItem> )} />
                         </div>
@@ -425,6 +445,35 @@ export default function ResumeBuilderPage() {
 
                         <Separator />
 
+                        <div className="space-y-4">
+                            <h3 className="text-xl font-semibold">Skills</h3>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <FormField name="technicalSkills" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Technical Skills (comma-separated)</FormLabel><FormControl><Textarea placeholder="e.g., Java, Python, React" {...field} /></FormControl><FormMessage /></FormItem> )} />
+                                <FormField name="softSkills" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Soft Skills (comma-separated)</FormLabel><FormControl><Textarea placeholder="e.g., Communication, Leadership" {...field} /></FormControl><FormMessage /></FormItem> )} />
+                            </div>
+                        </div>
+
+                        <Separator />
+
+                        <div>
+                            <h3 className="text-xl font-semibold mb-4">Projects</h3>
+                            <div className="space-y-6">
+                                {projectFields.map((field, index) => (
+                                <div key={field.id} className="p-4 border rounded-lg relative">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <FormField control={form.control} name={`projects.${index}.name`} render={({ field }) => ( <FormItem><FormLabel>Project Name</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem> )} />
+                                         <FormField control={form.control} name={`projects.${index}.url`} render={({ field }) => ( <FormItem><FormLabel>Project URL (Optional)</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem> )} />
+                                        <FormField control={form.control} name={`projects.${index}.description`} render={({ field }) => ( <FormItem className="md:col-span-2"><FormLabel>Description (one achievement per line)</FormLabel><FormControl><Textarea {...field} /></FormControl><FormMessage /></FormItem> )} />
+                                    </div>
+                                    <Button type="button" variant="ghost" size="icon" className="absolute top-2 right-2" onClick={() => removeProject(index)}> <Trash2 className="h-4 w-4" /> </Button>
+                                </div>
+                                ))}
+                            </div>
+                            <Button type="button" variant="outline" size="sm" onClick={() => appendProject({ name: '', description: '', url: '' })} className="mt-4"> <Plus className="mr-2 h-4 w-4" /> Add Project </Button>
+                        </div>
+                        
+                        <Separator />
+
                         <div>
                             <h3 className="text-xl font-semibold mb-4">Work Experience</h3>
                             <div className="space-y-6">
@@ -443,34 +492,15 @@ export default function ResumeBuilderPage() {
                             <Button type="button" variant="outline" size="sm" onClick={() => appendExperience({ role: '', company: '', duration: '', achievements: '' })} className="mt-4"> <Plus className="mr-2 h-4 w-4" /> Add Experience </Button>
                         </div>
 
-                         <Separator />
-
-                        <div>
-                            <h3 className="text-xl font-semibold mb-4">Projects</h3>
-                            <div className="space-y-6">
-                                {projectFields.map((field, index) => (
-                                <div key={field.id} className="p-4 border rounded-lg relative">
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        <FormField control={form.control} name={`projects.${index}.name`} render={({ field }) => ( <FormItem><FormLabel>Project Name</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem> )} />
-                                         <FormField control={form.control} name={`projects.${index}.url`} render={({ field }) => ( <FormItem><FormLabel>Project URL (Optional)</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem> )} />
-                                        <FormField control={form.control} name={`projects.${index}.description`} render={({ field }) => ( <FormItem className="md:col-span-2"><FormLabel>Description (one achievement per line)</FormLabel><FormControl><Textarea {...field} /></FormControl><FormMessage /></FormItem> )} />
-                                    </div>
-                                    <Button type="button" variant="ghost" size="icon" className="absolute top-2 right-2" onClick={() => removeProject(index)}> <Trash2 className="h-4 w-4" /> </Button>
-                                </div>
-                                ))}
-                            </div>
-                            <Button type="button" variant="outline" size="sm" onClick={() => appendProject({ name: '', description: '', url: '' })} className="mt-4"> <Plus className="mr-2 h-4 w-4" /> Add Project </Button>
-                        </div>
 
                         <Separator />
 
                         <div className="space-y-4">
-                            <h3 className="text-xl font-semibold">Skills</h3>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <FormField name="technicalSkills" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Technical Skills (comma-separated)</FormLabel><FormControl><Textarea placeholder="e.g., Java, Python, React" {...field} /></FormControl><FormMessage /></FormItem> )} />
-                                <FormField name="softSkills" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Soft Skills (comma-separated)</FormLabel><FormControl><Textarea placeholder="e.g., Communication, Leadership" {...field} /></FormControl><FormMessage /></FormItem> )} />
-                            </div>
+                            <h3 className="text-xl font-semibold">Achievements or Extracurricular Activities</h3>
+                             <FormField name="extracurricular" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Activities</FormLabel><FormControl><Textarea placeholder="List any relevant activities, achievements, or awards..." {...field} /></FormControl><FormMessage /></FormItem> )} />
                         </div>
+
+
                     </CardContent>
                     <CardFooter className="flex justify-end gap-4">
                         <Button type="button" variant="secondary" onClick={form.handleSubmit(onSubmit)} disabled={isLoading}>
@@ -489,3 +519,5 @@ export default function ResumeBuilderPage() {
     </div>
   );
 }
+
+    
