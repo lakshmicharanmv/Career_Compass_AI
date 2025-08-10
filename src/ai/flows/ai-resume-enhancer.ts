@@ -32,7 +32,7 @@ const projectSchema = z.object({
     url: z.string().optional().describe('URL to the project if available'),
 });
 
-export const ResumeDetailsInputSchema = z.object({
+const ResumeDetailsInputSchema = z.object({
   fullName: z.string().describe('User\'s full name'),
   email: z.string().email().describe('User\'s email address'),
   phone: z.string().describe('User\'s 10-digit phone number'),
@@ -49,7 +49,7 @@ export const ResumeDetailsInputSchema = z.object({
 });
 export type ResumeDetailsInput = z.infer<typeof ResumeDetailsInputSchema>;
 
-export const ResumeDetailsOutputSchema = ResumeDetailsInputSchema;
+const ResumeDetailsOutputSchema = ResumeDetailsInputSchema;
 export type ResumeDetailsOutput = z.infer<typeof ResumeDetailsOutputSchema>;
 
 
