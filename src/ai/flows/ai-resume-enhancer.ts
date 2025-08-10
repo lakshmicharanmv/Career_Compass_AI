@@ -34,9 +34,9 @@ const projectSchema = z.object({
 });
 
 const ResumeDetailsInputSchema = z.object({
-  fullName: z.string().describe('User\'s full name'),
-  email: z.string().describe('User\'s email address'),
-  phone: z.string().describe('User\'s 10-digit phone number'),
+  fullName: z.string().describe("User's full name"),
+  email: z.string().describe("User's email address"),
+  phone: z.string().describe("User's 10-digit phone number"),
   linkedin: z.string().optional().describe('LinkedIn profile URL'),
   github: z.string().optional().describe('GitHub profile URL'),
   professionalTitle: z.string().describe('A professional title summarizing their role (e.g., "Software Engineer")'),
@@ -97,10 +97,11 @@ const enhanceResumePrompt = ai.definePrompt({
 
   INSTRUCTIONS:
   1.  **Review All Sections**: Carefully analyze all the provided data.
-  2.  **Identify and Fill Gaps**: If any information is missing, incomplete, or looks like a placeholder (e.g., "My School," "My College/University," "Completion Year"), fill it in with reasonable, professional-sounding, and relevant details. For example, if a user has a B.Tech in Computer Science but hasn't listed skills, add standard skills like 'Java, Python, SQL, Git'.
-  3.  **Correct and Refine**: If there are any inconsistencies or poorly written parts, correct them. Rewrite sentences to be more professional and impactful. For the 'achievements' field in work experience, ensure each point starts with a strong action verb. Ensure the career objective is concise and tailored.
-  4.  **Do Not Remove Data**: Do not remove any data the user has provided. Your goal is to enhance, not delete.
-  5.  **Return Full Object**: Return a complete JSON object in the specified output format, including both the original and the newly generated information. Ensure all fields are populated correctly. The output structure must exactly match the input structure.
+  2.  **Identify and Fill Gaps**: If any information is missing, incomplete, or looks like a placeholder (e.g., "My School," "My College/University," "Completion Year"), fill it in with reasonable, professional-sounding, and relevant details.
+  3.  **Correct and Refine**: Rewrite sentences to be more professional and impactful. For the 'achievements' field in work experience, ensure each point starts with a strong action verb. Ensure the career objective is concise and tailored. For achievements/extracurriculars, format them as clear, impactful bullet points.
+  4.  **Enhance Skills**: Critically review the technical and soft skills. Correct any misspellings. If the skills are sparse, add relevant, industry-standard skills based on the user's professional title, experience, and projects. For example, if a user is a "Software Engineer" but only lists "Java", add common related skills like "Git, SQL, Agile Methodologies, REST APIs".
+  5.  **Do Not Remove Data**: Do not remove any data the user has provided. Your goal is to enhance, not delete.
+  6.  **Return Full Object**: Return a complete JSON object in the specified output format, including both the original and the newly generated information. Ensure all fields are populated correctly. The output structure must exactly match the input structure.
   `,
 });
 

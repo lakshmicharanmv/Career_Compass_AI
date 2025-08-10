@@ -6,7 +6,7 @@ import * as React from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { z } from 'zod';
-import { Bot, ArrowLeft, Loader2, Save, Download, Plus, Trash2, Wand2 } from 'lucide-react';
+import { Bot, ArrowLeft, Loader2, Save, Wand2, Plus, Trash2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
@@ -43,10 +43,10 @@ const projectSchema = z.object({
 
 const formSchema = z.object({
   fullName: z.string().min(1, 'Full name is required.'),
-  email: z.string(),
+  email: z.string().email(),
   phone: z.string().regex(/^\d{10}$/, 'Please enter a valid 10-digit phone number.'),
-  linkedin: z.string().optional().or(z.literal('')),
-  github: z.string().optional().or(z.literal('')),
+  linkedin: z.string().url().optional().or(z.literal('')),
+  github: z.string().url().optional().or(z.literal('')),
   
   professionalTitle: z.string().min(1, 'A professional title is required.'),
   careerObjective: z.string().min(1, 'A career objective or summary is required.'),
@@ -154,83 +154,142 @@ export default function ResumeBuilderPage() {
     const margin = 36; // 0.5 inch
     const pageWidth = doc.internal.pageSize.getWidth();
     const contentWidth = pageWidth - margin * 2;
-    let y = margin;
+    let y = 0;
     
     doc.setFont('helvetica', 'normal');
 
     // --- Header ---
-    doc.setFontSize(26);
+    y = margin;
+    doc.setFontSize(24);
     doc.setFont('helvetica', 'bold');
-    doc.text(data.fullName, margin, y);
-    
-    // Contact Info on the right
-    let contactY = y - 18;
-    doc.setFontSize(9);
+    doc.text(data.fullName.toUpperCase(), margin, y);
+    y += 20;
+
+    doc.setFontSize(10);
     doc.setFont('helvetica', 'normal');
-    if (data.email) {
-        doc.text(`E-mail: ${data.email}`, pageWidth - margin, contactY, { align: 'right' });
-        contactY += 12;
-    }
-    if (data.phone) {
-        doc.text(`Mob. No.: +91 ${data.phone}`, pageWidth - margin, contactY, { align: 'right' });
-        contactY += 12;
-    }
-    if (data.linkedin) {
-        doc.textWithLink(`LinkedIn: ${data.linkedin.split('/').pop()}`, pageWidth - margin, contactY, { url: data.linkedin, align: 'right' });
-        contactY += 12;
-    }
-     if (data.github) {
-        doc.textWithLink(`GitHub: ${data.github.split('/').pop()}`, pageWidth - margin, contactY, { url: data.github, align: 'right' });
-        contactY += 12;
-    }
-
-    y = contactY + 8;
-
+    doc.text(data.professionalTitle, margin, y);
+    y+= 15
+    
+    let contactInfo = [];
+    if (data.phone) contactInfo.push(`+91 ${data.phone}`);
+    if (data.email) contactInfo.push(data.email);
+    if (data.linkedin) contactInfo.push(data.linkedin);
+    if (data.github) contactInfo.push(data.github);
+    
+    doc.text(contactInfo.join(' | '), margin, y);
+    y += 10;
+    
+    doc.setDrawColor(0);
+    doc.setLineWidth(1);
+    doc.line(margin, y, pageWidth - margin, y);
+    y += 5;
 
     // Helper function to add sections
-    const addSection = (title: string) => {
-        y += 10;
+    const addSection = (title: string, topMargin = 20) => {
+        y += topMargin;
+         if (y > doc.internal.pageSize.getHeight() - margin) {
+            doc.addPage();
+            y = margin;
+        }
         doc.setFont('helvetica', 'bold');
         doc.setFontSize(11);
         doc.text(title.toUpperCase(), margin, y);
         y += 2;
-        doc.setDrawColor(0);
-        doc.setLineWidth(1);
+        doc.setDrawColor(180, 180, 180);
+        doc.setLineWidth(0.5);
         doc.line(margin, y, pageWidth - margin, y);
         y += 15;
     };
     
     // --- Career Objective ---
-    addSection('Career Objective');
+    addSection('Career Objective', 15);
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(10);
     const summaryLines = doc.splitTextToSize(data.careerObjective, contentWidth);
-    doc.text(summaryLines, margin, y, { align: 'justify', lineHeightFactor: 1.5 });
+    doc.text(summaryLines, margin, y, { align: 'left', lineHeightFactor: 1.5 });
     y += summaryLines.length * 10 * 1.5;
 
     // --- Education ---
     if(data.education && data.education.length > 0) {
         addSection('Educational Qualifications');
         data.education.forEach(edu => {
+            if (y > doc.internal.pageSize.getHeight() - margin - 40) {
+                doc.addPage();
+                y = margin;
+            }
             doc.setFontSize(11);
             doc.setFont('helvetica', 'bold');
-            doc.text(edu.institution, margin, y);
+            doc.text(edu.degree, margin, y);
 
             doc.setFont('helvetica', 'normal');
             doc.text(edu.year, pageWidth - margin, y, { align: 'right' });
             y += 15;
             
             doc.setFontSize(10);
-            const degreeLines = doc.splitTextToSize(`- ${edu.degree}`, contentWidth / 2);
-            doc.text(degreeLines, margin, y);
-
-            if (edu.score) {
-                 doc.text(edu.score, margin + 10, y + 12);
+            doc.setFont('helvetica', 'bold');
+            doc.text(edu.institution, margin, y);
+             if (edu.score) {
+                 doc.setFont('helvetica', 'normal');
+                 doc.text(edu.score, pageWidth - margin, y, {align: 'right'});
             }
             
-            y += 30;
+            y += 25;
         });
-        y -= 8;
+    }
+
+    // --- Skills ---
+    if(data.technicalSkills || data.softSkills) {
+        addSection('Skills');
+        doc.setFontSize(10);
+        
+        const addSkill = (label: string, skills: string | undefined) => {
+            if (!skills) return;
+            if (y > doc.internal.pageSize.getHeight() - margin) {
+                doc.addPage();
+                y = margin;
+            }
+            doc.setFont('helvetica', 'bold');
+            doc.text(label, margin, y);
+            doc.setFont('helvetica', 'normal');
+            const skillsText = skills.split(',').map(s => s.trim()).join(', ');
+            const skillLines = doc.splitTextToSize(skillsText, contentWidth - 60);
+            doc.text(skillLines, margin + 100, y);
+            y += skillLines.length * 12 + 8;
+        }
+        
+        addSkill('Technical:', data.technicalSkills);
+        addSkill('Soft:', data.softSkills);
+    }
+    
+    // --- Projects ---
+    if (data.projects && data.projects.length > 0 && data.projects.some(p => p.name)) {
+      addSection('Projects');
+      data.projects?.forEach(proj => {
+        if(!proj.name) return;
+        
+        if (y > doc.internal.pageSize.getHeight() - margin - 50) {
+            doc.addPage();
+            y = margin;
+        }
+
+        doc.setFontSize(11);
+        doc.setFont('helvetica', 'bold');
+        doc.text(proj.name, margin, y);
+        if (proj.url) {
+             doc.setFont('helvetica', 'normal');
+             doc.setTextColor(41, 128, 185);
+             doc.textWithLink('Link', pageWidth - margin, y, { url: proj.url, align: 'right' });
+             doc.setTextColor(0,0,0);
+        }
+        y += 15;
+        
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(10);
+        const descriptionLines = doc.splitTextToSize(proj.description, contentWidth);
+        
+        doc.text(descriptionLines, margin, y, { align: 'left', lineHeightFactor: 1.5 });
+        y += (descriptionLines.length * 10 * 1.5) + 10;
+      });
     }
 
     // --- Work Experience ---
@@ -238,17 +297,22 @@ export default function ResumeBuilderPage() {
       addSection('Work Experience');
       data.workExperience?.forEach(exp => {
           if(!exp.role) return;
+
+          if (y > doc.internal.pageSize.getHeight() - margin - 50) {
+            doc.addPage();
+            y = margin;
+          }
           
           doc.setFontSize(11);
           doc.setFont('helvetica', 'bold');
-          doc.text(exp.company, margin, y);
+          doc.text(exp.role, margin, y);
           
           doc.setFont('helvetica', 'normal');
           doc.text(exp.duration, pageWidth - margin, y, { align: 'right' });
           y += 15;
 
           doc.setFont('helvetica', 'bold');
-          doc.text(exp.role, margin, y);
+          doc.text(exp.company, margin, y);
           y += 15;
           
           doc.setFontSize(10);
@@ -259,68 +323,14 @@ export default function ResumeBuilderPage() {
                 doc.addPage();
                 y = margin;
               }
-              doc.circle(margin + 4, y - 3.5, 1.5, 'F');
-              doc.text(lines, margin + 15, y, { align: 'justify', lineHeightFactor: 1.4 });
+              doc.circle(margin + 4, y - 3.5, 2, 'F');
+              doc.text(lines, margin + 15, y, { align: 'left', lineHeightFactor: 1.4 });
               y += lines.length * 10 * 1.4 + 4;
           });
-          y += 10;
+          y += 5;
       });
-      y-=10;
     }
 
-    
-    // --- Projects ---
-    if (data.projects && data.projects.length > 0 && data.projects.some(p => p.name)) {
-      addSection('Projects');
-      data.projects?.forEach(proj => {
-        if(!proj.name) return;
-        
-        doc.setFontSize(11);
-        doc.setFont('helvetica', 'bold');
-        doc.text(`Title: ${proj.name}`, margin, y);
-
-        y += 15;
-        
-        doc.setFont('helvetica', 'normal');
-        doc.setFontSize(10);
-        const descriptionLines = doc.splitTextToSize(proj.description, contentWidth - 15);
-        
-        doc.circle(margin + 4, y - 3.5, 1.5, 'F');
-        doc.text(descriptionLines, margin + 15, y, { align: 'justify', lineHeightFactor: 1.5 });
-        y += (descriptionLines.length * 10 * 1.5) + 10;
-        
-        if (proj.url) {
-            doc.setFont('helvetica', 'bold');
-            doc.text(`Tools & Technologies: `, margin, y);
-             doc.setFont('helvetica', 'normal');
-            doc.setTextColor(0, 0, 0);
-            doc.text(`${proj.url}`, margin + 110, y);
-            y += 15
-        }
-      });
-      y -= 5;
-    }
-
-    // --- Skills ---
-    if(data.technicalSkills || data.softSkills) {
-        addSection('Skills');
-        doc.setFontSize(10);
-        
-        const addSkill = (label: string, skills: string | undefined) => {
-            if (!skills) return;
-            doc.setFont('helvetica', 'bold');
-            doc.text(label, margin, y);
-            doc.setFont('helvetica', 'normal');
-            const skillsText = skills.split(',').map(s => s.trim()).join(', ');
-            const skillLines = doc.splitTextToSize(skillsText, contentWidth - 80);
-            doc.text(skillLines, margin + 150, y);
-            y += skillLines.length * 12 + 4;
-        }
-        
-        addSkill('Languages:', data.technicalSkills);
-        addSkill('Web development:', data.softSkills);
-        y += 10;
-    }
 
     // --- Achievements/Extracurricular ---
     if (data.extracurricular) {
@@ -329,13 +339,13 @@ export default function ResumeBuilderPage() {
       doc.setFontSize(10);
       const extraItems = data.extracurricular.split('\n').filter(line => line.trim() !== '');
       extraItems.forEach(item => {
-          if (y + 14 > doc.internal.pageSize.getHeight() - margin) {
+          const lines = doc.splitTextToSize(item, contentWidth - 15);
+          if (y + (lines.length * 10 * 1.4) > doc.internal.pageSize.getHeight() - margin) {
             doc.addPage();
             y = margin;
           }
-          doc.circle(margin + 4, y - 3.5, 1.5, 'F');
-          const lines = doc.splitTextToSize(item, contentWidth - 15);
-          doc.text(lines, margin + 15, y, { align: 'justify', lineHeightFactor: 1.4 });
+          doc.circle(margin + 4, y - 3.5, 2, 'F');
+          doc.text(lines, margin + 15, y, { align: 'left', lineHeightFactor: 1.4 });
           y += (lines.length * 10 * 1.4) + 4;
       });
     }
