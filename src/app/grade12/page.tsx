@@ -80,18 +80,18 @@ export default function Grade12Page() {
   const form = useForm<FormValues>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
-      tenthPercentage: undefined,
-      english: undefined,
-      physics: undefined,
-      chemistry: undefined,
-      math: undefined,
-      biology: undefined,
-      accounts: undefined,
-      business_studies: undefined,
-      economics: undefined,
-      history: undefined,
-      political_science: undefined,
-      sociology_psychology: undefined,
+      tenthPercentage: '' as any,
+      english: '' as any,
+      physics: '' as any,
+      chemistry: '' as any,
+      math: '' as any,
+      biology: '' as any,
+      accounts: '' as any,
+      business_studies: '' as any,
+      economics: '' as any,
+      history: '' as any,
+      political_science: '' as any,
+      sociology_psychology: '' as any,
       takeTest: 'no',
     },
   });
@@ -472,5 +472,3 @@ export default function Grade12Page() {
     </div>
   );
 }
-
-    
