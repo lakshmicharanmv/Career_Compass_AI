@@ -140,7 +140,7 @@ export default function ResumeBuilderPage() {
     const margin = 40;
     const pageWidth = doc.internal.pageSize.getWidth();
     const contentWidth = pageWidth - margin * 2;
-    let y = margin;
+    let y = 28.35; // 1cm from top
     const lineHeight = 1.2;
     
     doc.setFont('helvetica');
@@ -149,18 +149,16 @@ export default function ResumeBuilderPage() {
     doc.setFontSize(28).setFont('helvetica', 'bold');
     doc.text(data.fullName.toUpperCase(), margin, y);
 
-    doc.setFontSize(10).setFont('helvetica', 'normal');
     const contactInfo = [data.phone, data.email, data.linkedin, data.github].filter(Boolean);
-    const contactInfoHeight = contactInfo.length * 10 * lineHeight;
-    let contactY = y - contactInfoHeight + 15; // Align top of contact info with top of name
+    const contactInfoBlock = contactInfo.join('\n');
+    doc.setFontSize(10).setFont('helvetica', 'normal');
+    doc.text(contactInfoBlock, pageWidth - margin, y, { align: 'right' });
     
-    contactInfo.forEach(info => {
-        doc.text(info, pageWidth - margin, contactY, { align: 'right' });
-        contactY += 10 * lineHeight;
-    });
-
     const nameLines = doc.splitTextToSize(data.fullName.toUpperCase(), contentWidth);
-    y += (nameLines.length * 28 * 0.7) + 5;
+    const contactLines = doc.splitTextToSize(contactInfoBlock, contentWidth);
+    const headerHeight = Math.max(nameLines.length * 28 * 0.7, contactLines.length * 10 * lineHeight);
+    
+    y += headerHeight + 5;
 
     doc.setFontSize(11).setFont('helvetica', 'bold');
     doc.text(data.professionalTitle.toUpperCase(), margin, y);
@@ -205,7 +203,8 @@ export default function ResumeBuilderPage() {
         if (edu.score) {
           doc.text(`Score: ${edu.score}`, pageWidth - margin, y, { align: 'right' });
         }
-        y += 10 * lineHeight + 8;
+        const eduLines = doc.splitTextToSize(edu.institution, (pageWidth/2) - margin);
+        y += eduLines.length * 10 * lineHeight + 8;
       });
     }
 
@@ -264,8 +263,7 @@ export default function ResumeBuilderPage() {
         if (exp.achievements) {
           exp.achievements.split('\n').forEach(ach => {
             if (ach.trim()) {
-                const achievementLines = doc.splitTextToSize(ach.trim().replace(/^•\s*/, ''), contentWidth - 15);
-                doc.circle(margin + 2, y - 3, 1.5, 'F');
+                const achievementLines = doc.splitTextToSize(ach.trim(), contentWidth - 15);
                 doc.text(achievementLines, margin + 10, y, { align: 'left' });
                 y += achievementLines.length * 10 * lineHeight;
             }
@@ -281,8 +279,7 @@ export default function ResumeBuilderPage() {
       doc.setFont('helvetica', 'normal').setFontSize(10);
       data.extracurricular.split('\n').forEach(item => {
         if (item.trim()) {
-            const itemLines = doc.splitTextToSize(item.trim().replace(/^•\s*/, ''), contentWidth - 15);
-            doc.circle(margin + 2, y - 3, 1.5, 'F');
+            const itemLines = doc.splitTextToSize(item.trim(), contentWidth - 15);
             doc.text(itemLines, margin + 10, y, { align: 'left' });
             y += itemLines.length * 10 * lineHeight;
         }
@@ -346,7 +343,7 @@ export default function ResumeBuilderPage() {
                 <CardDescription>Review, enhance with AI, and download your ATS-friendly resume.</CardDescription>
               </CardHeader>
               <CardContent className="space-y-8">
-                 {/* Personal Details */}
+                {/* Personal Details */}
                 <div className="space-y-4">
                   <h3 className="text-lg font-medium">Personal Information</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -358,7 +355,7 @@ export default function ResumeBuilderPage() {
                   </div>
                 </div>
                 <Separator />
-                 {/* Professional Title, Career Objective */}
+                {/* Professional Title, Career Objective */}
                  <div className="space-y-4">
                   <FormField control={form.control} name="professionalTitle" render={({ field }) => ( <FormItem><FormLabel>Professional Title</FormLabel><FormControl><Input placeholder="e.g., Aspiring Software Engineer" {...field} /></FormControl><FormMessage /></FormItem> )} />
                   <FormField control={form.control} name="careerObjective" render={({ field }) => ( <FormItem><FormLabel>Career Objective</FormLabel><FormControl><Textarea placeholder="A brief 2-3 sentence summary of your career goals." {...field} /></FormControl><FormMessage /></FormItem> )} />
