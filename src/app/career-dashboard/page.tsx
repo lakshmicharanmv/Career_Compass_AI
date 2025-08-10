@@ -768,7 +768,7 @@ export default function CareerDashboardPage() {
           </h1>
         </div>
 
-        <Card className="mb-10 shadow-xl transition-all hover:shadow-2xl border-border/50">
+        <Card className="mb-10 shadow-xl transition-all hover:shadow-2xl border-border/50 bg-card/80 backdrop-blur-sm">
           <CardHeader>
             <CardTitle className="flex items-center gap-3">
               <div className="p-2 rounded-lg bg-primary/10">
@@ -816,7 +816,7 @@ export default function CareerDashboardPage() {
         </Card>
 
         <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          <Card className="lg:col-span-2 shadow-xl transition-all hover:shadow-2xl border-border/50">
+          <Card className="lg:col-span-2 shadow-xl transition-all hover:shadow-2xl border-border/50 bg-card/80 backdrop-blur-sm">
             <CardHeader>
               <CardTitle className="flex items-center gap-3">
                 <div className="p-2 rounded-lg bg-primary/10">
@@ -840,7 +840,7 @@ export default function CareerDashboardPage() {
                       tickMargin={10} 
                       axisLine={false} 
                       width={130} 
-                      tick={{ fontSize: 12 }}
+                      tick={{ fontSize: 12, fill: 'hsl(var(--foreground))' }}
                     />
                     <XAxis dataKey="growth" type="number" hide />
                     <RechartsTooltip 
@@ -874,7 +874,7 @@ export default function CareerDashboardPage() {
             </CardContent>
           </Card>
 
-          <Card className="lg:col-span-2 xl:col-span-1 shadow-xl transition-all hover:shadow-2xl border-border/50">
+          <Card className="lg:col-span-2 xl:col-span-1 shadow-xl transition-all hover:shadow-2xl border-border/50 bg-card/80 backdrop-blur-sm">
             <CardHeader>
               <CardTitle className="flex items-center gap-3">
                 <div className="p-2 rounded-lg bg-primary/10">
@@ -897,7 +897,7 @@ export default function CareerDashboardPage() {
                     />
                     <PolarAngleAxis 
                       dataKey="skill" 
-                      tick={{ fontSize: 12 }}
+                      tick={{ fontSize: 12, fill: 'hsl(var(--foreground))' }}
                     />
                     <PolarRadiusAxis angle={30} domain={[0, 100]} tick={false} axisLine={false} />
                     <Radar 
@@ -923,7 +923,7 @@ export default function CareerDashboardPage() {
             </CardContent>
           </Card>
           
-          <Card className="xl:col-span-1 shadow-xl transition-all hover:shadow-2xl border-border/50">
+          <Card className="xl:col-span-1 shadow-xl transition-all hover:shadow-2xl border-border/50 bg-card/80 backdrop-blur-sm">
             <CardHeader>
               <CardTitle className="flex items-center gap-3">
                 <div className="p-2 rounded-lg bg-primary/10">
@@ -957,7 +957,7 @@ export default function CareerDashboardPage() {
             </CardContent>
           </Card>
 
-          <Card className="lg:col-span-2 shadow-xl transition-all hover:shadow-2xl border-border/50">
+          <Card className="lg:col-span-2 shadow-xl transition-all hover:shadow-2xl border-border/50 bg-card/80 backdrop-blur-sm">
             <CardHeader>
               <CardTitle className="flex items-center gap-3">
                 <div className="p-2 rounded-lg bg-primary/10">
@@ -979,11 +979,11 @@ export default function CareerDashboardPage() {
                       tickLine={false} 
                       tickMargin={10} 
                       axisLine={false} 
-                      tick={{ fontSize: 12 }}
+                      tick={{ fontSize: 12, fill: 'hsl(var(--foreground))' }}
                     />
                     <YAxis 
                       tickFormatter={(value) => `₹${new Intl.NumberFormat('en-IN', { notation: 'compact', compactDisplay: 'short' }).format(value)}`}
-                      tick={{ fontSize: 12 }}
+                      tick={{ fontSize: 12, fill: 'hsl(var(--foreground))' }}
                     />
                     <RechartsTooltip 
                       cursor={false} 
@@ -1016,7 +1016,7 @@ export default function CareerDashboardPage() {
             </CardContent>
           </Card>
           
-          <Card className="shadow-xl transition-all hover:shadow-2xl border-border/50">
+          <Card className="shadow-xl transition-all hover:shadow-2xl border-border/50 bg-card/80 backdrop-blur-sm">
             <CardHeader>
               <CardTitle className="flex items-center gap-3">
                 <div className="p-2 rounded-lg bg-primary/10">
@@ -1045,7 +1045,7 @@ export default function CareerDashboardPage() {
             </CardContent>
           </Card>
           
-          <Card className="lg:col-span-full xl:col-span-2 shadow-xl transition-all hover:shadow-2xl border-border/50">
+          <Card className="lg:col-span-full xl:col-span-2 shadow-xl transition-all hover:shadow-2xl border-border/50 bg-card/80 backdrop-blur-sm">
             <CardHeader>
               <CardTitle className="flex items-center gap-3">
                 <div className="p-2 rounded-lg bg-primary/10">
@@ -1096,7 +1096,7 @@ export default function CareerDashboardPage() {
             </CardContent>
           </Card>
 
-          <Card className="lg:col-span-full xl:col-span-2 shadow-xl transition-all hover:shadow-2xl border-border/50 overflow-hidden">
+          <Card className="lg:col-span-full xl:col-span-2 shadow-xl transition-all hover:shadow-2xl border-border/50 bg-card/80 backdrop-blur-sm overflow-hidden">
             <CardHeader>
               <CardTitle className="flex items-center gap-3">
                 <div className="p-2 rounded-lg bg-primary/10">
