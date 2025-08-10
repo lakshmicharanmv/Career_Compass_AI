@@ -6,7 +6,9 @@ import * as React from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { z } from 'zod';
-import { Bot, ArrowLeft, Loader2, Sparkles, Plus, Trash2, Briefcase, BookOpen, GitBranch, AlertTriangle } from 'lucide-react';
+import { Bot, ArrowLeft, Loader2, Sparkles, Plus, Trash2, Briefcase, BookOpen, GitBranch, AlertTriangle, FileText } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import Cookies from 'js-cookie';
 
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
@@ -51,6 +53,7 @@ const goals = [
 
 export default function ProfessionalPage() {
   const { toast } = useToast();
+  const router = useRouter();
   const [step, setStep] = React.useState<Step>('form');
   const [isLoading, setIsLoading] = React.useState(false);
   const [formData, setFormData] = React.useState<FormValues | null>(null);
@@ -126,6 +129,17 @@ export default function ProfessionalPage() {
     setIsLoading(true);
     setApiError(null);
     try {
+      // Save data to localStorage
+      const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+      const updatedUser = {
+        ...currentUser,
+        workExperience: formData.workExperience,
+        currentIndustry: formData.currentIndustry,
+        careerGoals: formData.careerGoals,
+        assessmentScore: score,
+      };
+      localStorage.setItem('currentUser', JSON.stringify(updatedUser));
+
       const result: RecommendationOutput = await getProfessionalAdvice({
         ...formData,
         assessmentScore: score ?? undefined,
@@ -143,6 +157,11 @@ export default function ProfessionalPage() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleGenerateResume = () => {
+    Cookies.set('resumeFlow', 'professional');
+    router.push('/resume-builder');
   };
 
   const startOver = () => {
@@ -371,8 +390,17 @@ export default function ProfessionalPage() {
             </div>
           )}
         </CardContent>
-        <CardFooter>
-            <Button onClick={startOver}>Start Over</Button>
+        <CardFooter className="flex-col items-start gap-4">
+            <div className="flex gap-4">
+              <Button onClick={startOver}>Start Over</Button>
+              <Button onClick={handleGenerateResume}>
+                  <FileText className="mr-2 h-4 w-4" />
+                  Generate Resume
+              </Button>
+            </div>
+            <p className="text-xs text-muted-foreground">
+                You can now generate a resume based on the information you've provided.
+            </p>
         </CardFooter>
       </Card>
     );

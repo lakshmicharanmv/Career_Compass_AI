@@ -6,7 +6,9 @@ import * as React from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
-import { Bot, ArrowLeft, Loader2, Sparkles, User, BookOpen, Brain, Briefcase } from 'lucide-react';
+import { Bot, ArrowLeft, Loader2, Sparkles, User, BookOpen, Brain, Briefcase, FileText } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import Cookies from 'js-cookie';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -132,6 +134,7 @@ type SkillsFormValues = z.infer<typeof skillsSchema>;
 
 export default function UndergraduatePage() {
   const { toast } = useToast();
+  const router = useRouter();
   const [currentStep, setCurrentStep] = React.useState(1);
   const [isLoading, setIsLoading] = React.useState(false);
   const [academicData, setAcademicData] = React.useState<AcademicFormValues | null>(null);
@@ -184,7 +187,6 @@ export default function UndergraduatePage() {
   };
 
   const handleSkillsSubmit = (data: SkillsFormValues) => {
-    const formattedData = { ...data, technical: data.technical.join(', ') };
     setSkillsData({
       technical: data.technical.join(', '),
       soft: data.soft,
@@ -236,6 +238,16 @@ export default function UndergraduatePage() {
     setCurrentStep(5);
     setIsLoading(true);
     try {
+      // Save all data to localStorage before getting recommendations
+      const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+      const updatedUser = {
+        ...currentUser,
+        academics: academicData,
+        skills: skillsData,
+        assessmentScore: score,
+      };
+      localStorage.setItem('currentUser', JSON.stringify(updatedUser));
+
       const result = await recommendUndergraduateOptions({
         academics: academicData,
         skills: skillsData,
@@ -248,6 +260,11 @@ export default function UndergraduatePage() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleGenerateResume = () => {
+    Cookies.set('resumeFlow', 'undergraduate');
+    router.push('/resume-builder');
   };
 
   const startOver = () => {
@@ -511,8 +528,17 @@ export default function UndergraduatePage() {
               </div>
           </div>
         </CardContent>
-        <CardFooter>
-            <Button onClick={startOver}>Start Over</Button>
+        <CardFooter className="flex-col items-start gap-4">
+            <div className="flex gap-4">
+              <Button onClick={startOver}>Start Over</Button>
+              <Button onClick={handleGenerateResume}>
+                  <FileText className="mr-2 h-4 w-4" />
+                  Generate Resume
+              </Button>
+            </div>
+             <p className="text-xs text-muted-foreground">
+                You can now generate a resume based on the information you've provided.
+            </p>
         </CardFooter>
       </Card>
     );
