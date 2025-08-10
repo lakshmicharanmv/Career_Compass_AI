@@ -118,8 +118,8 @@ export default function ResumeBuilderPage() {
         github: user.github || '',
         careerObjective: user.careerObjective || 'Seeking a challenging role in a dynamic organization to leverage my skills in [Your Key Skill] and contribute to organizational growth.',
         education: user.education && user.education.length > 0 ? user.education : (education.length > 0 ? education : [{ degree: '', institution: '', year: '', score: '' }]),
-        workExperience: user.workExperience && user.workExperience.length > 0 ? user.workExperience : [{ role: '', company: '', duration: '', achievements: '' }],
-        projects: user.projects && user.projects.length > 0 ? user.projects : [{ name: '', description: '', url: '' }],
+        workExperience: user.workExperience && user.workExperience.length > 0 ? user.workExperience : [],
+        projects: user.projects && user.projects.length > 0 ? user.projects : [],
         technicalSkills: user.skills?.technical || '',
         softSkills: user.skills?.soft || '',
       });
@@ -160,141 +160,164 @@ export default function ResumeBuilderPage() {
       const doc = new jsPDF('p', 'pt', 'a4');
       const margin = 36; // 0.5 inch
       const pageWidth = doc.internal.pageSize.getWidth();
-      const pageHeight = doc.internal.pageSize.getHeight();
       const contentWidth = pageWidth - margin * 2;
-      let y = margin;
+      let y = margin + 10;
 
-      doc.setFont('helvetica', 'normal');
-      doc.setFontSize(11);
-
-      // --- Header ---
-      doc.setFontSize(22);
-      doc.setFont('helvetica', 'bold');
-      doc.text(data.fullName, pageWidth / 2, y, { align: 'center' });
-      y += 20;
-
-      doc.setFontSize(10);
-      doc.setFont('helvetica', 'normal');
-      const contactInfo = [data.email, data.phone, data.linkedin, data.github].filter(Boolean).join(' | ');
-      doc.text(contactInfo, pageWidth / 2, y, { align: 'center' });
-      y += 20;
-
-      // --- Summary/Objective ---
-      doc.setFontSize(12);
-      doc.setFont('helvetica', 'bold');
-      doc.text('SUMMARY', margin, y);
-      y += 5;
-      doc.setDrawColor(200, 200, 200);
-      doc.line(margin, y, pageWidth - margin, y);
-      y += 15;
-      
-      doc.setFontSize(10);
-      doc.setFont('helvetica', 'normal');
-      const summaryLines = doc.splitTextToSize(data.careerObjective, contentWidth);
-      doc.text(summaryLines, margin, y);
-      y += summaryLines.length * 12 + 10;
-      
-      const addSection = (title: string, entries: any[], renderer: (entry: any) => void) => {
-          if (!entries || entries.length === 0 || entries.every(e => Object.values(e).every(v => !v))) return;
-
-          if (y > pageHeight - margin * 2) {
-              doc.addPage();
-              y = margin;
-          }
-
-          doc.setFontSize(12);
-          doc.setFont('helvetica', 'bold');
-          doc.text(title, margin, y);
-          y += 5;
-          doc.line(margin, y, pageWidth - margin, y);
-          y += 15;
-          entries.forEach(renderer);
-          y += 10;
+      // --- Helper Functions ---
+      const checkPageBreak = (spaceNeeded: number) => {
+        if (y + spaceNeeded > doc.internal.pageSize.getHeight() - margin) {
+            // This is a simple single-page resume generator, so we won't add a new page.
+            // In a more complex scenario, you would add doc.addPage() and reset y here.
+        }
       };
 
-      // --- Experience ---
-      addSection('EXPERIENCE', data.workExperience, (exp) => {
-        doc.setFontSize(11);
+      const addSection = (title: string, contentRenderer: () => void) => {
+        checkPageBreak(40);
         doc.setFont('helvetica', 'bold');
-        doc.text(exp.role, margin, y);
+        doc.setFontSize(12);
+        doc.text(title.toUpperCase(), margin, y);
+        y += 8;
+        doc.setDrawColor(0, 0, 0);
+        doc.setLineWidth(1);
+        doc.line(margin, y, pageWidth - margin, y);
+        y += 20;
+        contentRenderer();
+      };
+      
+      // --- Header ---
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(26);
+      doc.text(data.fullName.toUpperCase(), pageWidth / 2, y, { align: 'center' });
+      y += 20;
+      
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(10);
+      doc.text('PROFESSIONAL TITLE', pageWidth / 2, y, { align: 'center'});
+      y += 15;
+      
+      doc.setDrawColor(200, 200, 200);
+      doc.setLineWidth(0.5);
+      doc.line(margin, y, pageWidth - margin, y);
+      y += 15;
+
+      const contactInfo = [data.phone, data.email].filter(Boolean).join('  |  ');
+      doc.text(contactInfo, pageWidth / 2, y, { align: 'center' });
+      const socialLinks = [data.linkedin, data.github].filter(Boolean).join('  |  ');
+      if(socialLinks) {
+          y += 15;
+          doc.text(socialLinks, pageWidth / 2, y, { align: 'center' });
+      }
+      y += 25;
+
+
+      // --- Professional Summary ---
+      addSection('Professional Summary', () => {
         doc.setFont('helvetica', 'normal');
-        doc.text(exp.duration, pageWidth - margin, y, { align: 'right' });
-        y += 14;
-
-        doc.setFont('helvetica', 'italic');
-        doc.text(exp.company, margin, y);
-        y += 14;
-
         doc.setFontSize(10);
-        const achievements = exp.achievements.split('\n').filter((line:string) => line.trim() !== '');
-        achievements.forEach((ach: string) => {
-            const bulletedLine = `- ${ach}`;
-            const lines = doc.splitTextToSize(bulletedLine, contentWidth - 10);
-            doc.text(lines, margin + 5, y);
-            y += lines.length * 12;
-        });
-        y += 5;
+        const summaryLines = doc.splitTextToSize(data.careerObjective, contentWidth);
+        doc.text(summaryLines, margin, y);
+        y += summaryLines.length * 12 + 10;
       });
 
-       // --- Projects ---
-      addSection('PROJECTS', data.projects, (proj) => {
-        doc.setFontSize(11);
-        doc.setFont('helvetica', 'bold');
-        doc.text(proj.name, margin, y);
-        if (proj.url) {
-            doc.setFont('helvetica', 'normal');
-            doc.setTextColor(0, 0, 255);
-            doc.textWithLink(proj.url, pageWidth - margin, y, { align: 'right', url: proj.url });
-            doc.setTextColor(0, 0, 0);
-        }
-        y += 14;
+      // --- Work Experience ---
+      if (data.workExperience && data.workExperience.length > 0 && data.workExperience.some(e => e.role)) {
+        addSection('Work Experience', () => {
+          data.workExperience?.forEach(exp => {
+              if(!exp.role) return;
 
-        doc.setFontSize(10);
-        const descriptionLines = doc.splitTextToSize(proj.description, contentWidth - 10);
-        descriptionLines.forEach((line: string) => {
-            const bulletedLine = `- ${line}`;
-            const lines = doc.splitTextToSize(bulletedLine, contentWidth - 10);
-            doc.text(lines, margin + 5, y);
-            y += lines.length * 12;
+              checkPageBreak(50);
+              doc.setFontSize(11);
+              doc.setFont('helvetica', 'bold');
+              doc.text(exp.company, margin, y);
+              
+              doc.setFont('helvetica', 'normal');
+              doc.text(exp.duration, pageWidth - margin, y, { align: 'right' });
+              y += 15;
+
+              doc.setFont('helvetica', 'italic');
+              doc.text(exp.role, margin, y);
+              y += 15;
+              
+              doc.setFontSize(10);
+              const achievements = exp.achievements.split('\n').filter((line:string) => line.trim() !== '');
+              achievements.forEach((ach: string) => {
+                  checkPageBreak(12);
+                  doc.circle(margin + 5, y - 4, 1.5, 'F');
+                  const lines = doc.splitTextToSize(ach, contentWidth - 15);
+                  doc.text(lines, margin + 15, y);
+                  y += lines.length * 12;
+              });
+              y += 10;
+          });
         });
-        y += 5;
-      });
+      }
+
+      // --- Projects ---
+      if (data.projects && data.projects.length > 0 && data.projects.some(p => p.name)) {
+        addSection('Projects', (proj) => {
+            data.projects?.forEach(proj => {
+              if(!proj.name) return;
+
+              checkPageBreak(40);
+              doc.setFontSize(11);
+              doc.setFont('helvetica', 'bold');
+              doc.text(proj.name, margin, y);
+
+              if (proj.url) {
+                  doc.setFont('helvetica', 'normal');
+                  doc.setTextColor(0, 0, 255);
+                  doc.textWithLink('Link', pageWidth - margin, y, { align: 'right', url: proj.url });
+                  doc.setTextColor(0, 0, 0);
+              }
+              y += 15;
+              
+              doc.setFontSize(10);
+              const descriptionLines = proj.description.split('\n').filter((line: string) => line.trim() !== '');
+              descriptionLines.forEach((desc: string) => {
+                  checkPageBreak(12);
+                  doc.circle(margin + 5, y - 4, 1.5, 'F');
+                  const lines = doc.splitTextToSize(desc, contentWidth - 15);
+                  doc.text(lines, margin + 15, y);
+                  y += lines.length * 12;
+              });
+              y += 10;
+          });
+        });
+      }
 
       // --- Education ---
-      addSection('EDUCATION', data.education, (edu) => {
-          doc.setFontSize(11);
-          doc.setFont('helvetica', 'bold');
-          doc.text(edu.degree, margin, y);
-          doc.setFont('helvetica', 'normal');
-          doc.text(edu.year, pageWidth - margin, y, { align: 'right' });
-          y += 14;
-          
-          doc.setFont('helvetica', 'italic');
-          doc.text(edu.institution, margin, y);
-          if(edu.score) {
-              doc.setFont('helvetica', 'normal');
-              doc.text(edu.score, pageWidth - margin, y, { align: 'right' });
-          }
-          y += 14;
-      });
+      addSection('Education', () => {
+          data.education.forEach(edu => {
+              checkPageBreak(30);
+              doc.setFontSize(11);
+              doc.setFont('helvetica', 'bold');
+              doc.text(edu.degree, margin, y);
 
+              doc.setFont('helvetica', 'normal');
+              doc.text(edu.year, pageWidth - margin, y, { align: 'right' });
+              y += 15;
+
+              doc.setFont('helvetica', 'italic');
+              doc.text(edu.institution, margin, y);
+              if (edu.score) {
+                  doc.setFont('helvetica', 'normal');
+                  doc.text(edu.score, pageWidth - margin, y, { align: 'right' });
+              }
+              y += 15;
+          });
+      });
+      
       // --- Skills ---
-      if (data.technicalSkills || data.softSkills) {
-          doc.setFontSize(12);
-          doc.setFont('helvetica', 'bold');
-          doc.text('SKILLS', margin, y);
-          y += 5;
-          doc.line(margin, y, pageWidth - margin, y);
-          y += 15;
+      addSection('Skills', () => {
           doc.setFontSize(10);
           doc.setFont('helvetica', 'normal');
           let skillsText = '';
-          if (data.technicalSkills) skillsText += `Technical: ${data.technicalSkills}`;
-          if (data.technicalSkills && data.softSkills) skillsText += '  |  ';
-          if (data.softSkills) skillsText += `Soft Skills: ${data.softSkills}`;
+          if (data.technicalSkills) skillsText += `Technical: ${data.technicalSkills.split(',').map(s => s.trim()).join(' | ')}`;
+          if (data.technicalSkills && data.softSkills) skillsText += '\n';
+          if (data.softSkills) skillsText += `Soft Skills: ${data.softSkills.split(',').map(s => s.trim()).join(' | ')}`;
           const skillLines = doc.splitTextToSize(skillsText, contentWidth);
           doc.text(skillLines, margin, y);
-      }
+      });
       
       doc.save(`${data.fullName.replace(' ', '_')}_Resume.pdf`);
 
@@ -466,5 +489,3 @@ export default function ResumeBuilderPage() {
     </div>
   );
 }
-
-    
