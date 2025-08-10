@@ -19,7 +19,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { Separator } from '@/components/ui/separator';
-import { enhanceResumeDetails, ResumeDetailsInput } from '@/ai/flows/ai-resume-enhancer';
+import { enhanceResumeDetails, ResumeDetailsInput, ResumeDetailsOutput } from '@/ai/flows/ai-resume-enhancer';
 
 const educationSchema = z.object({
   degree: z.string().min(1, 'Degree is required'),
@@ -48,7 +48,7 @@ const formSchema = z.object({
   linkedin: z.string().url().optional().or(z.literal('')),
   github: z.string().url().optional().or(z.literal('')),
   
-  professionalTitle: z.string().min(1, 'Professional title is required.'),
+  professionalTitle: z.string().min(1, 'A professional title is required.'),
   careerObjective: z.string().min(1, 'A career objective or summary is required.'),
   
   education: z.array(educationSchema).min(1, 'At least one education entry is required.'),
@@ -77,6 +77,7 @@ export default function ResumeBuilderPage() {
       education: [{ degree: '', institution: '', year: '', score: '' }],
       workExperience: [],
       projects: [],
+      extracurricular: '',
     },
   });
 
@@ -148,16 +149,16 @@ export default function ResumeBuilderPage() {
     localStorage.setItem('currentUser', JSON.stringify(updatedUser));
   };
 
-  const generatePdf = (data: FormValues) => {
+  const generatePdf = (data: ResumeDetailsOutput) => {
     const doc = new jsPDF('p', 'pt', 'a4');
     const margin = 36; // 0.5 inch
     const pageWidth = doc.internal.pageSize.getWidth();
     const contentWidth = pageWidth - margin * 2;
     let y = margin;
 
-    // Helper functions
+    // Helper to add a section with a heading and a line
     const addSection = (title: string, contentRenderer: () => void, isLast: boolean = false) => {
-        if (y > margin) y += 20; 
+        if (y > margin + 20) y += 20; 
         doc.setFont('helvetica', 'bold');
         doc.setFontSize(11);
         doc.text(title.toUpperCase(), margin, y);
@@ -185,8 +186,6 @@ export default function ResumeBuilderPage() {
     doc.text(contactInfo, pageWidth / 2, y, { align: 'center' });
     y += 10;
     doc.line(margin, y, pageWidth - margin, y);
-    y+=5;
-
 
     // --- Summary ---
     addSection('Summary', () => {
@@ -198,27 +197,29 @@ export default function ResumeBuilderPage() {
     });
     
     // --- Education ---
-    addSection('Education', () => {
-        data.education.forEach(edu => {
-            doc.setFontSize(11);
-            doc.setFont('helvetica', 'bold');
-            doc.text(edu.degree, margin, y);
+    if(data.education && data.education.length > 0) {
+        addSection('Education', () => {
+            data.education.forEach(edu => {
+                doc.setFontSize(11);
+                doc.setFont('helvetica', 'bold');
+                doc.text(edu.degree, margin, y);
 
-            doc.setFont('helvetica', 'normal');
-            doc.text(edu.year, pageWidth - margin, y, { align: 'right' });
-            y += 15;
-
-            doc.setFont('helvetica', 'italic');
-            doc.text(edu.institution, margin, y);
-            if (edu.score) {
                 doc.setFont('helvetica', 'normal');
-                doc.text(edu.score, pageWidth - margin, y, { align: 'right' });
-            }
-            y += 20;
+                doc.text(edu.year, pageWidth - margin, y, { align: 'right' });
+                y += 15;
+
+                doc.setFont('helvetica', 'italic');
+                doc.text(edu.institution, margin, y);
+                if (edu.score) {
+                    doc.setFont('helvetica', 'normal');
+                    doc.text(edu.score, pageWidth - margin, y, { align: 'right' });
+                }
+                y += 20;
+            });
+            y -= 10;
         });
-        y -= 10; // Reduce space after last entry
-    });
-    
+    }
+
     // --- Skills ---
     if(data.technicalSkills || data.softSkills) {
         addSection('Skills', () => {
@@ -306,7 +307,7 @@ export default function ResumeBuilderPage() {
           });
       }, true);
     }
-    doc.save(`${data.fullName.replace(' ', '_')}_Resume.pdf`);
+    doc.save(`${data.fullName.replace(/ /g, '_')}_Resume.pdf`);
   }
 
   const handleGeneratePdf = async (data: FormValues) => {
@@ -318,10 +319,10 @@ export default function ResumeBuilderPage() {
     });
 
     try {
-      const enhancedData = await enhanceResumeDetails(data);
-      form.reset(enhancedData); // Update the form with AI enhanced data
-      saveDetails(enhancedData); // Save the enhanced data to localStorage
-      generatePdf(enhancedData); // Generate PDF with enhanced data
+      const enhancedData = await enhanceResumeDetails(data as ResumeDetailsInput);
+      form.reset(enhancedData);
+      saveDetails(enhancedData);
+      generatePdf(enhancedData);
 
       toast({
         title: 'Resume Generated!',
