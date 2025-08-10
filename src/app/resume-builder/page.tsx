@@ -139,42 +139,46 @@ export default function ResumeBuilderPage() {
     const doc = new jsPDF('p', 'pt', 'a4');
     const margin = 40;
     const pageWidth = doc.internal.pageSize.getWidth();
-    const pageHeight = doc.internal.pageSize.getHeight();
     const contentWidth = pageWidth - margin * 2;
-    let y = 0;
-
-    // Set Font
-    doc.setFont('helvetica', 'normal');
+    let y = margin;
+    const lineHeight = 1.2;
+    
+    doc.setFont('helvetica');
 
     // --- HEADER ---
-    y = margin;
     doc.setFontSize(28).setFont('helvetica', 'bold');
     doc.text(data.fullName.toUpperCase(), margin, y);
-    
+
     doc.setFontSize(10).setFont('helvetica', 'normal');
-    const contactInfo = [data.phone, data.email, data.linkedin, data.github].filter(Boolean).join(' | ');
-    const contactWidth = doc.getTextWidth(contactInfo);
-    doc.text(contactInfo, pageWidth - margin - contactWidth, y);
-    y += 15;
+    const contactInfo = [data.phone, data.email, data.linkedin, data.github].filter(Boolean);
+    const contactInfoHeight = contactInfo.length * 10 * lineHeight;
+    let contactY = y - contactInfoHeight + 15; // Align top of contact info with top of name
     
-    // --- PROFESSIONAL TITLE ---
+    contactInfo.forEach(info => {
+        doc.text(info, pageWidth - margin, contactY, { align: 'right' });
+        contactY += 10 * lineHeight;
+    });
+
+    const nameLines = doc.splitTextToSize(data.fullName.toUpperCase(), contentWidth);
+    y += (nameLines.length * 28 * 0.7) + 5;
+
     doc.setFontSize(11).setFont('helvetica', 'bold');
     doc.text(data.professionalTitle.toUpperCase(), margin, y);
     y += 10;
     doc.setDrawColor(0).setLineWidth(1).line(margin, y, pageWidth - margin, y);
     y += 20;
 
-    // --- Helper for Sections ---
-    const addSection = (title: string) => {
-      if (y > pageHeight - margin * 2) { // Add new page if not enough space
-          doc.addPage();
-          y = margin;
-      }
-      doc.setFontSize(11).setFont('helvetica', 'bold');
-      doc.text(title.toUpperCase(), margin, y);
-      y += 5;
-      doc.setDrawColor(0).setLineWidth(0.5).line(margin, y, pageWidth - margin, y);
-      y += 15;
+    // --- HELPER FOR SECTIONS ---
+    const addSection = (title: string, spaceAfter: number = 20) => {
+        if (y > doc.internal.pageSize.getHeight() - 100) { // New page check
+            doc.addPage();
+            y = margin;
+        }
+        doc.setFontSize(11).setFont('helvetica', 'bold');
+        doc.text(title.toUpperCase(), margin, y);
+        y += 8;
+        doc.setDrawColor(0).setLineWidth(0.5).line(margin, y, pageWidth - margin, y);
+        y += 15;
     };
 
     // --- CAREER OBJECTIVE ---
@@ -183,7 +187,7 @@ export default function ResumeBuilderPage() {
         doc.setFontSize(10).setFont('helvetica', 'normal');
         const summaryLines = doc.splitTextToSize(data.careerObjective, contentWidth);
         doc.text(summaryLines, margin, y, { align: 'left' });
-        y += summaryLines.length * 12 + 10;
+        y += summaryLines.length * 10 * lineHeight + 10;
     }
     
     // --- EDUCATION ---
@@ -194,14 +198,14 @@ export default function ResumeBuilderPage() {
         doc.text(edu.degree, margin, y);
         doc.setFontSize(10).setFont('helvetica', 'normal');
         doc.text(edu.year, pageWidth - margin, y, { align: 'right' });
-        y += 12;
+        y += 10 * lineHeight;
 
         doc.setFont('helvetica', 'normal');
         doc.text(edu.institution, margin, y);
         if (edu.score) {
           doc.text(`Score: ${edu.score}`, pageWidth - margin, y, { align: 'right' });
         }
-        y += 18;
+        y += 10 * lineHeight + 8;
       });
     }
 
@@ -211,16 +215,18 @@ export default function ResumeBuilderPage() {
       doc.setFontSize(10).setFont('helvetica', 'normal');
       if (data.technicalSkills) {
           doc.setFont('helvetica', 'bold').text('Technical Skills:', margin, y);
-          const techSkillsText = data.technicalSkills;
+          const techSkillsText = doc.splitTextToSize(data.technicalSkills, contentWidth - 80);
           doc.setFont('helvetica', 'normal').text(techSkillsText, margin + 90, y);
-          y += 15;
+          y += techSkillsText.length * 10 * lineHeight;
       }
+      y += 5;
       if (data.softSkills) {
           doc.setFont('helvetica', 'bold').text('Soft Skills:', margin, y);
-          const softSkillsText = data.softSkills;
+          const softSkillsText = doc.splitTextToSize(data.softSkills, contentWidth - 80);
           doc.setFont('helvetica', 'normal').text(softSkillsText, margin + 90, y);
-          y += 15;
+          y += softSkillsText.length * 10 * lineHeight;
       }
+      y += 10;
     }
 
     // --- PROJECTS ---
@@ -229,14 +235,14 @@ export default function ResumeBuilderPage() {
       data.projects.forEach(proj => {
         doc.setFontSize(10).setFont('helvetica', 'bold').text(proj.name, margin, y);
         if (proj.url) {
-            doc.setFontSize(10).setTextColor(41, 128, 185).textWithLink('Link', pageWidth - margin, y, { url: proj.url, align: 'right' });
+            doc.setFontSize(9).setTextColor(41, 128, 185).textWithLink('View Project', pageWidth - margin, y, { url: proj.url, align: 'right' });
             doc.setTextColor(0);
         }
-        y += 12;
+        y += 10 * lineHeight;
 
         const descLines = doc.splitTextToSize(proj.description, contentWidth);
         doc.setFont('helvetica', 'normal').text(descLines, margin, y, { align: 'left' });
-        y += descLines.length * 12 + 10;
+        y += descLines.length * 10 * lineHeight + 10;
       });
     }
 
@@ -248,20 +254,20 @@ export default function ResumeBuilderPage() {
         doc.text(exp.role, margin, y);
         doc.setFont('helvetica', 'normal').setFontSize(10);
         doc.text(exp.duration, pageWidth - margin, y, { align: 'right' });
-        y += 12;
+        y += 10 * lineHeight;
 
         doc.setFont('helvetica', 'bold').setFontSize(10);
         doc.text(exp.company, margin, y);
-        y += 12;
+        y += 10 * lineHeight + 5;
         
         doc.setFont('helvetica', 'normal').setFontSize(10);
         if (exp.achievements) {
           exp.achievements.split('\n').forEach(ach => {
             if (ach.trim()) {
-                const achievementLines = doc.splitTextToSize(ach.trim(), contentWidth - 15);
-                doc.circle(margin + 2, y - 3.5, 1.5, 'F');
+                const achievementLines = doc.splitTextToSize(ach.trim().replace(/^•\s*/, ''), contentWidth - 15);
+                doc.circle(margin + 2, y - 3, 1.5, 'F');
                 doc.text(achievementLines, margin + 10, y, { align: 'left' });
-                y += achievementLines.length * 12;
+                y += achievementLines.length * 10 * lineHeight;
             }
           });
         }
@@ -275,10 +281,10 @@ export default function ResumeBuilderPage() {
       doc.setFont('helvetica', 'normal').setFontSize(10);
       data.extracurricular.split('\n').forEach(item => {
         if (item.trim()) {
-            const itemLines = doc.splitTextToSize(item.trim(), contentWidth - 15);
-            doc.circle(margin + 2, y - 3.5, 1.5, 'F');
+            const itemLines = doc.splitTextToSize(item.trim().replace(/^•\s*/, ''), contentWidth - 15);
+            doc.circle(margin + 2, y - 3, 1.5, 'F');
             doc.text(itemLines, margin + 10, y, { align: 'left' });
-            y += itemLines.length * 12;
+            y += itemLines.length * 10 * lineHeight;
         }
       });
     }
@@ -352,7 +358,7 @@ export default function ResumeBuilderPage() {
                   </div>
                 </div>
                 <Separator />
-                {/* Professional Title, Career Objective */}
+                 {/* Professional Title, Career Objective */}
                  <div className="space-y-4">
                   <FormField control={form.control} name="professionalTitle" render={({ field }) => ( <FormItem><FormLabel>Professional Title</FormLabel><FormControl><Input placeholder="e.g., Aspiring Software Engineer" {...field} /></FormControl><FormMessage /></FormItem> )} />
                   <FormField control={form.control} name="careerObjective" render={({ field }) => ( <FormItem><FormLabel>Career Objective</FormLabel><FormControl><Textarea placeholder="A brief 2-3 sentence summary of your career goals." {...field} /></FormControl><FormMessage /></FormItem> )} />
