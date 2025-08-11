@@ -101,13 +101,13 @@ const enhanceResumePrompt = ai.definePrompt({
       - **Correct**: If you find any obvious errors (e.g., "B.Tch" instead of "B.Tech"), correct them.
       - **Expand for Completeness**: If the overall resume feels sparse or a section is too brief, expand upon it with realistic, industry-appropriate details.
         - **Career Objective**: If the objective is short, expand it to be a compelling 2-3 sentence summary that highlights the user's key strengths and career ambitions.
-        - **Project Description**: If a project description is brief, elaborate on it. Describe the project's purpose, what the user's role was, and the outcome. **Limit the description to a maximum of 4-5 lines.**
+        - **Project Description**: If a project description is brief, elaborate on it. Describe the project's purpose, what the user's role was, and the outcome. **Crucially, this description must be a single paragraph, not bullet points, and limited to a maximum of 4-5 lines.**
       - **Fill Gaps**: If any key information looks like a placeholder (e.g., "My University," "My Project Name"), replace it with professional-sounding and relevant examples that fit the user's profile.
 
   2.  **ATS Optimization & Formatting**:
       - **Keywords**: Ensure the resume includes relevant keywords for the user's professional title and industry.
       - **Formatting**: Use clear, standard section headings. 
-      - **Bullet Points**: For 'achievements' in work experience, 'description' in projects, and 'extracurricular' activities, rewrite them as impactful bullet points. Each bullet point should start with a strong action verb (e.g., "Led," "Engineered," "Accelerated," "Implemented").
+      - **Bullet Points**: For 'achievements' in work experience and 'extracurricular' activities, rewrite them as impactful bullet points. Each bullet point should start with a strong action verb (e.g., "Led," "Engineered," "Accelerated," "Implemented"). Ensure each item is a single, clean bullet point.
       - **Quantify**: Where possible, add measurable outcomes to achievements (e.g., "Increased user engagement by 25%," "Reduced server costs by 10%").
       - **Alignment**: Ensure that all bullet points and paragraphs are neatly aligned. If a line starts at a certain position, the next line should start directly below it.
 
