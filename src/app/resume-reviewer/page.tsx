@@ -28,6 +28,14 @@ import { useToast } from '@/hooks/use-toast';
 import { reviewResume, ReviewResumeOutput } from '@/ai/flows/ai-resume-reviewer';
 import { Progress } from '@/components/ui/progress';
 import mammoth from 'mammoth';
+import * as pdfjs from 'pdfjs-dist';
+
+// Set worker path
+pdfjs.GlobalWorkerOptions.workerSrc = new URL(
+  'pdfjs-dist/build/pdf.worker.min.mjs',
+  import.meta.url
+).toString();
+
 
 const FormSchema = z.object({
   resume: z
@@ -62,10 +70,6 @@ export default function ResumeReviewerPage() {
             try {
                 const arrayBuffer = event.target?.result as ArrayBuffer;
                 if (file.type === 'application/pdf') {
-                    // Dynamically import pdfjs-dist
-                    const pdfjs = await import('pdfjs-dist/build/pdf');
-                    pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
-
                     const pdf = await pdfjs.getDocument({ data: arrayBuffer }).promise;
                     let textContent = '';
                     for (let i = 1; i <= pdf.numPages; i++) {
@@ -209,8 +213,7 @@ export default function ResumeReviewerPage() {
       );
     }
     
-    // This case should not happen if the check is done correctly, but it's good practice
-    if (typeof result.atsScore === 'undefined') {
+    if (result.atsScore === undefined) {
         return (
           <Card className="max-w-2xl mx-auto border-destructive/50">
            <CardHeader>
