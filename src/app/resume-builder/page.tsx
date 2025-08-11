@@ -143,6 +143,7 @@ export default function ResumeBuilderPage() {
     let y = margin + 10; 
 
     const nameFontSize = 22;
+    const titleFontSize = 12;
     const headingFontSize = 12;
     const bodyFontSize = 10.5;
     const contactFontSize = 10;
@@ -153,6 +154,13 @@ export default function ResumeBuilderPage() {
     // --- HEADER ---
     doc.setFontSize(nameFontSize).setFont('helvetica', 'bold');
     doc.text(data.fullName.toUpperCase(), margin, y);
+    y += nameFontSize * 0.7;
+
+    if (data.professionalTitle) {
+      doc.setFontSize(titleFontSize).setFont('helvetica', 'normal');
+      doc.text(data.professionalTitle, margin, y);
+    }
+
 
     // --- Contact info block ---
     const contactInfo = [
@@ -163,14 +171,14 @@ export default function ResumeBuilderPage() {
     ].filter(Boolean) as string[];
     
     doc.setFontSize(contactFontSize).setFont('helvetica', 'normal');
-    let contactY = y - (contactFontSize * 0.5); 
+    let contactY = margin + 10;
     contactInfo.forEach((info) => {
         doc.text(info, pageWidth - margin, contactY, { align: 'right' });
         contactY += contactFontSize * lineHeight;
     });
 
     const headerHeight = Math.max(doc.getTextDimensions(data.fullName.toUpperCase()).h, contactInfo.length * contactFontSize * lineHeight);
-    y += headerHeight;
+    y = margin + 10 + headerHeight;
     
     const addSection = (title: string) => {
         y += 10; // spacing before section
@@ -191,7 +199,7 @@ export default function ResumeBuilderPage() {
         doc.setFontSize(bodyFontSize).setFont('helvetica', 'normal');
         const summaryLines = doc.splitTextToSize(data.careerObjective, contentWidth);
         doc.text(summaryLines, margin, y, { align: 'left', lineHeightFactor: 1.5 });
-        const summaryHeight = doc.getTextDimensions(summaryLines).h * 1.15;
+        const summaryHeight = doc.getTextDimensions(summaryLines).h;
         y += summaryHeight + 5;
     }
     
@@ -258,8 +266,8 @@ export default function ResumeBuilderPage() {
         const textHeight = doc.getTextDimensions(descLines).h;
         const descriptionHeight = (textHeight / bodyFontSize) * (bodyFontSize * lineHeightFactor) - (bodyFontSize * (lineHeight-lineHeightFactor));
         y += descriptionHeight;
-
-        y += bodyFontSize * lineHeight * 0.5;
+        
+        y += bodyFontSize * lineHeight;
       });
     }
 
