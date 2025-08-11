@@ -29,6 +29,7 @@ const workExperienceSchema = z.object({
 const projectSchema = z.object({
     name: z.string().describe('Project name'),
     description: z.string().describe('A brief paragraph describing the project'),
+    techStack: z.string().optional().describe('Comma-separated list of technologies used'),
     url: z.string().optional().describe('URL to the project if available'),
 });
 
@@ -84,7 +85,7 @@ const enhanceResumePrompt = ai.definePrompt({
 
   - Projects:
   {{#each projects}}
-  - Name: {{{this.name}}}, Description: {{{this.description}}}, URL: {{{this.url}}}
+  - Name: {{{this.name}}}, Description: {{{this.description}}}, Tech Stack: {{{this.techStack}}}, URL: {{{this.url}}}
   {{/each}}
 
   - Skills:
@@ -98,7 +99,10 @@ const enhanceResumePrompt = ai.definePrompt({
 
   1.  **Content Validation & Enhancement**:
       - **Correct**: If you find any obvious errors (e.g., "B.Tch" instead of "B.Tech"), correct them.
-      - **Expand**: If any information is too brief or incomplete, expand upon it with realistic, industry-appropriate details. For example, if a work experience achievement says "Managed a project," expand it to something like "Managed a project from conception to completion, resulting in a 15% increase in efficiency."
+      - **Expand for Completeness**: If the overall resume feels sparse or a section is too brief, expand upon it with realistic, industry-appropriate details.
+        - **Career Objective**: If the objective is short, expand it to be a compelling 2-3 sentence summary that highlights the user's key strengths and career ambitions.
+        - **Project Description**: If a project description is brief, elaborate on it. Describe the project's purpose, what the user's role was, and the outcome.
+        - **Project Tech Stack**: For each project, you MUST ensure there is a relevant tech stack. If the user provided one, refine it. If not, generate a realistic, comma-separated list of technologies that fit the project description (e.g., "React, Node.js, Firebase, Tailwind CSS").
       - **Fill Gaps**: If any key information looks like a placeholder (e.g., "My University," "My Project Name"), replace it with professional-sounding and relevant examples that fit the user's profile.
 
   2.  **ATS Optimization**:

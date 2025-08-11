@@ -39,6 +39,7 @@ const workExperienceSchema = z.object({
 const projectSchema = z.object({
   name: z.string().min(1, 'Project name is required'),
   description: z.string().min(1, 'Description is required'),
+  techStack: z.string().optional(),
   url: z.string().url().optional().or(z.literal('')),
 });
 
@@ -242,13 +243,20 @@ export default function ResumeBuilderPage() {
     if (data.projects?.length) {
       addSection('PROJECTS');
       data.projects.forEach(proj => {
-        if (y > doc.internal.pageSize.getHeight() - 60) { doc.addPage(); y = margin; }
+        if (y > doc.internal.pageSize.getHeight() - 80) { doc.addPage(); y = margin; }
         doc.setFontSize(bodyFontSize).setFont('helvetica', 'bold').text(proj.name, margin, y);
         if (proj.url) {
             doc.setFontSize(bodyFontSize - 1).setTextColor(41, 128, 185).textWithLink('View Project', pageWidth - margin, y, { url: proj.url, align: 'right' });
             doc.setTextColor(0);
         }
         y += bodyFontSize * lineHeight;
+
+        if (proj.techStack) {
+            doc.setFont('helvetica', 'bold').setFontSize(bodyFontSize - 1).text('Tech Stack: ', margin, y);
+            const tsX = margin + doc.getTextWidth('Tech Stack: ');
+            doc.setFont('helvetica', 'normal').text(proj.techStack, tsX, y);
+            y += bodyFontSize * lineHeight;
+        }
 
         doc.setFont('helvetica', 'normal').setFontSize(bodyFontSize);
         const descLines = doc.splitTextToSize(proj.description, contentWidth);
@@ -396,7 +404,7 @@ export default function ResumeBuilderPage() {
                  <div className="space-y-4">
                     <div className="flex items-center justify-between">
                      <h3 className="text-lg font-medium">Projects</h3>
-                      <Button type="button" variant="outline" size="sm" onClick={() => appendProject({ name: '', description: '', url: '' })}>
+                      <Button type="button" variant="outline" size="sm" onClick={() => appendProject({ name: '', description: '', techStack: '', url: '' })}>
                         <Plus className="mr-2 h-4 w-4" /> Add Project
                       </Button>
                    </div>
@@ -405,6 +413,7 @@ export default function ResumeBuilderPage() {
                          <Button type="button" variant="ghost" size="icon" className="absolute top-1 right-1" onClick={() => removeProject(index)}><Trash2 className="h-4 w-4" /></Button>
                          <FormField control={form.control} name={`projects.${index}.name`} render={({ field }) => ( <FormItem><FormLabel>Project Name</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem> )} />
                          <FormField control={form.control} name={`projects.${index}.description`} render={({ field }) => ( <FormItem><FormLabel>Description</FormLabel><FormControl><Textarea {...field} /></FormControl><FormMessage /></FormItem> )} />
+                         <FormField control={form.control} name={`projects.${index}.techStack`} render={({ field }) => ( <FormItem><FormLabel>Tech Stack</FormLabel><FormControl><Input placeholder="e.g., React, Node.js, Firebase" {...field} /></FormControl><FormMessage /></FormItem> )} />
                          <FormField control={form.control} name={`projects.${index}.url`} render={({ field }) => ( <FormItem><FormLabel>Project URL</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem> )} />
                       </div>
                     ))}
