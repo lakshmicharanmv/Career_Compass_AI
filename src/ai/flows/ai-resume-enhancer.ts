@@ -104,7 +104,7 @@ const enhanceResumePrompt = ai.definePrompt({
   2.  **Content Validation & Enhancement**:
       - **Correct**: If you find any obvious errors (e.g., "B.Tch" instead of "B.Tech"), correct them.
       - **Fill Gaps**: If any key information looks like a placeholder (e.g., "My University," "My Project Name"), replace it with professional-sounding and relevant examples that fit the user's profile.
-      - **Career Objective**: This section must be a minimum of **3 complete lines**.
+      - **Career Objective**: This section must be a minimum of **2.5 to 3 lines** and a maximum of **4 lines**.
       - **Project Description**: The project description must be a **single paragraph**, not bullet points, and must be exactly **4 lines long**.
 
   3.  **ATS Optimization & Formatting**:
