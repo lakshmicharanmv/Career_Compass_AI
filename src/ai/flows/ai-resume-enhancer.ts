@@ -104,7 +104,8 @@ const enhanceResumePrompt = ai.definePrompt({
   2.  **Content Validation & Enhancement**:
       - **Correct**: If you find any obvious errors (e.g., "B.Tch" instead of "B.Tech"), correct them.
       - **Fill Gaps**: If any key information looks like a placeholder (e.g., "My University," "My Project Name"), replace it with professional-sounding and relevant examples that fit the user's profile.
-      - **Project Description**: The project description must be a **single paragraph**, not bullet points, and limited to a maximum of 4-5 lines.
+      - **Career Objective**: This section must be a minimum of **3 complete lines**.
+      - **Project Description**: The project description must be a **single paragraph**, not bullet points, and must be exactly **4 lines long**.
 
   3.  **ATS Optimization & Formatting**:
       - **Keywords**: Ensure the resume includes relevant keywords for the user's professional title and industry.
