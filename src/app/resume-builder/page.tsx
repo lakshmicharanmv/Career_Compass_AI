@@ -254,8 +254,9 @@ export default function ResumeBuilderPage() {
 
         doc.setFont('helvetica', 'normal').setFontSize(bodyFontSize);
         const descLines = doc.splitTextToSize(proj.description, contentWidth);
+        const descHeight = doc.getTextDimensions(descLines).h;
         doc.text(descLines, margin, y, { align: 'left', lineHeightFactor: 1.5 });
-        y += doc.getTextDimensions(descLines).h;
+        y += descHeight;
 
         if (proj.techStack) {
             y += bodyFontSize * lineHeight * 0.5;
