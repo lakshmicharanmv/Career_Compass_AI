@@ -61,7 +61,7 @@ const enhanceResumePrompt = ai.definePrompt({
   name: 'enhanceResumePrompt',
   input: {schema: ResumeDetailsInputSchema},
   output: {schema: ResumeDetailsOutputSchema},
-  prompt: `You are an expert resume writer and ATS optimization expert. Your task is to take the provided resume data and enhance it to create a professional, polished, and complete resume.
+  prompt: `You are an expert resume writer and ATS optimization specialist. Your task is to take the provided raw resume data and transform it into a professional, polished, and complete resume, ready for job applications.
 
   USER'S RESUME DATA:
   - Full Name: {{{fullName}}}
@@ -94,13 +94,31 @@ const enhanceResumePrompt = ai.definePrompt({
   - Achievements/Extracurricular:
     {{{extracurricular}}}
 
-  INSTRUCTIONS:
-  1.  **Review All Sections**: Carefully analyze all the provided data.
-  2.  **Identify and Fill Gaps**: If any information is missing, incomplete, or looks like a placeholder (e.g., "My School," "My College/University," "Completion Year"), fill it in with reasonable, professional-sounding, and relevant details.
-  3.  **Correct and Refine**: Rewrite sentences to be more professional and impactful. For the 'achievements' field in work experience, ensure each point starts with a strong action verb. Ensure the career objective is concise and tailored. For achievements/extracurriculars, format them as clear, impactful bullet points.
-  4.  **Refine Skills**: Critically review the technical and soft skills provided by the user. Correct any misspellings or formatting issues. **Do not add any new skills that the user has not provided.** Your role is to polish the existing list, not expand it.
-  5.  **Do Not Remove Data**: Do not remove any data the user has provided. Your goal is to enhance, not delete.
-  6.  **Return Full Object**: Return a complete JSON object in the specified output format, including both the original and the newly generated information. Ensure all fields are populated correctly. The output structure must exactly match the input structure.
+  INSTRUCTIONS (Follow these strictly):
+
+  1.  **Content Validation & Enhancement**:
+      - **Correct**: If you find any obvious errors (e.g., "B.Tch" instead of "B.Tech"), correct them.
+      - **Expand**: If any information is too brief or incomplete, expand upon it with realistic, industry-appropriate details. For example, if a work experience achievement says "Managed a project," expand it to something like "Managed a project from conception to completion, resulting in a 15% increase in efficiency."
+      - **Fill Gaps**: If any key information looks like a placeholder (e.g., "My University," "My Project Name"), replace it with professional-sounding and relevant examples that fit the user's profile.
+
+  2.  **ATS Optimization**:
+      - **Keywords**: Ensure the resume includes relevant keywords for the user's professional title and industry.
+      - **Formatting**: Use clear, standard section headings. For 'achievements' in work experience and 'description' in projects, rewrite them as impactful bullet points, each starting with a strong action verb (e.g., "Led," "Engineered," "Accelerated," "Implemented").
+      - **Quantify**: Where possible, add measurable outcomes to achievements (e.g., "Increased user engagement by 25%," "Reduced server costs by 10%").
+
+  3.  **Readability and Professional Tone**:
+      - Rewrite sentences to be concise, professional, and action-oriented.
+      - Ensure the career objective is sharp and tailored to the user's profile.
+      - For achievements and extracurriculars, format them as clear, impactful bullet points.
+
+  4.  **Skills Refinement**:
+      - Review the technical and soft skills. Correct any misspellings or formatting issues (e.g., ensure they are neatly comma-separated).
+      - **Crucially, do not add any new skills.** Your role is to polish the existing list provided by the user, not to invent new skills they may not have.
+
+  5.  **Final Output**:
+      - Return a complete JSON object in the specified output format.
+      - Ensure every field is populated correctly, including both the original and the newly enhanced information.
+      - The output structure must exactly match the input structure. Do not remove any fields, even if they were empty in the input.
   `,
 });
 
