@@ -251,18 +251,19 @@ export default function ResumeBuilderPage() {
         }
         y += bodyFontSize * lineHeight;
 
+        doc.setFont('helvetica', 'normal').setFontSize(bodyFontSize);
+        const descLines = doc.splitTextToSize(proj.description, contentWidth);
+        doc.text(descLines, margin, y, { align: 'left', lineHeightFactor: 1.5 });
+        const descHeight = descLines.length * bodyFontSize * lineHeight;
+        y += descHeight;
+
         if (proj.techStack) {
             doc.setFont('helvetica', 'bold').setFontSize(bodyFontSize - 1).text('Tech Stack: ', margin, y);
             const tsX = margin + doc.getTextWidth('Tech Stack: ');
             doc.setFont('helvetica', 'normal').text(proj.techStack, tsX, y);
             y += bodyFontSize * lineHeight;
         }
-
-        doc.setFont('helvetica', 'normal').setFontSize(bodyFontSize);
-        const descLines = doc.splitTextToSize(proj.description, contentWidth);
-        doc.text(descLines, margin, y, { align: 'left' });
-        const descHeight = descLines.length * bodyFontSize * lineHeight;
-        y += descHeight + 5;
+        y += 5;
       });
     }
 
@@ -281,7 +282,7 @@ export default function ResumeBuilderPage() {
         
         if (exp.achievements) {
           const achievementLines = doc.splitTextToSize(`  ${exp.achievements.replace(/\n/g, '\n  ')}`, contentWidth - 10);
-          doc.text(achievementLines, margin, y);
+          doc.text(achievementLines, margin, y, { align: 'left', lineHeightFactor: 1.5 });
           y += achievementLines.length * bodyFontSize * lineHeight;
         }
         y += 5; // Spacing after each experience
@@ -293,7 +294,7 @@ export default function ResumeBuilderPage() {
       addSection('ACHIEVEMENTS & EXTRACURRICULAR ACTIVITIES');
       doc.setFont('helvetica', 'normal').setFontSize(bodyFontSize);
       const extracurricularLines = doc.splitTextToSize(`  ${data.extracurricular.replace(/\n/g, '\n  ')}`, contentWidth - 10);
-      doc.text(extracurricularLines, margin, y);
+      doc.text(extracurricularLines, margin, y, { align: 'left', lineHeightFactor: 1.5 });
       y += extracurricularLines.length * bodyFontSize * lineHeight;
     }
 

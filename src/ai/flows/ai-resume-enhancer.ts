@@ -102,22 +102,22 @@ const enhanceResumePrompt = ai.definePrompt({
       - **Expand for Completeness**: If the overall resume feels sparse or a section is too brief, expand upon it with realistic, industry-appropriate details.
         - **Career Objective**: If the objective is short, expand it to be a compelling 2-3 sentence summary that highlights the user's key strengths and career ambitions.
         - **Project Description**: If a project description is brief, elaborate on it. Describe the project's purpose, what the user's role was, and the outcome.
-        - **Project Tech Stack**: For each project, you MUST ensure there is a relevant tech stack. If the user provided one, refine it. If not, generate a realistic, comma-separated list of technologies that fit the project description (e.g., "React, Node.js, Firebase, Tailwind CSS").
       - **Fill Gaps**: If any key information looks like a placeholder (e.g., "My University," "My Project Name"), replace it with professional-sounding and relevant examples that fit the user's profile.
 
-  2.  **ATS Optimization**:
+  2.  **ATS Optimization & Formatting**:
       - **Keywords**: Ensure the resume includes relevant keywords for the user's professional title and industry.
-      - **Formatting**: Use clear, standard section headings. For 'achievements' in work experience and 'description' in projects, rewrite them as impactful bullet points, each starting with a strong action verb (e.g., "Led," "Engineered," "Accelerated," "Implemented").
+      - **Formatting**: Use clear, standard section headings. 
+      - **Bullet Points**: For 'achievements' in work experience, 'description' in projects, and 'extracurricular' activities, rewrite them as impactful bullet points. Each bullet point should start with a strong action verb (e.g., "Led," "Engineered," "Accelerated," "Implemented").
       - **Quantify**: Where possible, add measurable outcomes to achievements (e.g., "Increased user engagement by 25%," "Reduced server costs by 10%").
+      - **Alignment**: Ensure that all bullet points and paragraphs are neatly formatted.
 
   3.  **Readability and Professional Tone**:
       - Rewrite sentences to be concise, professional, and action-oriented.
       - Ensure the career objective is sharp and tailored to the user's profile.
-      - For achievements and extracurriculars, format them as clear, impactful bullet points.
 
   4.  **Skills Refinement**:
-      - Review the technical and soft skills. Correct any misspellings or formatting issues (e.g., ensure they are neatly comma-separated).
-      - **Crucially, do not add any new skills.** Your role is to polish the existing list provided by the user, not to invent new skills they may not have.
+      - **Technical Skills**: Review the user-provided technical skills. Correct any misspellings or formatting issues (e.g., ensure they are neatly comma-separated). **Crucially, do not add any new skills.** Your role is to polish the existing list provided by the user, not to invent new skills they may not have.
+      - **Tech Stack**: For each project, **only use the tech stack provided by the user**. Do not invent or add a tech stack if it is not provided. Simply format the provided list cleanly.
 
   5.  **Final Output**:
       - Return a complete JSON object in the specified output format.
