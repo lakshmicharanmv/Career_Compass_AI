@@ -62,7 +62,7 @@ const enhanceResumePrompt = ai.definePrompt({
   name: 'enhanceResumePrompt',
   input: {schema: ResumeDetailsInputSchema},
   output: {schema: ResumeDetailsOutputSchema},
-  prompt: `You are an expert resume writer and ATS optimization specialist. Your task is to take the provided raw resume data and transform it into a professional, polished, and complete resume, ready for job applications. The final resume should be concise enough to fit on a single page.
+  prompt: `You are an expert resume writer and ATS optimization specialist. Your primary goal is to take the provided raw resume data and transform it into a professional, polished, and complete resume that fits on a **single page**.
 
   USER'S RESUME DATA:
   - Full Name: {{{fullName}}}
@@ -97,29 +97,32 @@ const enhanceResumePrompt = ai.definePrompt({
 
   INSTRUCTIONS (Follow these strictly):
 
-  1.  **Content Validation & Enhancement**:
-      - **Correct**: If you find any obvious errors (e.g., "B.Tch" instead of "B.Tech"), correct them.
-      - **Expand for Completeness**: If the overall resume feels sparse or a section is too brief, expand upon it with realistic, industry-appropriate details.
-        - **Career Objective**: If the objective is short, expand it to be a compelling 2-3 sentence summary that highlights the user's key strengths and career ambitions.
-        - **Project Description**: If a project description is brief, elaborate on it. Describe the project's purpose, what the user's role was, and the outcome. **Crucially, this description must be a single paragraph, not bullet points, and limited to a maximum of 4-5 lines.**
-      - **Fill Gaps**: If any key information looks like a placeholder (e.g., "My University," "My Project Name"), replace it with professional-sounding and relevant examples that fit the user's profile.
+  1.  **Single-Page Optimization (Crucial)**:
+      - **If the content is sparse** and would result in a short resume, **expand** upon the 'Career Objective' and 'Project Description' sections. Add relevant, realistic details to create a more comprehensive view of the user's profile.
+      - **If the content is too long** and would exceed one page, **condense and summarize** the 'Career Objective' and 'Project Description' sections. Keep them meaningful but brief.
+      - The final generated content must be concise enough to fit on a single, standard-sized resume page.
 
-  2.  **ATS Optimization & Formatting**:
+  2.  **Content Validation & Enhancement**:
+      - **Correct**: If you find any obvious errors (e.g., "B.Tch" instead of "B.Tech"), correct them.
+      - **Fill Gaps**: If any key information looks like a placeholder (e.g., "My University," "My Project Name"), replace it with professional-sounding and relevant examples that fit the user's profile.
+      - **Project Description**: The project description must be a **single paragraph**, not bullet points, and limited to a maximum of 4-5 lines.
+
+  3.  **ATS Optimization & Formatting**:
       - **Keywords**: Ensure the resume includes relevant keywords for the user's professional title and industry.
       - **Formatting**: Use clear, standard section headings. 
       - **Bullet Points**: For 'achievements' in work experience and 'extracurricular' activities, rewrite them as impactful bullet points. Each bullet point should start with a strong action verb (e.g., "Led," "Engineered," "Accelerated," "Implemented"). Ensure each item is a single, clean bullet point.
       - **Quantify**: Where possible, add measurable outcomes to achievements (e.g., "Increased user engagement by 25%," "Reduced server costs by 10%").
       - **Alignment**: Ensure that all bullet points and paragraphs are neatly aligned. If a line starts at a certain position, the next line should start directly below it.
 
-  3.  **Readability and Professional Tone**:
+  4.  **Readability and Professional Tone**:
       - Rewrite sentences to be concise, professional, and action-oriented.
       - Ensure the career objective is sharp and tailored to the user's profile.
 
-  4.  **Skills Refinement**:
+  5.  **Skills Refinement**:
       - **Technical Skills**: Review the user-provided technical skills. Correct any misspellings or formatting issues (e.g., ensure they are neatly comma-separated). **Crucially, do not add any new skills.** Your role is to polish the existing list provided by the user, not to invent new skills they may not have.
       - **Tech Stack**: For each project, **only use the tech stack provided by the user**. Do not invent or add a tech stack if it is not provided. Simply format the provided list cleanly.
 
-  5.  **Final Output**:
+  6.  **Final Output**:
       - Return a complete JSON object in the specified output format.
       - Ensure every field is populated correctly, including both the original and the newly enhanced information.
       - The output structure must exactly match the input structure. Do not remove any fields, even if they were empty in the input.
