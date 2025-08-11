@@ -255,8 +255,9 @@ export default function ResumeBuilderPage() {
         doc.setFont('helvetica', 'normal').setFontSize(bodyFontSize);
         const descLines = doc.splitTextToSize(proj.description, contentWidth);
         doc.text(descLines, margin, y, { align: 'left', lineHeightFactor: 1.5 });
-        const descHeight = doc.getTextDimensions(descLines).h;
-        y += descHeight + (bodyFontSize * lineHeight * 0.5);
+        const descHeight = (doc.getTextDimensions(descLines).h) * 1.5 - (bodyFontSize * (lineHeight-1.5));
+        y += descHeight;
+        y += (bodyFontSize * lineHeight * 0.5) + 5; // Add extra spacing here
 
         if (proj.techStack) {
             doc.setFont('helvetica', 'bold').setFontSize(bodyFontSize - 1).text('Tech Stack: ', margin, y);
