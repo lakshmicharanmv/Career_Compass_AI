@@ -43,6 +43,7 @@ import {
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 
 export default function Home() {
@@ -388,27 +389,92 @@ export default function Home() {
           reserved.
         </p>
         <nav className="sm:ml-auto flex gap-4 sm:gap-6">
-          <Link
-            href="#"
-            className="text-xs hover:underline underline-offset-4"
-            prefetch={false}
-          >
-            Terms of Service
-          </Link>
-          <Link
-            href="#"
-            className="text-xs hover:underline underline-offset-4"
-            prefetch={false}
-          >
-            Privacy
-          </Link>
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button variant="link" className="text-xs p-0 h-auto text-muted-foreground hover:text-primary">
+                Terms of Service
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-3xl">
+              <DialogHeader>
+                <DialogTitle className="text-2xl">Terms of Service</DialogTitle>
+                <DialogDescription>
+                  Last updated: {format(new Date(), "PPP")}
+                </DialogDescription>
+              </DialogHeader>
+              <ScrollArea className="h-96 pr-6">
+                <div className="prose prose-sm dark:prose-invert">
+                  <p>Welcome to Career Compass AI. These terms and conditions outline the rules and regulations for the use of our website.</p>
+                  <p>By accessing this website we assume you accept these terms and conditions. Do not continue to use Career Compass AI if you do not agree to take all of the terms and conditions stated on this page.</p>
+                  
+                  <h3 className="text-lg font-semibold mt-4">1. License</h3>
+                  <p>Unless otherwise stated, Career Compass AI and/or its licensors own the intellectual property rights for all material on Career Compass AI. All intellectual property rights are reserved. You may access this from Career Compass AI for your own personal use subjected to restrictions set in these terms and conditions.</p>
+                  <p>You must not:</p>
+                  <ul className="list-disc pl-5">
+                    <li>Republish material from Career Compass AI</li>
+                    <li>Sell, rent or sub-license material from Career Compass AI</li>
+                    <li>Reproduce, duplicate or copy material from Career Compass AI</li>
+                    <li>Redistribute content from Career Compass AI</li>
+                  </ul>
+                  
+                  <h3 className="text-lg font-semibold mt-4">2. User-Generated Content</h3>
+                  <p>Parts of this website offer an opportunity for users to post and exchange opinions and information. Career Compass AI does not filter, edit, publish or review Comments prior to their presence on the website. Comments do not reflect the views and opinions of Career Compass AI, its agents and/or affiliates. Comments reflect the views and opinions of the person who post their views and opinions.</p>
+                  
+                  <h3 className="text-lg font-semibold mt-4">3. Disclaimer</h3>
+                  <p>The information provided by Career Compass AI is for general guidance on matters of interest only. Even if the Company takes every precaution to insure that the content of the Service is both current and accurate, errors can occur. Plus, given the changing nature of laws, rules and regulations, there may be delays, omissions or inaccuracies in the information contained on the Service.</p>
+                </div>
+              </ScrollArea>
+              <DialogFooter>
+                <DialogTrigger asChild>
+                  <Button type="button">Close</Button>
+                </DialogTrigger>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button variant="link" className="text-xs p-0 h-auto text-muted-foreground hover:text-primary">
+                Privacy Policy
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-3xl">
+              <DialogHeader>
+                <DialogTitle className="text-2xl">Privacy Policy</DialogTitle>
+                 <DialogDescription>
+                  Last updated: {format(new Date(), "PPP")}
+                </DialogDescription>
+              </DialogHeader>
+               <ScrollArea className="h-96 pr-6">
+                 <div className="prose prose-sm dark:prose-invert">
+                  <p>Your privacy is important to us. It is Career Compass AI's policy to respect your privacy regarding any information we may collect from you across our website.</p>
+                  
+                  <h3 className="text-lg font-semibold mt-4">1. Information We Collect</h3>
+                  <p>We only ask for personal information when we truly need it to provide a service to you. We collect it by fair and lawful means, with your knowledge and consent. We also let you know why we’re collecting it and how it will be used. The personal information that you are asked to provide, and the reasons why you are asked to provide it, will be made clear to you at the point we ask you to provide your personal information.</p>
+                  
+                  <h3 className="text-lg font-semibold mt-4">2. Use of Your Information</h3>
+                  <p>We may use the information we collect in various ways, including to:</p>
+                   <ul className="list-disc pl-5">
+                    <li>Provide, operate, and maintain our website</li>
+                    <li>Improve, personalize, and expand our website</li>
+                    <li>Understand and analyze how you use our website</li>
+                    <li>Develop new products, services, features, and functionality</li>
+                    <li>Communicate with you, either directly or through one of our partners</li>
+                  </ul>
+
+                  <h3 className="text-lg font-semibold mt-4">3. Data Storage</h3>
+                   <p>For this prototype application, all user data, including your name, email, and any details you provide for resume building or career advice, is stored in your web browser's local storage. This means your data stays on your device and is not transmitted to a central server or database. If you clear your browser data or use a different device, this information will not be available.</p>
+                </div>
+              </ScrollArea>
+              <DialogFooter>
+                <DialogTrigger asChild>
+                  <Button type="button">Close</Button>
+                </DialogTrigger>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
         </nav>
       </footer>
     </div>
   );
-
-    
-
-    
-
-    
+}
