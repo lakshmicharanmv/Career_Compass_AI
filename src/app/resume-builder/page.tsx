@@ -145,7 +145,7 @@ export default function ResumeBuilderPage() {
 
     const nameFontSize = 22;
     const headingFontSize = 12;
-    const bodyFontSize = 10;
+    const bodyFontSize = 10.5;
     const contactFontSize = 10;
     const lineHeight = 1.3;
 
@@ -254,11 +254,12 @@ export default function ResumeBuilderPage() {
         doc.setFont('helvetica', 'normal').setFontSize(bodyFontSize);
         const descLines = doc.splitTextToSize(proj.description, contentWidth);
         doc.text(descLines, margin, y, { align: 'left', lineHeightFactor: 1.5 });
-        const descHeight = descLines.length * (bodyFontSize * 1.5);
+        const descHeight = descLines.length * (bodyFontSize / 2) * 1.5; // Adjusted height calculation
         y += descHeight;
 
+        y += bodyFontSize * lineHeight; // Space after description
+
         if (proj.techStack) {
-            y += bodyFontSize * 0.5; // Add some space before tech stack
             doc.setFont('helvetica', 'bold').setFontSize(bodyFontSize - 1).text('Tech Stack: ', margin, y);
             const tsX = margin + doc.getTextWidth('Tech Stack: ');
             doc.setFont('helvetica', 'normal').text(proj.techStack, tsX, y);
@@ -278,19 +279,14 @@ export default function ResumeBuilderPage() {
             doc.setFont('helvetica', 'normal').text(exp.duration, pageWidth - margin, y, { align: 'right' });
             y += bodyFontSize * lineHeight;
 
-            doc.setFont('helvetica', 'normal').text(exp.company, margin, y);
+            doc.setFont('helvetica', 'bold').text(exp.company, margin, y);
             y += bodyFontSize * lineHeight;
             
             if (exp.achievements) {
                 const achievementLines = doc.splitTextToSize(exp.achievements, contentWidth - 15); // Adjust width for bullet
-                achievementLines.forEach((line: string, index: number) => {
+                achievementLines.forEach((line: string) => {
                     if (y > doc.internal.pageSize.getHeight() - 40) { doc.addPage(); y = margin; }
-                    // Add bullet point only for the first line of each achievement item
-                    if (index === 0 || (line.startsWith('- ') && achievementLines[index-1] !== line)) {
-                        doc.text(`- ${line.replace(/^- /,'')}`, margin + 5, y, { align: 'left', lineHeightFactor: 1.5 });
-                    } else {
-                        doc.text(line, margin + 5, y, { align: 'left', lineHeightFactor: 1.5 });
-                    }
+                    doc.text(`- ${line.replace(/^- /,'')}`, margin + 5, y, { align: 'left', lineHeightFactor: 1.5 });
                     y += (bodyFontSize * 1.15);
                 });
             }
