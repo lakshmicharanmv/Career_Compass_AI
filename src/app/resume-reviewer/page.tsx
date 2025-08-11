@@ -27,6 +27,7 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { reviewResume, ReviewResumeOutput } from '@/ai/flows/ai-resume-reviewer';
 import { Progress } from '@/components/ui/progress';
+import mammoth from 'mammoth';
 
 const FormSchema = z.object({
   resume: z
@@ -54,15 +55,36 @@ export default function ResumeReviewerPage() {
 
   const fileRef = form.register('resume');
 
-  const handleFileRead = (file: File): Promise<string> => {
+  const handleFileRead = async (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        const dataUri = event.target?.result as string;
-        resolve(dataUri);
-      };
-      reader.onerror = reject;
-      reader.readAsDataURL(file);
+        const reader = new FileReader();
+        reader.onload = async (event) => {
+            try {
+                const arrayBuffer = event.target?.result as ArrayBuffer;
+                if (file.type === 'application/pdf') {
+                    // Dynamically import pdfjs-dist
+                    const pdfjs = await import('pdfjs-dist/build/pdf');
+                    pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
+
+                    const pdf = await pdfjs.getDocument({ data: arrayBuffer }).promise;
+                    let textContent = '';
+                    for (let i = 1; i <= pdf.numPages; i++) {
+                        const page = await pdf.getPage(i);
+                        const text = await page.getTextContent();
+                        textContent += text.items.map(s => (s as any).str).join(' ');
+                    }
+                    resolve(textContent);
+                } else if (file.type.includes('word')) {
+                    const result = await mammoth.extractRawText({ arrayBuffer });
+                    resolve(result.value);
+                }
+            } catch (error) {
+                console.error("Error parsing file:", error);
+                reject(new Error("Failed to parse the document. The file might be corrupted or in an unsupported format."));
+            }
+        };
+        reader.onerror = reject;
+        reader.readAsArrayBuffer(file);
     });
   };
 
@@ -73,15 +95,24 @@ export default function ResumeReviewerPage() {
     try {
       const file = data.resume[0];
       if (file) {
-        const resumeDataUri = await handleFileRead(file);
-        const aiResult = await reviewResume({ resumeDataUri });
+        const resumeText = await handleFileRead(file);
+        if (!resumeText.trim()) {
+            toast({
+                variant: 'destructive',
+                title: 'Empty Resume',
+                description: 'Could not extract any text from the document. Please ensure it is not an image-based file.',
+            });
+            setIsLoading(false);
+            return;
+        }
+        const aiResult = await reviewResume({ resumeText });
         setResult(aiResult);
       }
-    } catch (error) {
+    } catch (error: any) {
       toast({
         variant: 'destructive',
         title: 'Uh oh! Something went wrong.',
-        description: 'There was a problem analyzing your resume. Please try again.',
+        description: error.message || 'There was a problem analyzing your resume. Please try again.',
       });
       console.error(error);
     } finally {
@@ -98,7 +129,7 @@ export default function ResumeReviewerPage() {
       <CardHeader>
         <CardTitle>AI Resume Reviewer</CardTitle>
         <CardDescription>
-          Upload your resume (PDF or DOCX, max 5MB) to get AI-powered feedback on how to improve it.
+          Upload your resume (PDF or DOCX, max 5MB) to get an ATS score and AI-powered feedback.
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -169,16 +200,35 @@ export default function ResumeReviewerPage() {
           <CardContent>
             <p className="text-destructive">{result.message || 'An unknown error occurred.'}</p>
           </CardContent>
-          <CardContent>
+          <CardFooter>
             <Button onClick={() => { setResult(null); form.reset(); }}>
                 Try Again
             </Button>
-          </CardContent>
+          </CardFooter>
         </Card>
       );
     }
+    
+    // This case should not happen if the check is done correctly, but it's good practice
+    if (typeof result.atsScore === 'undefined') {
+        return (
+          <Card className="max-w-2xl mx-auto border-destructive/50">
+           <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-destructive">
+                <AlertTriangle /> Analysis Error
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p>The AI could not provide a score for this resume. Please try a different file or check the content.</p>
+            </CardContent>
+            <CardFooter>
+                <Button onClick={() => { setResult(null); form.reset(); }}>Try Again</Button>
+            </CardFooter>
+          </Card>
+        );
+    }
 
-    const { atsScore, improvements } = result as ReviewResumeOutput;
+    const { atsScore, improvements, summary } = result as ReviewResumeOutput;
 
     return (
       <div className="max-w-2xl mx-auto space-y-8">
@@ -197,6 +247,12 @@ export default function ResumeReviewerPage() {
               <p className="text-6xl font-bold text-primary">{atsScore.toFixed(1)} <span className="text-2xl text-muted-foreground">/ 10</span></p>
               <Progress value={atsScore * 10} className="mt-4" />
             </div>
+
+            <div>
+                <h3 className="font-semibold mb-2">AI Summary:</h3>
+                <p className="text-sm text-muted-foreground italic p-3 bg-muted/50 rounded-md">{summary}</p>
+            </div>
+
             <div>
               <h3 className="font-semibold mb-2">Key Improvements:</h3>
               <ul className="space-y-2 list-inside">
@@ -248,7 +304,7 @@ export default function ResumeReviewerPage() {
           <Card className="max-w-2xl mx-auto">
             <CardHeader>
               <CardTitle>Analyzing Your Resume...</CardTitle>
-              <CardDescription>Our AI is working its magic. This may take a moment.</CardDescription>
+              <CardDescription>Our AI is extracting the text and working its magic. This may take a moment.</CardDescription>
             </CardHeader>
             <CardContent className="flex items-center justify-center p-8">
               <Loader2 className="h-12 w-12 animate-spin text-primary" />
