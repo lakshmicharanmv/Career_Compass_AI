@@ -939,18 +939,8 @@ export default function CareerDashboardPage() {
               {industryData.companies.map(company => (
                 <div 
                   key={company.name} 
-                  className="flex items-center gap-3 p-3 border rounded-lg bg-background hover:bg-secondary/10 transition-all hover:shadow-sm border-border/30"
+                  className="flex items-center justify-center text-center p-3 border rounded-lg bg-background hover:bg-secondary/10 transition-all hover:shadow-sm border-border/30"
                 >
-                  <div className="p-1 bg-white rounded-full shadow-sm">
-                    <Image 
-                      src={company.logo} 
-                      alt={`${company.name} logo`} 
-                      width={40} 
-                      height={40} 
-                      className="rounded-full" 
-                      data-ai-hint={company.hint} 
-                    />
-                  </div>
                   <span className="font-medium text-sm">{company.name}</span>
                 </div>
               ))}
