@@ -62,7 +62,7 @@ const enhanceResumePrompt = ai.definePrompt({
   name: 'enhanceResumePrompt',
   input: {schema: ResumeDetailsInputSchema},
   output: {schema: ResumeDetailsOutputSchema},
-  prompt: `You are an expert resume writer and ATS optimization specialist. Your primary goal is to take the provided raw resume data and transform it into a professional, polished, and complete resume that fits on a **single page**.
+  prompt: `You are an expert resume writer and ATS optimization specialist. Your primary goal is to take the provided raw resume data and transform it into a professional, polished, and complete resume that fits on a **single page**. This is the most important rule.
 
   USER'S RESUME DATA:
   - Full Name: {{{fullName}}}
@@ -97,15 +97,15 @@ const enhanceResumePrompt = ai.definePrompt({
 
   INSTRUCTIONS (Follow these strictly):
 
-  1.  **Single-Page Optimization (Crucial)**:
-      - **If the content is sparse** and would result in a short resume, **expand** upon the 'Career Objective' and 'Project Description' sections. Add relevant, realistic details to create a more comprehensive view of the user's profile.
-      - **If the content is too long** and would exceed one page, **condense and summarize** the 'Career Objective' and 'Project Description' sections. Keep them meaningful but brief.
-      - The final generated content must be concise enough to fit on a single, standard-sized resume page.
+  1.  **Single-Page Optimization (CRUCIAL)**:
+      - This is the highest priority. The final generated content MUST be concise enough to fit on a single, standard-sized resume page.
+      - **If the content is too long** and would exceed one page, you **must condense and summarize** the 'Career Objective' and 'Project Description' sections. Keep them meaningful but brief.
+      - **If the content is sparse** and would result in a very short resume, you may **expand** upon the 'Career Objective' and 'Project Description' sections, but do so concisely and ensure it does not exceed one page.
 
   2.  **Content Validation & Enhancement**:
       - **Correct**: If you find any obvious errors (e.g., "B.Tch" instead of "B.Tech"), correct them.
       - **Fill Gaps**: If any key information looks like a placeholder (e.g., "My University," "My Project Name"), replace it with professional-sounding and relevant examples that fit the user's profile.
-      - **Project Description**: The project description must be a **single paragraph**, not bullet points, and limited to a maximum of 4-5 lines.
+      - **Project Description**: The project description must be a **single paragraph**, not bullet points, and limited to a maximum of 4 lines.
 
   3.  **ATS Optimization & Formatting**:
       - **Keywords**: Ensure the resume includes relevant keywords for the user's professional title and industry.
