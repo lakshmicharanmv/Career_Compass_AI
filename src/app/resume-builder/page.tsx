@@ -254,10 +254,11 @@ export default function ResumeBuilderPage() {
         doc.setFont('helvetica', 'normal').setFontSize(bodyFontSize);
         const descLines = doc.splitTextToSize(proj.description, contentWidth);
         doc.text(descLines, margin, y, { align: 'left', lineHeightFactor: 1.5 });
-        const descHeight = descLines.length * bodyFontSize * lineHeight;
+        const descHeight = descLines.length * (bodyFontSize * 1.15); // Use a smaller line height for calculation
         y += descHeight;
 
         if (proj.techStack) {
+            y += bodyFontSize * 0.5; // Add some space before tech stack
             doc.setFont('helvetica', 'bold').setFontSize(bodyFontSize - 1).text('Tech Stack: ', margin, y);
             const tsX = margin + doc.getTextWidth('Tech Stack: ');
             doc.setFont('helvetica', 'normal').text(proj.techStack, tsX, y);
@@ -281,9 +282,9 @@ export default function ResumeBuilderPage() {
         y += bodyFontSize * lineHeight;
         
         if (exp.achievements) {
-          const achievementLines = doc.splitTextToSize(`  ${exp.achievements.replace(/\n/g, '\n  ')}`, contentWidth - 10);
-          doc.text(achievementLines, margin, y, { align: 'left', lineHeightFactor: 1.5 });
-          y += achievementLines.length * bodyFontSize * lineHeight;
+          const achievementLines = doc.splitTextToSize(`- ${exp.achievements.replace(/\n/g, '\n- ')}`, contentWidth - 10);
+          doc.text(achievementLines, margin + 5, y, { align: 'left', lineHeightFactor: 1.5 });
+          y += achievementLines.length * (bodyFontSize * 1.15);
         }
         y += 5; // Spacing after each experience
       });
@@ -293,9 +294,9 @@ export default function ResumeBuilderPage() {
     if (data.extracurricular) {
       addSection('ACHIEVEMENTS & EXTRACURRICULAR ACTIVITIES');
       doc.setFont('helvetica', 'normal').setFontSize(bodyFontSize);
-      const extracurricularLines = doc.splitTextToSize(`  ${data.extracurricular.replace(/\n/g, '\n  ')}`, contentWidth - 10);
-      doc.text(extracurricularLines, margin, y, { align: 'left', lineHeightFactor: 1.5 });
-      y += extracurricularLines.length * bodyFontSize * lineHeight;
+      const extracurricularLines = doc.splitTextToSize(`- ${data.extracurricular.replace(/\n/g, '\n- ')}`, contentWidth - 10);
+      doc.text(extracurricularLines, margin + 5, y, { align: 'left', lineHeightFactor: 1.5 });
+      y += extracurricularLines.length * (bodyFontSize * 1.15);
     }
 
     doc.save(`${data.fullName.replace(/ /g, '_')}_Resume.pdf`);
