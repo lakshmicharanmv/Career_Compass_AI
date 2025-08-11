@@ -192,7 +192,7 @@ export default function ResumeBuilderPage() {
         doc.setFontSize(bodyFontSize).setFont('helvetica', 'normal');
         const summaryLines = doc.splitTextToSize(data.careerObjective, contentWidth);
         doc.text(summaryLines, margin, y, { align: 'left' });
-        const summaryHeight = summaryLines.length * bodyFontSize * lineHeight;
+        const summaryHeight = doc.getTextDimensions(summaryLines).h;
         y += summaryHeight + 5;
     }
     
@@ -227,14 +227,15 @@ export default function ResumeBuilderPage() {
             const tsX = margin + doc.getTextWidth('Technical Skills: ');
             const skillLines = doc.splitTextToSize(data.technicalSkills, contentWidth - doc.getTextWidth('Technical Skills: '));
             doc.setFont('helvetica', 'normal').text(skillLines, tsX, y);
-            y += skillLines.length * bodyFontSize * lineHeight;
+            y += doc.getTextDimensions(skillLines).h;
         }
         if (data.softSkills) {
+            if(data.technicalSkills) y += bodyFontSize * lineHeight * 0.5; // add a bit of space
             doc.setFont('helvetica', 'bold').text('Soft Skills: ', margin, y);
             const ssX = margin + doc.getTextWidth('Soft Skills: ');
             const softSkillLines = doc.splitTextToSize(data.softSkills, contentWidth - doc.getTextWidth('Soft Skills: '));
             doc.setFont('helvetica', 'normal').text(softSkillLines, ssX, y);
-            y += softSkillLines.length * bodyFontSize * lineHeight;
+            y += doc.getTextDimensions(softSkillLines).h;
         }
          y += 5;
     }
@@ -254,12 +255,10 @@ export default function ResumeBuilderPage() {
         doc.setFont('helvetica', 'normal').setFontSize(bodyFontSize);
         const descLines = doc.splitTextToSize(proj.description, contentWidth);
         doc.text(descLines, margin, y, { align: 'left', lineHeightFactor: 1.5 });
-        const descHeight = descLines.length * (bodyFontSize / 2) * 1.5; // Adjusted height calculation
-        y += descHeight;
-
-        y += bodyFontSize * lineHeight; // Space after description
+        y += doc.getTextDimensions(descLines).h;
 
         if (proj.techStack) {
+            y += bodyFontSize * lineHeight * 0.5;
             doc.setFont('helvetica', 'bold').setFontSize(bodyFontSize - 1).text('Tech Stack: ', margin, y);
             const tsX = margin + doc.getTextWidth('Tech Stack: ');
             doc.setFont('helvetica', 'normal').text(proj.techStack, tsX, y);
@@ -280,13 +279,14 @@ export default function ResumeBuilderPage() {
             y += bodyFontSize * lineHeight;
 
             doc.setFont('helvetica', 'bold').text(exp.company, margin, y);
+            doc.setFont('helvetica', 'normal'); // Reset font to normal
             y += bodyFontSize * lineHeight;
             
             if (exp.achievements) {
                 const achievementLines = doc.splitTextToSize(exp.achievements, contentWidth - 15); // Adjust width for bullet
                 achievementLines.forEach((line: string) => {
                     if (y > doc.internal.pageSize.getHeight() - 40) { doc.addPage(); y = margin; }
-                    doc.text(`- ${line.replace(/^- /,'')}`, margin + 5, y, { align: 'left', lineHeightFactor: 1.5 });
+                    doc.text(`- ${line.replace(/^- /, '')}`, margin + 5, y, { align: 'left', lineHeightFactor: 1.5 });
                     y += (bodyFontSize * 1.15);
                 });
             }
@@ -301,7 +301,7 @@ export default function ResumeBuilderPage() {
         const extracurricularLines = doc.splitTextToSize(data.extracurricular, contentWidth - 15);
         extracurricularLines.forEach((line: string) => {
             if (y > doc.internal.pageSize.getHeight() - 40) { doc.addPage(); y = margin; }
-            doc.text(`- ${line.replace(/^- /,'')}`, margin + 5, y, { align: 'left', lineHeightFactor: 1.5 });
+            doc.text(`- ${line.replace(/^- /, '')}`, margin + 5, y, { align: 'left', lineHeightFactor: 1.5 });
             y += (bodyFontSize * 1.15);
         });
     }
