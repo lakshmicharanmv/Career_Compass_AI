@@ -191,8 +191,8 @@ export default function ResumeBuilderPage() {
         addSection('CAREER OBJECTIVE');
         doc.setFontSize(bodyFontSize).setFont('helvetica', 'normal');
         const summaryLines = doc.splitTextToSize(data.careerObjective, contentWidth);
-        doc.text(summaryLines, margin, y, { align: 'left' });
-        const summaryHeight = doc.getTextDimensions(summaryLines).h;
+        doc.text(summaryLines, margin, y, { align: 'left', lineHeightFactor: 1.5 });
+        const summaryHeight = doc.getTextDimensions(summaryLines).h * 1.15;
         y += summaryHeight + 5;
     }
     
@@ -254,7 +254,7 @@ export default function ResumeBuilderPage() {
 
         doc.setFont('helvetica', 'normal').setFontSize(bodyFontSize);
         const descLines = doc.splitTextToSize(proj.description, contentWidth);
-        const descHeight = doc.getTextDimensions(descLines).h;
+        const descHeight = descLines.length * bodyFontSize * 1.5;
         doc.text(descLines, margin, y, { align: 'left', lineHeightFactor: 1.5 });
         y += descHeight;
 
@@ -280,8 +280,8 @@ export default function ResumeBuilderPage() {
             y += bodyFontSize * lineHeight;
 
             doc.setFont('helvetica', 'bold').text(exp.company, margin, y);
-            doc.setFont('helvetica', 'normal'); // Reset font to normal
             y += bodyFontSize * lineHeight;
+            doc.setFont('helvetica', 'normal'); // Reset font to normal
             
             if (exp.achievements) {
                 const achievementLines = doc.splitTextToSize(exp.achievements, contentWidth - 15); // Adjust width for bullet
@@ -477,3 +477,5 @@ export default function ResumeBuilderPage() {
     </div>
   );
 }
+
+    
