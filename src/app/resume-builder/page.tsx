@@ -39,7 +39,6 @@ const workExperienceSchema = z.object({
 const projectSchema = z.object({
   name: z.string().min(1, 'Project name is required'),
   description: z.string().min(1, 'Description is required'),
-  techStack: z.string().optional(),
   url: z.string().url().optional().or(z.literal('')),
 });
 
@@ -255,17 +254,12 @@ export default function ResumeBuilderPage() {
         doc.setFont('helvetica', 'normal').setFontSize(bodyFontSize);
         const descLines = doc.splitTextToSize(proj.description, contentWidth);
         doc.text(descLines, margin, y, { align: 'left', lineHeightFactor: 1.5 });
-        const descHeight = (doc.getTextDimensions(descLines).h) * 1.5 - (bodyFontSize * (lineHeight-1.5));
-        y += descHeight;
-        y += (bodyFontSize * lineHeight * 0.5) + 5; // Add extra spacing here
+        const lineHeightFactor = 1.5;
+        const textHeight = doc.getTextDimensions(descLines).h;
+        const descriptionHeight = (textHeight / bodyFontSize) * (bodyFontSize * lineHeightFactor) - (bodyFontSize * (lineHeight-lineHeightFactor));
+        y += descriptionHeight;
 
-        if (proj.techStack) {
-            doc.setFont('helvetica', 'bold').setFontSize(bodyFontSize - 1).text('Tech Stack: ', margin, y);
-            const tsX = margin + doc.getTextWidth('Tech Stack: ');
-            doc.setFont('helvetica', 'normal').text(proj.techStack, tsX, y);
-            y += bodyFontSize * lineHeight;
-        }
-        y += 5;
+        y += bodyFontSize * lineHeight * 0.5;
       });
     }
 
@@ -276,7 +270,7 @@ export default function ResumeBuilderPage() {
             if (y > doc.internal.pageSize.getHeight() - 40) { doc.addPage(); y = margin; }
             const cleanedEntry = entry.replace(/^- /, '').trim();
             const textLines = doc.splitTextToSize(cleanedEntry, contentWidth - 15);
-            doc.text(`-`, margin + 5, y, { align: 'left', lineHeightFactor: 1.5 });
+            doc.text(`•`, margin + 5, y, { align: 'left', lineHeightFactor: 1.5 });
             doc.text(textLines, margin + 15, y, { align: 'left', lineHeightFactor: 1.5 });
             const textHeight = doc.getTextDimensions(textLines).h;
             y += textHeight + 5;
@@ -286,7 +280,7 @@ export default function ResumeBuilderPage() {
     // --- WORK EXPERIENCE ---
     if (data.workExperience?.length) {
         addSection('WORK EXPERIENCE');
-        doc.setFontSize(bodyFontSize).setFont('helvetica', 'normal');
+        doc.setFontSize(bodyFontSize);
         data.workExperience.forEach(exp => {
             if (y > doc.internal.pageSize.getHeight() - 80) { doc.addPage(); y = margin; }
             doc.setFont('helvetica', 'bold').text(exp.role, margin, y);
@@ -418,7 +412,7 @@ export default function ResumeBuilderPage() {
                  <div className="space-y-4">
                     <div className="flex items-center justify-between">
                      <h3 className="text-lg font-medium">Projects</h3>
-                      <Button type="button" variant="outline" size="sm" onClick={() => appendProject({ name: '', description: '', techStack: '', url: '' })}>
+                      <Button type="button" variant="outline" size="sm" onClick={() => appendProject({ name: '', description: '', url: '' })}>
                         <Plus className="mr-2 h-4 w-4" /> Add Project
                       </Button>
                    </div>
@@ -427,7 +421,6 @@ export default function ResumeBuilderPage() {
                          <Button type="button" variant="ghost" size="icon" className="absolute top-1 right-1" onClick={() => removeProject(index)}><Trash2 className="h-4 w-4" /></Button>
                          <FormField control={form.control} name={`projects.${index}.name`} render={({ field }) => ( <FormItem><FormLabel>Project Name</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem> )} />
                          <FormField control={form.control} name={`projects.${index}.description`} render={({ field }) => ( <FormItem><FormLabel>Description</FormLabel><FormControl><Textarea {...field} /></FormControl><FormMessage /></FormItem> )} />
-                         <FormField control={form.control} name={`projects.${index}.techStack`} render={({ field }) => ( <FormItem><FormLabel>Tech Stack</FormLabel><FormControl><Input placeholder="e.g., React, Node.js, Firebase" {...field} /></FormControl><FormMessage /></FormItem> )} />
                          <FormField control={form.control} name={`projects.${index}.url`} render={({ field }) => ( <FormItem><FormLabel>Project URL</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem> )} />
                       </div>
                     ))}

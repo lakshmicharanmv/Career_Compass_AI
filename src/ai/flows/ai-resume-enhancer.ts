@@ -29,7 +29,6 @@ const workExperienceSchema = z.object({
 const projectSchema = z.object({
     name: z.string().describe('Project name'),
     description: z.string().describe('A brief paragraph describing the project'),
-    techStack: z.string().optional().describe('Comma-separated list of technologies used'),
     url: z.string().optional().describe('URL to the project if available'),
 });
 
@@ -85,7 +84,7 @@ const enhanceResumePrompt = ai.definePrompt({
 
   - Projects:
   {{#each projects}}
-  - Name: {{{this.name}}}, Description: {{{this.description}}}, Tech Stack: {{{this.techStack}}}, URL: {{{this.url}}}
+  - Name: {{{this.name}}}, Description: {{{this.description}}}, URL: {{{this.url}}}
   {{/each}}
 
   - Skills:
@@ -105,7 +104,7 @@ const enhanceResumePrompt = ai.definePrompt({
   2.  **Content Validation & Enhancement**:
       - **Correct**: If you find any obvious errors (e.g., "B.Tch" instead of "B.Tech"), correct them.
       - **Fill Gaps**: If any key information looks like a placeholder (e.g., "My University," "My Project Name"), replace it with professional-sounding and relevant examples that fit the user's profile.
-      - **Project Description**: The project description must be a **single paragraph**, not bullet points, and limited to a maximum of 4 lines.
+      - **Project Description**: The project description must be a **single paragraph**, not bullet points, and limited to a maximum of 4-5 lines.
 
   3.  **ATS Optimization & Formatting**:
       - **Keywords**: Ensure the resume includes relevant keywords for the user's professional title and industry.
@@ -120,7 +119,6 @@ const enhanceResumePrompt = ai.definePrompt({
 
   5.  **Skills Refinement**:
       - **Technical Skills**: Review the user-provided technical skills. Correct any misspellings or formatting issues (e.g., ensure they are neatly comma-separated). **Crucially, do not add any new skills.** Your role is to polish the existing list provided by the user, not to invent new skills they may not have.
-      - **Tech Stack**: For each project, **only use the tech stack provided by the user**. Do not invent or add a tech stack if it is not provided. Simply format the provided list cleanly.
 
   6.  **Final Output**:
       - Return a complete JSON object in the specified output format.
