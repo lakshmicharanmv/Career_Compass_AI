@@ -144,6 +144,7 @@ export default function UndergraduatePage() {
   const [currentQuestionIndex, setCurrentQuestionIndex] = React.useState(0);
   const [userAnswers, setUserAnswers] = React.useState<string[]>([]);
   const [testScore, setTestScore] = React.useState<number | null>(null);
+  const [rawScore, setRawScore] = React.useState<number | null>(null);
 
   const academicForm = useForm<AcademicFormValues>({ 
     resolver: zodResolver(academicSchema),
@@ -227,6 +228,7 @@ export default function UndergraduatePage() {
         if (newAnswers[i] === q.correctAnswer) score++;
       });
       const finalScore = (score / (assessment?.questions.length ?? 1)) * 100;
+      setRawScore(score);
       setTestScore(finalScore);
       setCurrentStep(5);
       getRecommendations(finalScore);
@@ -274,6 +276,7 @@ export default function UndergraduatePage() {
     setAssessment(null);
     setRecommendation(null);
     setTestScore(null);
+    setRawScore(null);
     setUserAnswers([]);
     setCurrentQuestionIndex(0);
     academicForm.reset();
@@ -486,6 +489,9 @@ export default function UndergraduatePage() {
           <CardContent className="flex flex-col items-center justify-center space-y-4 p-8">
             <Loader2 className="h-12 w-12 animate-spin text-primary" />
             <p className="text-muted-foreground">Our AI is analyzing your profile to find the best opportunities for you.</p>
+            {testScore !== null && assessment && (
+                <p className="font-bold text-lg">Your assessment score: {rawScore}/{assessment.questions.length} ({testScore.toFixed(2)}%)</p>
+            )}
           </CardContent>
         </Card>
       );
@@ -546,19 +552,9 @@ export default function UndergraduatePage() {
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
-       <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container flex h-14 max-w-screen-xl items-center">
-          <Link href="/" className="mr-auto flex items-center gap-2" prefetch={false}>
-            <Bot className="h-6 w-6 text-primary" />
-            <span className="font-bold font-headline text-lg">
-               Career Compass AI
-            </span>
-          </Link>
-        </div>
-      </header>
       <main className="flex-1 container py-12 md:py-16">
         <div className="flex items-center mb-8">
-          <Link href="/" passHref>
+          <Link href="/ai-career-advisor" passHref>
             <Button variant="outline" size="icon">
               <ArrowLeft className="h-4 w-4" />
             </Button>

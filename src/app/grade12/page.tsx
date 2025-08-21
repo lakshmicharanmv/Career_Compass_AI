@@ -75,6 +75,7 @@ export default function Grade12Page() {
   const [currentQuestionIndex, setCurrentQuestionIndex] = React.useState(0);
   const [userAnswers, setUserAnswers] = React.useState<string[]>([]);
   const [testScore, setTestScore] = React.useState<number | null>(null);
+  const [rawScore, setRawScore] = React.useState<number | null>(null);
   const [formValues, setFormValues] = React.useState<FormValues | null>(null);
 
   const form = useForm<FormValues>({
@@ -105,6 +106,7 @@ export default function Grade12Page() {
     setCurrentQuestionIndex(0);
     setUserAnswers([]);
     setTestScore(null);
+    setRawScore(null);
     setFormValues(data);
 
     try {
@@ -166,6 +168,7 @@ export default function Grade12Page() {
         }
       });
       const finalScore = (score / (assessment?.questions.length ?? 1)) * 100;
+      setRawScore(score);
       setTestScore(finalScore);
       getRecommendationWithTestScore(finalScore);
     }
@@ -213,7 +216,9 @@ export default function Grade12Page() {
         <Card>
           <CardHeader>
             <CardTitle>Assessment Complete!</CardTitle>
-            <CardDescription>Your score: {testScore.toFixed(2)}%</CardDescription>
+            <CardDescription>
+              Your score: {rawScore}/{assessment.questions.length} ({testScore.toFixed(2)}%)
+            </CardDescription>
           </CardHeader>
           <CardContent>
             {isLoading ? (
@@ -439,19 +444,9 @@ export default function Grade12Page() {
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
-      <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container flex h-14 max-w-screen-xl items-center justify-between">
-          <Link href="/" className="flex items-center" prefetch={false}>
-            <Bot className="h-6 w-6 text-primary" />
-            <span className="ml-2 font-bold font-headline text-lg">
-              Career Compass AI
-            </span>
-          </Link>
-        </div>
-      </header>
       <main className="flex-1 container py-12 md:py-16">
         <div className="flex items-center mb-8">
-          <Link href="/" passHref>
+          <Link href="/ai-career-advisor" passHref>
             <Button variant="outline" size="icon">
               <ArrowLeft className="h-4 w-4" />
             </Button>
