@@ -131,11 +131,12 @@ const skillsSchema = z.object({
 
 type AcademicFormValues = z.infer<typeof academicSchema>;
 type SkillsFormValues = z.infer<typeof skillsSchema>;
+type View = 'academic' | 'skills' | 'assessmentChoice' | 'assessment' | 'loading' | 'results';
 
 export default function UndergraduatePage() {
   const { toast } = useToast();
   const router = useRouter();
-  const [currentStep, setCurrentStep] = React.useState(1);
+  const [view, setView] = React.useState<View>('academic');
   const [isLoading, setIsLoading] = React.useState(false);
   const [academicData, setAcademicData] = React.useState<AcademicFormValues | null>(null);
   const [skillsData, setSkillsData] = React.useState<SkillsFormValues | null>(null);
@@ -184,7 +185,7 @@ export default function UndergraduatePage() {
 
   const handleAcademicSubmit = (data: AcademicFormValues) => {
     setAcademicData(data);
-    setCurrentStep(2);
+    setView('skills');
   };
 
   const handleSkillsSubmit = (data: SkillsFormValues) => {
@@ -192,12 +193,12 @@ export default function UndergraduatePage() {
       technical: data.technical.join(', '),
       soft: data.soft,
     });
-    setCurrentStep(3);
+    setView('assessmentChoice');
   };
 
   const handleAssessmentChoice = async (choice: 'yes' | 'no') => {
+    setIsLoading(true);
     if (choice === 'yes') {
-      setIsLoading(true);
       try {
         const assessmentData = await generateAssessmentQuestions({
           level: 'UG',
@@ -205,14 +206,15 @@ export default function UndergraduatePage() {
           numberOfQuestions: 20,
         });
         setAssessment(assessmentData);
-        setCurrentStep(4);
+        setView('assessment');
       } catch (error) {
         toast({ variant: 'destructive', title: 'Error', description: 'Could not generate assessment questions.' });
       } finally {
         setIsLoading(false);
       }
     } else {
-      getRecommendations(null);
+      await getRecommendations(null);
+      setIsLoading(false);
     }
   };
 
@@ -230,14 +232,13 @@ export default function UndergraduatePage() {
       const finalScore = (score / (assessment?.questions.length ?? 1)) * 100;
       setRawScore(score);
       setTestScore(finalScore);
-      setCurrentStep(5);
       getRecommendations(finalScore);
     }
   };
 
   const getRecommendations = async (score: number | null) => {
     if (!academicData || !skillsData) return;
-    setCurrentStep(5);
+    setView('loading');
     setIsLoading(true);
     try {
       // Save all data to localStorage before getting recommendations
@@ -256,8 +257,10 @@ export default function UndergraduatePage() {
         assessmentScore: score ?? undefined,
       });
       setRecommendation(result);
+      setView('results');
     } catch (error) {
       toast({ variant: 'destructive', title: 'Error', description: 'Could not get recommendations.' });
+      setView('assessmentChoice');
       console.error(error);
     } finally {
       setIsLoading(false);
@@ -270,7 +273,7 @@ export default function UndergraduatePage() {
   };
 
   const startOver = () => {
-    setCurrentStep(1);
+    setView('academic');
     setAcademicData(null);
     setSkillsData(null);
     setAssessment(null);
@@ -284,12 +287,13 @@ export default function UndergraduatePage() {
   };
   
   const renderStep = () => {
-    switch (currentStep) {
-      case 1: return renderAcademicForm();
-      case 2: return renderSkillsForm();
-      case 3: return renderAssessmentChoice();
-      case 4: return renderAssessment();
-      case 5: return renderRecommendations();
+    switch (view) {
+      case 'academic': return renderAcademicForm();
+      case 'skills': return renderSkillsForm();
+      case 'assessmentChoice': return renderAssessmentChoice();
+      case 'assessment': return renderAssessment();
+      case 'loading': return renderLoading();
+      case 'results': return renderRecommendations();
       default: return null;
     }
   }
@@ -420,7 +424,7 @@ export default function UndergraduatePage() {
                 </FormItem>
             )} />
             <div className="flex gap-4">
-              <Button variant="outline" onClick={() => setCurrentStep(1)}>Back</Button>
+              <Button variant="outline" onClick={() => setView('academic')}>Back</Button>
               <Button type="submit">Next: Assessment</Button>
             </div>
           </form>
@@ -440,12 +444,12 @@ export default function UndergraduatePage() {
               <Button onClick={() => handleAssessmentChoice('yes')} className="w-full md:w-auto" disabled={isLoading}>
                   {isLoading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Generating Test...</> : 'Yes, Start Test'}
               </Button>
-              <Button variant="secondary" onClick={() => handleAssessmentChoice('no')} className="w-full md:w-auto">
-                  No, Skip to Recommendations
+              <Button variant="secondary" onClick={() => handleAssessmentChoice('no')} className="w-full md:w-auto" disabled={isLoading}>
+                  {isLoading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Getting Advice...</> : 'No, Skip to Recommendations'}
               </Button>
           </CardContent>
            <CardFooter>
-              <Button variant="outline" onClick={() => setCurrentStep(2)}>Back</Button>
+              <Button variant="outline" onClick={() => setView('skills')}>Back</Button>
            </CardFooter>
       </Card>
   );
@@ -480,22 +484,31 @@ export default function UndergraduatePage() {
       </Form>
     );
   };
+  
+  const renderLoading = () => (
+     <Card>
+      <CardHeader>
+        {testScore !== null ? (
+            <CardTitle>Assessment Complete!</CardTitle>
+        ) : (
+            <CardTitle>Generating Your Future Path...</CardTitle>
+        )}
+      </CardHeader>
+      <CardContent className="flex flex-col items-center justify-center space-y-4 p-8">
+        {testScore !== null && rawScore !== null && assessment ? (
+             <div className="text-center">
+                <p>Your score: <strong className="text-primary">{rawScore}/{assessment.questions.length} ({testScore.toFixed(2)}%)</strong></p>
+                <p className="mt-4 text-muted-foreground">Now generating your career recommendation based on your marks and test score.</p>
+             </div>
+        ): (
+            <p className="text-muted-foreground">Please wait while our AI analyzes your profile.</p>
+        )}
+        <Loader2 className="h-12 w-12 animate-spin text-primary mt-4" />
+      </CardContent>
+    </Card>
+  );
 
   const renderRecommendations = () => {
-    if (isLoading) {
-      return (
-        <Card>
-          <CardHeader><CardTitle>Generating Your Future Path...</CardTitle></CardHeader>
-          <CardContent className="flex flex-col items-center justify-center space-y-4 p-8">
-            <Loader2 className="h-12 w-12 animate-spin text-primary" />
-            <p className="text-muted-foreground">Our AI is analyzing your profile to find the best opportunities for you.</p>
-            {testScore !== null && assessment && (
-                <p className="font-bold text-lg">Your assessment score: {rawScore}/{assessment.questions.length} ({testScore.toFixed(2)}%)</p>
-            )}
-          </CardContent>
-        </Card>
-      );
-    }
     if (!recommendation) return null;
 
     return (
@@ -516,11 +529,11 @@ export default function UndergraduatePage() {
             )}
         </CardHeader>
         <CardContent className="grid grid-cols-1 md:grid-cols-1 gap-8">
-           {testScore !== null && (
+           {testScore !== null && rawScore !== null && assessment && (
               <div className="p-4 bg-background/50 rounded-lg">
                   <h4 className="font-semibold text-center">Assessment Result</h4>
                   <p className="text-center text-muted-foreground text-sm mt-1">
-                      You scored <strong className="text-primary">{rawScore}/{assessment?.questions.length}</strong> which is <strong className="text-primary">{testScore.toFixed(2)}%</strong>.
+                      You scored <strong className="text-primary">{rawScore}/{assessment.questions.length}</strong> which is <strong className="text-primary">{testScore.toFixed(2)}%</strong>.
                   </p>
               </div>
             )}
@@ -583,5 +596,3 @@ export default function UndergraduatePage() {
     </div>
   );
 }
-
-    

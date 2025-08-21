@@ -77,6 +77,7 @@ export default function Grade12Page() {
   const [testScore, setTestScore] = React.useState<number | null>(null);
   const [rawScore, setRawScore] = React.useState<number | null>(null);
   const [formValues, setFormValues] = React.useState<FormValues | null>(null);
+  const [view, setView] = React.useState<'form' | 'assessment' | 'loading' | 'results'>('form');
 
   const form = useForm<FormValues>({
     resolver: zodResolver(FormSchema),
@@ -101,12 +102,6 @@ export default function Grade12Page() {
 
   async function onSubmit(data: FormValues) {
     setIsLoading(true);
-    setRecommendation(null);
-    setAssessment(null);
-    setCurrentQuestionIndex(0);
-    setUserAnswers([]);
-    setTestScore(null);
-    setRawScore(null);
     setFormValues(data);
 
     try {
@@ -122,25 +117,9 @@ export default function Grade12Page() {
           numberOfQuestions: 20,
         });
         setAssessment(assessmentData);
+        setView('assessment');
       } else {
-        const result = await recommendDegreeCourses({
-            tenthPercentage: data.tenthPercentage,
-            twelfthStream: data.twelfthStream,
-            twelfthMarks: {
-                physics: data.physics,
-                chemistry: data.chemistry,
-                math: data.math,
-                biology: data.biology,
-                accounts: data.accounts,
-                business_studies: data.business_studies,
-                economics: data.economics,
-                history: data.history,
-                political_science: data.political_science,
-                sociology_psychology: data.sociology_psychology,
-                english: data.english,
-            },
-        });
-        setRecommendation(result);
+        await getRecommendationWithTestScore(null);
       }
     } catch (error) {
       toast({
@@ -174,8 +153,9 @@ export default function Grade12Page() {
     }
   };
 
-  const getRecommendationWithTestScore = async (score: number) => {
+  const getRecommendationWithTestScore = async (score: number | null) => {
     if (!formValues) return;
+    setView('loading');
     setIsLoading(true);
     try {
       const result = await recommendDegreeCourses({
@@ -194,46 +174,37 @@ export default function Grade12Page() {
             sociology_psychology: formValues.sociology_psychology,
             english: formValues.english,
         },
-        aptitudeTestScore: score,
+        aptitudeTestScore: score ?? undefined,
       });
       setRecommendation(result);
+      setView('results');
     } catch (error) {
       toast({
         variant: 'destructive',
         title: 'Uh oh! Something went wrong.',
         description: 'There was a problem getting your recommendation.',
       });
+      setView('form');
     } finally {
       setIsLoading(false);
     }
   };
 
+  const startOver = () => {
+    setView('form');
+    setIsLoading(false);
+    setAssessment(null);
+    setRecommendation(null);
+    setCurrentQuestionIndex(0);
+    setUserAnswers([]);
+    setTestScore(null);
+    setRawScore(null);
+    setFormValues(null);
+    form.reset();
+  }
+
   const renderAssessment = () => {
     if (!assessment) return null;
-
-    if (testScore !== null) {
-      return (
-        <Card>
-          <CardHeader>
-            <CardTitle>Assessment Complete!</CardTitle>
-            <CardDescription>
-              Your score: {rawScore}/{assessment.questions.length} ({testScore.toFixed(2)}%)
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {isLoading ? (
-              <div className="flex items-center justify-center">
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                <p>Generating your recommendation...</p>
-              </div>
-            ) : (
-              <p>Now generating your degree recommendation based on your marks and test score.</p>
-            )}
-          </CardContent>
-        </Card>
-      );
-    }
-
     const question = assessment.questions[currentQuestionIndex];
     const progress = ((currentQuestionIndex + 1) / assessment.questions.length) * 100;
 
@@ -275,11 +246,11 @@ export default function Grade12Page() {
           <CardDescription>{recommendation.reasoning}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-           {testScore !== null && (
+           {testScore !== null && rawScore !== null && assessment && (
             <div className="p-4 bg-background/50 rounded-lg">
                 <h4 className="font-semibold text-center">Assessment Result</h4>
                 <p className="text-center text-muted-foreground text-sm mt-1">
-                    You scored <strong className="text-primary">{rawScore}/{assessment?.questions.length}</strong> which is <strong className="text-primary">{testScore.toFixed(2)}%</strong>.
+                    You scored <strong className="text-primary">{rawScore}/{assessment.questions.length}</strong> which is <strong className="text-primary">{testScore.toFixed(2)}%</strong>.
                 </p>
             </div>
           )}
@@ -293,12 +264,7 @@ export default function Grade12Page() {
           </div>
         </CardContent>
         <CardFooter>
-            <Button onClick={() => {
-              setRecommendation(null);
-              setAssessment(null);
-              setTestScore(null);
-              form.reset();
-            }}>Start Over</Button>
+            <Button onClick={startOver}>Start Over</Button>
         </CardFooter>
       </Card>
     );
@@ -450,6 +416,40 @@ export default function Grade12Page() {
     </Card>
   );
 
+  const renderLoading = () => (
+     <Card>
+      <CardHeader>
+        {testScore !== null ? (
+            <CardTitle>Assessment Complete!</CardTitle>
+        ) : (
+            <CardTitle>Generating your recommendation...</CardTitle>
+        )}
+      </CardHeader>
+      <CardContent className="flex flex-col items-center justify-center space-y-4 p-8">
+        {testScore !== null && rawScore !== null && assessment ? (
+             <div className="text-center">
+                <p>Your score: <strong className="text-primary">{rawScore}/{assessment.questions.length} ({testScore.toFixed(2)}%)</strong></p>
+                <p className="mt-4 text-muted-foreground">Now generating your degree recommendation based on your marks and test score.</p>
+             </div>
+        ): (
+            <p className="text-muted-foreground">Please wait while our AI analyzes your profile.</p>
+        )}
+        <Loader2 className="h-12 w-12 animate-spin text-primary mt-4" />
+      </CardContent>
+    </Card>
+  );
+  
+  const renderContent = () => {
+    switch (view) {
+        case 'form': return renderForm();
+        case 'assessment': return renderAssessment();
+        case 'loading': return renderLoading();
+        case 'results': return renderRecommendation();
+        default: return renderForm();
+    }
+  }
+
+
   return (
     <div className="flex flex-col min-h-screen bg-background">
       <main className="flex-1 container py-12 md:py-16">
@@ -464,16 +464,9 @@ export default function Grade12Page() {
           </h1>
         </div>
         <div className="max-w-5xl mx-auto">
-          {recommendation 
-            ? renderRecommendation()
-            : (assessment && !isLoading)
-              ? renderAssessment()
-              : renderForm()
-          }
+          {renderContent()}
         </div>
       </main>
     </div>
   );
 }
-
-    

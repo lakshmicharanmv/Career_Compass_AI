@@ -40,7 +40,7 @@ const formSchema = z.object({
 });
 
 type FormValues = z.infer<typeof formSchema>;
-type Step = 'form' | 'assessmentChoice' | 'assessment' | 'results';
+type Step = 'form' | 'assessmentChoice' | 'assessment' | 'loading' | 'results';
 type RecommendationOutput = ProfessionalCareerAdvisorOutput & { error?: boolean; message?: string };
 
 
@@ -127,7 +127,7 @@ export default function ProfessionalPage() {
 
   const getRecommendations = async (score: number | null) => {
     if (!formData) return;
-    setStep('results');
+    setStep('loading');
     setIsLoading(true);
     setApiError(null);
     try {
@@ -153,9 +153,11 @@ export default function ProfessionalPage() {
       } else {
         setRecommendation(result);
       }
+      setStep('results');
     } catch (error) {
       console.error("Failed to get recommendations:", error);
       setApiError("An unexpected error occurred. Please try again.");
+      setStep('results');
     } finally {
       setIsLoading(false);
     }
@@ -309,23 +311,30 @@ export default function ProfessionalPage() {
     );
   };
 
-  const renderResults = () => {
-    if (isLoading) {
-      return (
-        <Card>
-          <CardHeader>
+  const renderLoading = () => (
+    <Card>
+      <CardHeader>
+        {testScore !== null ? (
+            <CardTitle>Assessment Complete!</CardTitle>
+        ) : (
             <CardTitle>Generating Your Career Progression Plan...</CardTitle>
-          </CardHeader>
-          <CardContent className="flex flex-col items-center justify-center space-y-4 p-8">
-            <Loader2 className="h-12 w-12 animate-spin text-primary" />
+        )}
+      </CardHeader>
+      <CardContent className="flex flex-col items-center justify-center space-y-4 p-8">
+        {testScore !== null && rawScore !== null && assessment ? (
+             <div className="text-center">
+                <p>Your score: <strong className="text-primary">{rawScore}/{assessment.questions.length} ({testScore.toFixed(2)}%)</strong></p>
+                <p className="mt-4 text-muted-foreground">Our AI is analyzing your profile to forge the best path forward.</p>
+             </div>
+        ): (
             <p className="text-muted-foreground">Our AI is analyzing your profile to forge the best path forward.</p>
-             {testScore !== null && assessment && (
-                <p className="font-bold text-lg">Your assessment score: {rawScore}/{assessment.questions.length} ({testScore.toFixed(2)}%)</p>
-            )}
-          </CardContent>
-        </Card>
-      );
-    }
+        )}
+        <Loader2 className="h-12 w-12 animate-spin text-primary mt-4" />
+      </CardContent>
+    </Card>
+  );
+
+  const renderResults = () => {
     if (apiError) {
       return (
         <Card className="border-destructive/50">
@@ -342,21 +351,6 @@ export default function ProfessionalPage() {
           </CardFooter>
         </Card>
       );
-    }
-    if (!recommendation && testScore !== null) {
-         return (
-            <Card>
-              <CardHeader>
-                <CardTitle>Assessment Complete!</CardTitle>
-                 {testScore !== null && assessment && (
-                     <CardDescription>Your score: {rawScore}/{assessment.questions.length} ({testScore.toFixed(2)}%)</CardDescription>
-                 )}
-              </CardHeader>
-              <CardContent>
-                  <p>Now generating your career roadmap...</p>
-              </CardContent>
-            </Card>
-        );
     }
     
     if (!recommendation) return null;
@@ -380,11 +374,11 @@ export default function ProfessionalPage() {
             )}
         </CardHeader>
         <CardContent className="space-y-8">
-           {testScore !== null && (
+           {testScore !== null && rawScore !== null && assessment && (
               <div className="p-4 bg-background/50 rounded-lg">
                   <h4 className="font-semibold text-center">Professional Skills Assessment Result</h4>
                   <p className="text-center text-muted-foreground text-sm mt-1">
-                      You scored <strong className="text-primary">{rawScore}/{assessment?.questions.length}</strong> which is <strong className="text-primary">{testScore.toFixed(2)}%</strong>.
+                      You scored <strong className="text-primary">{rawScore}/{assessment.questions.length}</strong> which is <strong className="text-primary">{testScore.toFixed(2)}%</strong>.
                   </p>
               </div>
             )}
@@ -449,6 +443,7 @@ export default function ProfessionalPage() {
       case 'form': return renderForm();
       case 'assessmentChoice': return renderAssessmentChoice();
       case 'assessment': return renderAssessment();
+      case 'loading': return renderLoading();
       case 'results': return renderResults();
       default: return null;
     }
@@ -474,5 +469,3 @@ export default function ProfessionalPage() {
     </div>
   );
 }
-
-    
