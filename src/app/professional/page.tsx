@@ -343,7 +343,7 @@ export default function ProfessionalPage() {
         </Card>
       );
     }
-    if (!recommendation) {
+    if (!recommendation && testScore !== null) {
          return (
             <Card>
               <CardHeader>
@@ -358,6 +358,8 @@ export default function ProfessionalPage() {
             </Card>
         );
     }
+    
+    if (!recommendation) return null;
 
 
     return (
@@ -472,3 +474,5 @@ export default function ProfessionalPage() {
     </div>
   );
 }
+
+    

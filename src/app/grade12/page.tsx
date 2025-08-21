@@ -466,7 +466,7 @@ export default function Grade12Page() {
         <div className="max-w-5xl mx-auto">
           {recommendation 
             ? renderRecommendation()
-            : (assessment && !isLoading && testScore === null)
+            : (assessment && !isLoading)
               ? renderAssessment()
               : renderForm()
           }
@@ -475,3 +475,5 @@ export default function Grade12Page() {
     </div>
   );
 }
+
+    
