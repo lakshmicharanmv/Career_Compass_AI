@@ -443,7 +443,7 @@ export default function ProfessionalPage() {
     <div className="flex flex-col min-h-screen bg-background">
       <main className="flex-1 container py-12 md:py-16">
         <div className="flex items-center mb-8">
-          <Link href="/ai-career-advisor" passHref>
+          <Link href="/" passHref>
             <Button variant="outline" size="icon">
               <ArrowLeft className="h-4 w-4" />
             </Button>
