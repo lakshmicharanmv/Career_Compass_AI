@@ -146,6 +146,7 @@ export default function Grade12Page() {
           score++;
         }
       });
+      
       const finalScore = (score / (assessment?.questions.length ?? 1)) * 100;
       setRawScore(score);
       setTestScore(finalScore);
@@ -219,11 +220,19 @@ export default function Grade12Page() {
             </CardHeader>
             <CardContent className="p-8">
               <p className="text-lg font-semibold mb-6 leading-relaxed">{question.question}</p>
-              <RadioGroup onValueChange={handleAnswerSubmit} key={currentQuestionIndex} className="space-y-4">
+              <RadioGroup onValueChange={handleAnswerSubmit} key={currentQuestionIndex} className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {question.options.map((option, index) => (
-                  <div key={index} className="flex items-center space-x-3 p-4 border rounded-lg has-[:checked]:bg-primary/10 has-[:checked]:border-primary">
+                  <div
+                    key={index}
+                    className="flex items-center space-x-3 p-4 border rounded-lg has-[:checked]:bg-primary/10 has-[:checked]:border-primary"
+                  >
                     <RadioGroupItem value={option} id={`q${currentQuestionIndex}-o${index}`} />
-                    <FormLabel htmlFor={`q${currentQuestionIndex}-o${index}`} className="text-base font-normal flex-1 cursor-pointer">{option}</FormLabel>
+                    <FormLabel
+                      htmlFor={`q${currentQuestionIndex}-o${index}`}
+                      className="text-base font-normal flex-1 cursor-pointer"
+                    >
+                      {option}
+                    </FormLabel>
                   </div>
                 ))}
               </RadioGroup>
@@ -449,7 +458,6 @@ export default function Grade12Page() {
     }
   }
 
-
   return (
     <div className="flex flex-col min-h-screen bg-background">
       <main className="flex-1 container py-12 md:py-16">
@@ -470,5 +478,3 @@ export default function Grade12Page() {
     </div>
   );
 }
-
-    
