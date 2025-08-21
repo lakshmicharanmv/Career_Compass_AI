@@ -142,7 +142,7 @@ export default function Grade12Page() {
     } else {
       let score = 0;
       assessment?.questions.forEach((q, i) => {
-        if (newAnswers[i] === q.correctAnswer) {
+        if (newAnswers[i].trim().toLowerCase() === q.correctAnswer.trim().toLowerCase()) {
           score++;
         }
       });
@@ -470,3 +470,5 @@ export default function Grade12Page() {
     </div>
   );
 }
+
+    

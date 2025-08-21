@@ -126,7 +126,7 @@ export default function Grade10Page() {
       // Test finished, calculate score and get recommendation
       let score = 0;
       assessment?.questions.forEach((q, i) => {
-        if (newAnswers[i] === q.correctAnswer) {
+        if (newAnswers[i].trim().toLowerCase() === q.correctAnswer.trim().toLowerCase()) {
           score++;
         }
       });
@@ -173,7 +173,7 @@ export default function Grade10Page() {
           <CardHeader>
             <CardTitle>Assessment Complete!</CardTitle>
             <CardDescription>
-              Your score: {rawScore}/{assessment.questions.length} ({testScore.toFixed(2)}%)
+              You scored {rawScore}/{assessment.questions.length} ({testScore.toFixed(2)}%)
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -233,11 +233,11 @@ export default function Grade10Page() {
           )}
         </CardHeader>
         <CardContent className="space-y-6">
-          {testScore !== null && (
+          {testScore !== null && rawScore !== null && assessment && (
             <div className="p-4 bg-background/50 rounded-lg">
                 <h4 className="font-semibold text-center">Assessment Result</h4>
                 <p className="text-center text-muted-foreground text-sm mt-1">
-                    You scored <strong className="text-primary">{rawScore}/{assessment?.questions.length}</strong> which is <strong className="text-primary">{testScore.toFixed(2)}%</strong>.
+                    You scored <strong className="text-primary">{rawScore}/{assessment.questions.length}</strong> which is <strong className="text-primary">{testScore.toFixed(2)}%</strong>.
                 </p>
             </div>
           )}
@@ -429,3 +429,5 @@ export default function Grade10Page() {
     </div>
   );
 }
+
+    

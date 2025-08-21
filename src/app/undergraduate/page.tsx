@@ -227,7 +227,7 @@ export default function UndergraduatePage() {
     } else {
       let score = 0;
       assessment?.questions.forEach((q, i) => {
-        if (newAnswers[i] === q.correctAnswer) score++;
+        if (newAnswers[i].trim().toLowerCase() === q.correctAnswer.trim().toLowerCase()) score++;
       });
       const finalScore = (score / (assessment?.questions.length ?? 1)) * 100;
       setRawScore(score);
@@ -596,3 +596,5 @@ export default function UndergraduatePage() {
     </div>
   );
 }
+
+    
