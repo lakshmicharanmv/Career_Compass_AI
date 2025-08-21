@@ -367,12 +367,25 @@ export default function ProfessionalPage() {
                 <Sparkles className="h-6 w-6 text-primary" />
                 <CardTitle className="text-primary font-headline">Your AI-Powered Career Roadmap</CardTitle>
             </div>
-            <CardDescription>
-                Based on your experience, goals, {testScore !== null && `and assessment score of ${testScore.toFixed(2)}%, `}
-                here is your tailored advice.
-            </CardDescription>
+            {testScore !== null ? (
+              <CardDescription>
+                  Based on your experience, goals, and assessment score, here is your tailored advice.
+              </CardDescription>
+            ) : (
+               <CardDescription>
+                  Based on your experience and goals, here is your tailored advice.
+              </CardDescription>
+            )}
         </CardHeader>
         <CardContent className="space-y-8">
+           {testScore !== null && (
+              <div className="p-4 bg-background/50 rounded-lg">
+                  <h4 className="font-semibold text-center">Professional Skills Assessment Result</h4>
+                  <p className="text-center text-muted-foreground text-sm mt-1">
+                      You scored <strong className="text-primary">{rawScore}/{assessment?.questions.length}</strong> which is <strong className="text-primary">{testScore.toFixed(2)}%</strong>.
+                  </p>
+              </div>
+            )}
           {recommendation.nextRoles?.length > 0 && (
             <div>
               <h3 className="text-xl font-bold flex items-center gap-2 mb-4"><Briefcase className="text-accent" /> Recommended Next Roles</h3>

@@ -274,8 +274,16 @@ export default function Grade12Page() {
           </div>
           <CardDescription>{recommendation.reasoning}</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div>
+        <CardContent className="space-y-6">
+           {testScore !== null && (
+            <div className="p-4 bg-background/50 rounded-lg">
+                <h4 className="font-semibold text-center">Assessment Result</h4>
+                <p className="text-center text-muted-foreground text-sm mt-1">
+                    You scored <strong className="text-primary">{rawScore}/{assessment?.questions.length}</strong> which is <strong className="text-primary">{testScore.toFixed(2)}%</strong>.
+                </p>
+            </div>
+          )}
+          <div className="space-y-4">
             <h4 className="font-semibold">Top Degree Options for You:</h4>
             <ul className="list-disc list-inside text-muted-foreground mt-2">
               {recommendation.recommendedCourses.map((path, index) => (

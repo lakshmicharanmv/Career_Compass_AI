@@ -228,20 +228,32 @@ export default function Grade10Page() {
             <Sparkles className="h-6 w-6 text-primary" />
             <CardTitle className="text-primary font-headline">AI-Powered Recommendation</CardTitle>
           </div>
-          <CardDescription>Based on your input, here is our suggestion for your academic stream.</CardDescription>
+          {testScore !== null && (
+            <CardDescription>Based on your input and assessment score, here is our suggestion.</CardDescription>
+          )}
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div>
-            <h3 className="font-bold text-lg text-accent">{recommendation.recommendedStream}</h3>
-            <p className="text-muted-foreground mt-1">{recommendation.reasoning}</p>
-          </div>
-          <div>
-            <h4 className="font-semibold">Top Career Paths for this Stream:</h4>
-            <ul className="list-disc list-inside text-muted-foreground mt-2">
-              {recommendation.careerPaths.map((path, index) => (
-                <li key={index}>{path}</li>
-              ))}
-            </ul>
+        <CardContent className="space-y-6">
+          {testScore !== null && (
+            <div className="p-4 bg-background/50 rounded-lg">
+                <h4 className="font-semibold text-center">Assessment Result</h4>
+                <p className="text-center text-muted-foreground text-sm mt-1">
+                    You scored <strong className="text-primary">{rawScore}/{assessment?.questions.length}</strong> which is <strong className="text-primary">{testScore.toFixed(2)}%</strong>.
+                </p>
+            </div>
+          )}
+          <div className="space-y-4">
+            <div>
+              <h3 className="font-bold text-lg text-accent">{recommendation.recommendedStream}</h3>
+              <p className="text-muted-foreground mt-1">{recommendation.reasoning}</p>
+            </div>
+            <div>
+              <h4 className="font-semibold">Top Career Paths for this Stream:</h4>
+              <ul className="list-disc list-inside text-muted-foreground mt-2">
+                {recommendation.careerPaths.map((path, index) => (
+                  <li key={index}>{path}</li>
+                ))}
+              </ul>
+            </div>
           </div>
         </CardContent>
         <CardFooter>

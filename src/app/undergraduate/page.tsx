@@ -505,12 +505,25 @@ export default function UndergraduatePage() {
                 <Sparkles className="h-6 w-6 text-primary" />
                 <CardTitle className="text-primary font-headline">Your Personalized Recommendations</CardTitle>
             </div>
-            <CardDescription>
-                Based on your academics, skills, {testScore !== null && `and assessment score of ${testScore.toFixed(2)}%, `}
-                here are some tailored suggestions for your career journey.
-            </CardDescription>
+            {testScore !== null ? (
+              <CardDescription>
+                Based on your academics, skills, and assessment score, here are some tailored suggestions for your career journey.
+              </CardDescription>
+            ) : (
+               <CardDescription>
+                Based on your academics and skills, here are some tailored suggestions for your career journey.
+              </CardDescription>
+            )}
         </CardHeader>
-        <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <CardContent className="grid grid-cols-1 md:grid-cols-1 gap-8">
+           {testScore !== null && (
+              <div className="p-4 bg-background/50 rounded-lg">
+                  <h4 className="font-semibold text-center">Assessment Result</h4>
+                  <p className="text-center text-muted-foreground text-sm mt-1">
+                      You scored <strong className="text-primary">{rawScore}/{assessment?.questions.length}</strong> which is <strong className="text-primary">{testScore.toFixed(2)}%</strong>.
+                  </p>
+              </div>
+            )}
           <div className="space-y-4">
               <h3 className="text-xl font-bold flex items-center gap-2"><Briefcase className="text-accent" /> Recommended Job Roles</h3>
               <div className="space-y-4">
