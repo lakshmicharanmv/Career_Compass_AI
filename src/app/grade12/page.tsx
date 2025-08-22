@@ -220,7 +220,7 @@ export default function Grade12Page() {
             </CardHeader>
             <CardContent className="p-8">
               <p className="text-lg font-semibold mb-6 leading-relaxed">{question.question}</p>
-              <RadioGroup onValueChange={handleAnswerSubmit} key={currentQuestionIndex} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <RadioGroup onValueChange={(val) => handleAnswerSubmit(val)} key={currentQuestionIndex} className="space-y-4">
                 {question.options.map((option, index) => (
                   <div
                     key={index}
