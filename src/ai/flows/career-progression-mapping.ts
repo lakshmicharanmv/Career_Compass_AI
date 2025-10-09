@@ -33,7 +33,7 @@ const CareerProgressionOutputSchema = z.object({
 });
 export type CareerProgressionOutput = z.infer<typeof CareerProgressionOutputSchema>;
 
-export async function getCareerProgressionMap(input: CareerProgressionInput): Promise<CareerProgressionOutput> {
+export async function getCareerProgressionMap(input: CareerProgressionInput): Promise<CareerProgressionOutput | { error: true; message: string }> {
   return careerProgressionFlow(input);
 }
 
@@ -54,7 +54,7 @@ const careerProgressionFlow = ai.defineFlow(
   {
     name: 'careerProgressionFlow',
     inputSchema: CareerProgressionInputSchema,
-    outputSchema: CareerProgressionOutputSchema,
+    outputSchema: z.union([CareerProgressionOutputSchema, z.object({ error: z.literal(true), message: z.string() })]),
   },
   async (input) => {
     try {
@@ -69,7 +69,11 @@ const careerProgressionFlow = ai.defineFlow(
            const { output } = await careerProgressionPrompt(input, { model: flashModel });
            return output!;
         } catch (fallbackError: any) {
+            const fallbackMessage = (fallbackError.message || '') as string;
             console.error("Fallback career progression model also failed:", fallbackError);
+             if (fallbackMessage.includes('503') || fallbackMessage.includes('overloaded') || fallbackMessage.includes('429')) {
+                return { error: true, message: 'Our AI is currently busy. Please try again in a few moments.' };
+            }
             throw fallbackError;
         }
       } else {

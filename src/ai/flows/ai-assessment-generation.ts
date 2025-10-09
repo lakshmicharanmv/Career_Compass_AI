@@ -37,7 +37,7 @@ const AssessmentQuestionsOutputSchema = z.object({
 });
 export type AssessmentQuestionsOutput = z.infer<typeof AssessmentQuestionsOutputSchema>;
 
-export async function generateAssessmentQuestions(input: AssessmentQuestionsInput): Promise<AssessmentQuestionsOutput> {
+export async function generateAssessmentQuestions(input: AssessmentQuestionsInput): Promise<AssessmentQuestionsOutput | { error: true; message: string }> {
   return generateAssessmentQuestionsFlow(input);
 }
 
@@ -61,7 +61,7 @@ const generateAssessmentQuestionsFlow = ai.defineFlow(
   {
     name: 'generateAssessmentQuestionsFlow',
     inputSchema: AssessmentQuestionsInputSchema,
-    outputSchema: AssessmentQuestionsOutputSchema,
+    outputSchema: z.union([AssessmentQuestionsOutputSchema, z.object({ error: z.literal(true), message: z.string() })]),
   },
   async (input) => {
     try {
@@ -76,7 +76,11 @@ const generateAssessmentQuestionsFlow = ai.defineFlow(
            const { output } = await assessmentQuestionsPrompt(input, { model: flashModel });
            return output!;
         } catch (fallbackError: any) {
+            const fallbackMessage = (fallbackError.message || '') as string;
             console.error("Fallback assessment model also failed:", fallbackError);
+            if (fallbackMessage.includes('503') || fallbackMessage.includes('overloaded') || fallbackMessage.includes('429')) {
+                return { error: true, message: 'Our AI is currently busy. Please try again in a few moments.' };
+            }
             throw fallbackError;
         }
       } else {

@@ -38,7 +38,7 @@ const RecommendDegreeCoursesOutputSchema = z.object({
 export type RecommendDegreeCoursesOutput = z.infer<typeof RecommendDegreeCoursesOutputSchema>;
 
 
-export async function recommendDegreeCourses(input: RecommendDegreeCoursesInput): Promise<RecommendDegreeCoursesOutput> {
+export async function recommendDegreeCourses(input: RecommendDegreeCoursesInput): Promise<RecommendDegreeCoursesOutput | { error: true; message: string }> {
   return recommendDegreeCoursesFlow(input);
 }
 
@@ -90,7 +90,7 @@ const recommendDegreeCoursesFlow = ai.defineFlow(
   {
     name: 'recommendDegreeCoursesFlow',
     inputSchema: RecommendDegreeCoursesInputSchema,
-    outputSchema: RecommendDegreeCoursesOutputSchema,
+    outputSchema: z.union([RecommendDegreeCoursesOutputSchema, z.object({ error: z.literal(true), message: z.string() })]),
   },
   async (input) => {
     try {
@@ -105,7 +105,11 @@ const recommendDegreeCoursesFlow = ai.defineFlow(
            const { output } = await recommendDegreeCoursesPrompt(input, { model: flashModel });
            return output!;
         } catch (fallbackError: any) {
+            const fallbackMessage = (fallbackError.message || '') as string;
             console.error("Fallback degree courses model also failed:", fallbackError);
+            if (fallbackMessage.includes('503') || fallbackMessage.includes('overloaded') || fallbackMessage.includes('429')) {
+                return { error: true, message: 'Our AI is currently busy. Please try again in a few moments.' };
+            }
             throw fallbackError;
         }
       } else {

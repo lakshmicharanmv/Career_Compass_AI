@@ -41,7 +41,7 @@ const UndergraduateOptionsOutputSchema = z.object({
 export type UndergraduateOptionsOutput = z.infer<typeof UndergraduateOptionsOutputSchema>;
 
 
-export async function recommendUndergraduateOptions(input: UndergraduateOptionsInput): Promise<UndergraduateOptionsOutput> {
+export async function recommendUndergraduateOptions(input: UndergraduateOptionsInput): Promise<UndergraduateOptionsOutput | { error: true; message: string }> {
   return recommendUndergraduateOptionsFlow(input);
 }
 
@@ -80,7 +80,7 @@ const recommendUndergraduateOptionsFlow = ai.defineFlow(
   {
     name: 'recommendUndergraduateOptionsFlow',
     inputSchema: UndergraduateOptionsInputSchema,
-    outputSchema: UndergraduateOptionsOutputSchema,
+    outputSchema: z.union([UndergraduateOptionsOutputSchema, z.object({ error: z.literal(true), message: z.string() })]),
   },
   async (input) => {
     try {
@@ -95,7 +95,11 @@ const recommendUndergraduateOptionsFlow = ai.defineFlow(
            const { output } = await recommendUndergraduateOptionsPrompt(input, { model: flashModel });
            return output!;
         } catch (fallbackError: any) {
+            const fallbackMessage = (fallbackError.message || '') as string;
             console.error("Fallback undergraduate options model also failed:", fallbackError);
+             if (fallbackMessage.includes('503') || fallbackMessage.includes('overloaded') || fallbackMessage.includes('429')) {
+                return { error: true, message: 'Our AI is currently busy. Please try again in a few moments.' };
+            }
             throw fallbackError;
         }
       } else {

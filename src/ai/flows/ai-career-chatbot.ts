@@ -21,7 +21,7 @@ const AICareerChatbotOutputSchema = z.object({
 });
 export type AICareerChatbotOutput = z.infer<typeof AICareerChatbotOutputSchema>;
 
-export async function aiCareerChatbot(input: AICareerChatbotInput): Promise<AICareerChatbotOutput> {
+export async function aiCareerChatbot(input: AICareerChatbotInput): Promise<AICareerChatbotOutput | { error: true; message: string }> {
   return aiCareerChatbotFlow(input);
 }
 
@@ -43,7 +43,7 @@ const aiCareerChatbotFlow = ai.defineFlow(
   {
     name: 'aiCareerChatbotFlow',
     inputSchema: AICareerChatbotInputSchema,
-    outputSchema: AICareerChatbotOutputSchema,
+    outputSchema: z.union([AICareerChatbotOutputSchema, z.object({ error: z.literal(true), message: z.string() })]),
   },
   async (input) => {
     try {
@@ -58,7 +58,11 @@ const aiCareerChatbotFlow = ai.defineFlow(
            const { output } = await prompt(input, { model: flashModel });
            return output!;
         } catch (fallbackError: any) {
+            const fallbackMessage = (fallbackError.message || '') as string;
             console.error("Fallback chatbot model also failed:", fallbackError);
+            if (fallbackMessage.includes('503') || fallbackMessage.includes('overloaded') || fallbackMessage.includes('429')) {
+                return { error: true, message: 'Our AI is currently busy. Please try again in a few moments.' };
+            }
             throw fallbackError;
         }
       } else {

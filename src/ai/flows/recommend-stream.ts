@@ -33,7 +33,7 @@ const RecommendStreamOutputSchema = z.object({
 export type RecommendStreamOutput = z.infer<typeof RecommendStreamOutputSchema>;
 
 
-export async function recommendStream(input: RecommendStreamInput): Promise<RecommendStreamOutput> {
+export async function recommendStream(input: RecommendStreamInput): Promise<RecommendStreamOutput | { error: true; message: string }> {
   return recommendStreamFlow(input);
 }
 
@@ -76,7 +76,7 @@ const recommendStreamFlow = ai.defineFlow(
   {
     name: 'recommendStreamFlow',
     inputSchema: RecommendStreamInputSchema,
-    outputSchema: RecommendStreamOutputSchema,
+    outputSchema: z.union([RecommendStreamOutputSchema, z.object({ error: z.literal(true), message: z.string() })]),
   },
   async (input) => {
     try {
@@ -91,7 +91,11 @@ const recommendStreamFlow = ai.defineFlow(
            const { output } = await recommendStreamPrompt(input, { model: flashModel });
            return output!;
         } catch (fallbackError: any) {
+            const fallbackMessage = (fallbackError.message || '') as string;
             console.error("Fallback stream recommendation model also failed:", fallbackError);
+            if (fallbackMessage.includes('503') || fallbackMessage.includes('overloaded') || fallbackMessage.includes('429')) {
+                return { error: true, message: 'Our AI is currently busy. Please try again in a few moments.' };
+            }
             throw fallbackError;
         }
       } else {

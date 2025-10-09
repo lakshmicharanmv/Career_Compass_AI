@@ -37,7 +37,7 @@ export type AICareerSuggestionsOutput = z.infer<
 
 export async function aiCareerSuggestions(
   input: AICareerSuggestionsInput
-): Promise<AICareerSuggestionsOutput> {
+): Promise<AICareerSuggestionsOutput | { error: true; message: string }> {
   return aiCareerSuggestionsFlow(input);
 }
 
@@ -58,7 +58,7 @@ const aiCareerSuggestionsFlow = ai.defineFlow(
   {
     name: 'aiCareerSuggestionsFlow',
     inputSchema: AICareerSuggestionsInputSchema,
-    outputSchema: AICareerSuggestionsOutputSchema,
+    outputSchema: z.union([AICareerSuggestionsOutputSchema, z.object({ error: z.literal(true), message: z.string() })]),
   },
   async (input) => {
     try {
@@ -73,7 +73,11 @@ const aiCareerSuggestionsFlow = ai.defineFlow(
            const { output } = await prompt(input, { model: flashModel });
            return output!;
         } catch (fallbackError: any) {
+            const fallbackMessage = (fallbackError.message || '') as string;
             console.error("Fallback career suggestions model also failed:", fallbackError);
+            if (fallbackMessage.includes('503') || fallbackMessage.includes('overloaded') || fallbackMessage.includes('429')) {
+                return { error: true, message: 'Our AI is currently busy. Please try again in a few moments.' };
+            }
             throw fallbackError;
         }
       } else {
