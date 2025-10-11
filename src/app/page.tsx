@@ -28,6 +28,7 @@ import {
   Github,
   Calendar,
   Pencil,
+  Heart,
 } from "lucide-react";
 import React from "react";
 import {
@@ -124,7 +125,7 @@ export default function Home() {
                 <DialogHeader>
                   <DialogTitle className="text-2xl font-headline">{currentUser.fullName || currentUser.displayName}</DialogTitle>
                   <DialogDescription>
-                    {currentUser.professionalTitle || "Your Profile"}
+                    {currentUser.interests || "Your Profile"}
                   </DialogDescription>
                 </DialogHeader>
                 <div className="space-y-4 py-4">
@@ -154,6 +155,12 @@ export default function Home() {
                         <div className="flex items-center gap-3">
                             <Github className="h-4 w-4 text-muted-foreground" />
                              <a href={currentUser.github} target="_blank" rel="noopener noreferrer" className="text-sm text-primary hover:underline truncate">{currentUser.github}</a>
+                        </div>
+                     )}
+                      {currentUser.interests && (
+                        <div className="flex items-center gap-3">
+                            <Heart className="h-4 w-4 text-muted-foreground" />
+                            <span className="text-sm">{currentUser.interests}</span>
                         </div>
                      )}
                 </div>
