@@ -46,6 +46,8 @@ const FormSchema = z.object({
   phone: z.string().regex(/^\d{10}$/, 'Please enter a valid 10-digit phone number.'),
   linkedin: z.string().url().optional().or(z.literal('')),
   github: z.string().url().optional().or(z.literal('')),
+  userType: z.enum(['Student', 'Professional'], { required_error: 'Please select if you are a student or professional.' }),
+  interests: z.string().min(1, 'Please list at least one interest.'),
 });
 
 type FormValues = z.infer<typeof FormSchema>;
@@ -67,6 +69,8 @@ export default function PersonalInformationPage() {
       phone: '',
       linkedin: '',
       github: '',
+      userType: undefined,
+      interests: '',
     },
   });
 
@@ -84,6 +88,8 @@ export default function PersonalInformationPage() {
             linkedin: aac?.linkedin || '',
             github: aac?.github || '',
             dob: dob,
+            userType: aac?.userType,
+            interests: aac?.interests || '',
         });
     }
   }, [isUserLoading, user, aac, router, form]);
@@ -244,7 +250,42 @@ export default function PersonalInformationPage() {
                       </FormItem>
                     )}
                   />
+                  <FormField
+                    control={form.control}
+                    name="userType"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>I am a...</FormLabel>
+                        <Select onValueChange={field.onChange} value={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select one" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="Student">Student</SelectItem>
+                            <SelectItem value="Professional">Professional</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                 </div>
+                 <FormField
+                    control={form.control}
+                    name="interests"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Interests</FormLabel>
+                        <FormControl>
+                          <Input placeholder="e.g., Technology, Art, Finance" {...field} />
+                        </FormControl>
+                        <FormDescription>Please provide a comma-separated list of your interests.</FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                 
                 <div>
                     <h3 className="text-md font-medium mb-2">Social Media (Optional)</h3>
