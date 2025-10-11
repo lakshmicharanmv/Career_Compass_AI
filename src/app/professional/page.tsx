@@ -155,7 +155,6 @@ export default function ProfessionalPage() {
       }
       setStep('results');
     } catch (error) {
-      console.error("Failed to get recommendations:", error);
       setApiError("An unexpected error occurred. Please try again.");
       setStep('results');
     } finally {
@@ -469,5 +468,3 @@ export default function ProfessionalPage() {
     </div>
   );
 }
-
-    

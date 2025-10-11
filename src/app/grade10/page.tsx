@@ -110,7 +110,6 @@ export default function Grade10Page() {
         title: 'Uh oh! Something went wrong.',
         description: 'There was a problem with your request. Please try again.',
       });
-      console.error(error);
     } finally {
       setIsLoading(false);
     }
@@ -429,5 +428,3 @@ export default function Grade10Page() {
     </div>
   );
 }
-
-    

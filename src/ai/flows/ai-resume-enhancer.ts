@@ -136,22 +136,18 @@ const enhanceResumeDetailsFlow = ai.defineFlow(
   },
   async (input) => {
     try {
-      console.log('Attempting to use primary model for resume enhancement: gemini-1.5-pro');
       const { output } = await enhanceResumePrompt(input, { model: proModel });
       return output!;
     } catch (error: any) {
       const errorMessage = error.message || '';
       if (errorMessage.includes('503') || errorMessage.includes('overloaded') || errorMessage.includes('429')) {
-        console.warn('Primary resume enhancement model failed or was rate-limited. Switching to fallback model: gemini-1.5-flash');
         try {
            const { output } = await enhanceResumePrompt(input, { model: flashModel });
            return output!;
         } catch (fallbackError: any) {
-            console.error("Fallback resume enhancement model also failed:", fallbackError);
             throw fallbackError;
         }
       } else {
-         console.error("An unexpected error occurred during resume enhancement:", error);
          throw error;
       }
     }

@@ -83,7 +83,6 @@ export default function ResumeReviewerPage() {
                     resolve(result.value);
                 }
             } catch (error) {
-                console.error("Error parsing file:", error);
                 reject(new Error("Failed to parse the document. The file might be corrupted or in an unsupported format."));
             }
         };
@@ -118,7 +117,6 @@ export default function ResumeReviewerPage() {
         title: 'Uh oh! Something went wrong.',
         description: error.message || 'There was a problem analyzing your resume. Please try again.',
       });
-      console.error(error);
     } finally {
       setIsLoading(false);
     }

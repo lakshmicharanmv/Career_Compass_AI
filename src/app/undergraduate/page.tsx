@@ -261,7 +261,6 @@ export default function UndergraduatePage() {
     } catch (error) {
       toast({ variant: 'destructive', title: 'Error', description: 'Could not get recommendations.' });
       setView('assessmentChoice');
-      console.error(error);
     } finally {
       setIsLoading(false);
     }
@@ -596,5 +595,3 @@ export default function UndergraduatePage() {
     </div>
   );
 }
-
-    

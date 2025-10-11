@@ -127,7 +127,6 @@ export default function Grade12Page() {
         title: 'Uh oh! Something went wrong.',
         description: 'There was a problem with your request. Please try again.',
       });
-      console.error(error);
     } finally {
       setIsLoading(false);
     }

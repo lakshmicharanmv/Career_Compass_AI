@@ -58,26 +58,22 @@ const careerProgressionFlow = ai.defineFlow(
   },
   async (input) => {
     try {
-      console.log('Attempting to use primary model for career progression: gemini-1.5-pro');
       const { output } = await careerProgressionPrompt(input, { model: proModel });
       return output!;
     } catch (error: any) {
       const errorMessage = error.message || '';
       if (errorMessage.includes('503') || errorMessage.includes('overloaded') || errorMessage.includes('429')) {
-        console.warn('Primary career progression model failed or was rate-limited. Switching to fallback model: gemini-1.5-flash');
         try {
            const { output } = await careerProgressionPrompt(input, { model: flashModel });
            return output!;
         } catch (fallbackError: any) {
             const fallbackMessage = (fallbackError.message || '') as string;
-            console.error("Fallback career progression model also failed:", fallbackError);
              if (fallbackMessage.includes('503') || fallbackMessage.includes('overloaded') || fallbackMessage.includes('429')) {
                 return { error: true, message: 'Our AI is currently busy. Please try again in a few moments.' };
             }
             throw fallbackError;
         }
       } else {
-         console.error("An unexpected error occurred during career progression generation:", error);
          throw error;
       }
     }
