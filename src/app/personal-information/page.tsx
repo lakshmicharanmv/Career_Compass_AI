@@ -42,7 +42,7 @@ const FormSchema = z.object({
   fullName: z.string().min(1, 'Full name is required.'),
   gender: z.enum(['Male', 'Female', 'Other']),
   email: z.string().email(),
-  dob: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Please use YYYY-MM-DD format.'),
+  dob: z.string().regex(/^(0[1-9]|[12][0-9]|3[01])\/(0[1-9]|1[0-2])\/\d{4}$/, 'Please use DD/MM/YYYY format.'),
   phone: z.string().regex(/^\d{10}$/, 'Please enter a valid 10-digit phone number.'),
   linkedin: z.string().url().optional().or(z.literal('')),
   github: z.string().url().optional().or(z.literal('')),
@@ -79,7 +79,9 @@ export default function PersonalInformationPage() {
       router.push('/signin');
     }
     if (!isUserLoading && user) {
-        const dob = aac?.dob ? new Date(aac.dob).toISOString().split('T')[0] : '';
+        const dob = aac?.dob ? new Date(aac.dob) : null;
+        const formattedDob = dob ? `${String(dob.getDate()).padStart(2, '0')}/${String(dob.getMonth() + 1).padStart(2, '0')}/${dob.getFullYear()}` : '';
+
         form.reset({
             fullName: user.displayName || aac?.fullName || '',
             email: user.email || '',
@@ -87,7 +89,7 @@ export default function PersonalInformationPage() {
             phone: aac?.phone || '',
             linkedin: aac?.linkedin || '',
             github: aac?.github || '',
-            dob: dob,
+            dob: formattedDob,
             userType: aac?.userType,
             interests: aac?.interests || '',
         });
@@ -104,7 +106,8 @@ export default function PersonalInformationPage() {
     }
 
     try {
-        const dob = new Date(data.dob).toISOString();
+        const [day, month, year] = data.dob.split('/');
+        const dob = new Date(`${year}-${month}-${day}`).toISOString();
 
         // Update Firebase Auth profile
         await updateProfile(user, { displayName: data.fullName });
@@ -244,7 +247,7 @@ export default function PersonalInformationPage() {
                       <FormItem>
                         <FormLabel>Date of Birth</FormLabel>
                         <FormControl>
-                          <Input placeholder="YYYY-MM-DD" {...field} />
+                          <Input placeholder="DD/MM/YYYY" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
