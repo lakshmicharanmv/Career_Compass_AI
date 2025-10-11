@@ -5,10 +5,10 @@ import { FirebaseOptions } from 'firebase/app';
 // You can find this in the Firebase Console:
 // https://console.firebase.google.com/
 export const firebaseConfig: FirebaseOptions = {
-  apiKey: 'REPLACE_WITH_YOUR_API_KEY',
-  authDomain: 'REPLACE_WITH_YOUR_AUTH_DOMAIN',
-  projectId: 'REPLACE_WITH_YOUR_PROJECT_ID',
-  storageBucket: 'REPLACE_WITH_YOUR_STORAGE_BUCKET',
-  messagingSenderId: 'REPLACE_WITH_YOUR_MESSAGING_SENDER_ID',
-  appId: 'REPLACE_WITH_YOUR_APP_ID',
+  apiKey: "AIzaSyDfzLoXMsUeSlmHbfIvYmBoR8Fr5fAIEcs",
+  authDomain: "career-compass-ai-4ee1d.firebaseapp.com",
+  projectId: "career-compass-ai-4ee1d",
+  storageBucket: "career-compass-ai-4ee1d.appspot.com",
+  messagingSenderId: "746789996075",
+  appId: "1:746789996075:web:f3cc38755d02178f3b0c6e"
 };
