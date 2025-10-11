@@ -1,4 +1,3 @@
-
 "use client";
 
 import Link from "next/link";
@@ -44,42 +43,43 @@ import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useAuth, useUser } from "@/firebase";
+import { signOut } from "firebase/auth";
 
 
 export default function Home() {
   const [year, setYear] = React.useState<number | null>(null);
-  const [isAuthenticated, setIsAuthenticated] = React.useState(false);
-  const [currentUser, setCurrentUser] = React.useState<any>(null);
   const [showLearnMore, setShowLearnMore] = React.useState(false);
   const router = useRouter();
   const { toast } = useToast();
+  const auth = useAuth();
+  const { user, aac, isLoading } = useUser();
+
+  const isAuthenticated = !!user;
+  const currentUser = user ? { ...user, ...aac } : null;
 
   React.useEffect(() => {
-    const user = JSON.parse(localStorage.getItem("currentUser") || "{}");
-    if (user && user.email) {
-        setIsAuthenticated(true);
-        setCurrentUser(user);
-        // Redirect to personal-information page if not completed
-        if (!user.personalInfoCompleted) {
-          router.push('/personal-information');
-        }
-    } else {
-        setIsAuthenticated(false);
+    if (!isLoading && isAuthenticated && currentUser && !currentUser.personalInfoCompleted) {
+        router.push('/personal-information');
     }
     setYear(new Date().getFullYear());
-  }, [router]);
+  }, [router, isLoading, isAuthenticated, currentUser]);
 
-  const handleSignOut = () => {
-    localStorage.removeItem("currentUser");
-    setIsAuthenticated(false);
-    setCurrentUser(null);
-    router.push("/"); // Refresh the page to reflect signed-out state
+  const handleSignOut = async () => {
+    if (auth) {
+      await signOut(auth);
+      toast({
+        title: "Signed Out",
+        description: "You have been successfully signed out.",
+      });
+      router.push("/signin");
+    }
   };
 
 
   return (
     <div className="flex flex-col min-h-[100dvh] bg-background">
-       <Dialog open={!isAuthenticated} onOpenChange={() => {}}>
+       <Dialog open={!isLoading && !isAuthenticated} onOpenChange={() => {}}>
         <DialogContent className="sm:max-w-[425px]" hideCloseButton={true}>
           <DialogHeader>
             <DialogTitle className="text-center text-2xl font-headline">Welcome to Career Compass AI</DialogTitle>
@@ -112,7 +112,7 @@ export default function Home() {
                   <DialogTrigger asChild>
                     <div className="flex items-center gap-2 cursor-pointer p-2 rounded-md hover:bg-muted/50 transition-colors">
                         <User className="h-5 w-5 text-muted-foreground" />
-                        <span className="font-medium">{currentUser.name}</span>
+                        <span className="font-medium">{currentUser.displayName || currentUser.email}</span>
                     </div>
                   </DialogTrigger>
                 <Button variant="outline" size="sm" onClick={handleSignOut}>
@@ -122,7 +122,7 @@ export default function Home() {
               </div>
               <DialogContent className="sm:max-w-md">
                 <DialogHeader>
-                  <DialogTitle className="text-2xl font-headline">{currentUser.fullName}</DialogTitle>
+                  <DialogTitle className="text-2xl font-headline">{currentUser.fullName || currentUser.displayName}</DialogTitle>
                   <DialogDescription>
                     {currentUser.professionalTitle || "Your Profile"}
                   </DialogDescription>
@@ -186,7 +186,7 @@ export default function Home() {
           <div className="absolute inset-0 bg-black/50" />
           <div className="relative container h-full flex flex-col items-center justify-center text-center text-white space-y-6 pt-16">
             <h1 className="font-headline text-4xl font-bold tracking-tighter sm:text-5xl md:text-6xl xl:text-7xl/none text-shadow-lg">
-              {isAuthenticated && currentUser ? `Welcome, ${currentUser.name}! ` : ''}Navigate Your Future with AI
+              {isAuthenticated && currentUser ? `Welcome, ${currentUser.displayName}! ` : ''}Navigate Your Future with AI
             </h1>
             <p className="max-w-[600px] md:text-xl text-shadow">
               Career Compass AI provides personalized guidance for students
@@ -463,7 +463,7 @@ export default function Home() {
                   </ul>
 
                   <h3 className="text-lg font-semibold mt-4">3. Data Storage</h3>
-                   <p>For this prototype application, all user data, including your name, email, and any details you provide for resume building or career advice, is stored in your web browser's local storage. This means your data stays on your device and is not transmitted to a central server or database. If you clear your browser data or use a different device, this information will not be available.</p>
+                   <p>This application uses Firebase Authentication for user management. Your user data, including your name and email, is stored securely in Firebase. Other details you provide for resume building or career advice may be stored in your browser's local storage or in Firebase services, as described when you use those features.</p>
                 </div>
               </ScrollArea>
               <DialogFooter>

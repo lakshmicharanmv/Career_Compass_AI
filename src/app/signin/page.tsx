@@ -1,4 +1,3 @@
-
 "use client";
 
 import Link from "next/link";
@@ -29,6 +28,8 @@ import {
 } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { useAuth } from "@/firebase";
+import { signInWithEmailAndPassword, setPersistence, browserLocalPersistence, browserSessionPersistence } from "firebase/auth";
 
 
 const FormSchema = z.object({
@@ -45,6 +46,7 @@ export default function SignInPage() {
   const [isLoading, setIsLoading] = React.useState(false);
   const [showPassword, setShowPassword] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
+  const auth = useAuth();
 
   const form = useForm<FormValues>({
     resolver: zodResolver(FormSchema),
@@ -55,36 +57,44 @@ export default function SignInPage() {
     },
   });
 
-  function onSubmit(data: FormValues) {
+  async function onSubmit(data: FormValues) {
     setIsLoading(true);
     setError(null);
 
-    // Simulate API call
-    setTimeout(() => {
-        const users = JSON.parse(localStorage.getItem("users") || "[]");
+    if (!auth) {
+      setError("Authentication service is not available. Please try again later.");
+      setIsLoading(false);
+      return;
+    }
 
-        if (users.length === 0) {
-          setError("No accounts found. Please sign up first.");
-          setIsLoading(false);
-          return;
-        }
+    try {
+      const persistence = data.rememberMe ? browserLocalPersistence : browserSessionPersistence;
+      await setPersistence(auth, persistence);
+      await signInWithEmailAndPassword(auth, data.email, data.password);
+      
+      toast({
+        title: "Signed in successfully!",
+        description: "Redirecting to the main page...",
+      });
+      router.push("/");
 
-        const user = users.find(
-          (u: any) => u.email === data.email && u.password === data.password
-        );
-
-        if (user) {
-            localStorage.setItem("currentUser", JSON.stringify(user));
-            toast({
-              title: "Signed in successfully!",
-              description: "Redirecting to the main page...",
-            });
-            router.push("/");
-        } else {
-            setError("Invalid email or password.");
-        }
+    } catch (error: any) {
+      switch (error.code) {
+        case 'auth/user-not-found':
+        case 'auth/wrong-password':
+        case 'auth/invalid-credential':
+          setError("Invalid email or password.");
+          break;
+        case 'auth/too-many-requests':
+          setError("Too many attempts. Please try again later.");
+          break;
+        default:
+          setError("An unexpected error occurred. Please try again.");
+          break;
+      }
+    } finally {
         setIsLoading(false);
-    }, 1000);
+    }
   }
 
   return (

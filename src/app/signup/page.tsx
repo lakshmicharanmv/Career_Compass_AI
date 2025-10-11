@@ -1,4 +1,3 @@
-
 "use client";
 
 import Link from "next/link";
@@ -28,6 +27,8 @@ import {
 } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { useAuth } from "@/firebase";
+import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 
 
 const FormSchema = z.object({
@@ -50,6 +51,7 @@ export default function SignUpPage() {
   const [showPassword, setShowPassword] = React.useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
+  const auth = useAuth();
 
   const form = useForm<FormValues>({
     resolver: zodResolver(FormSchema),
@@ -61,29 +63,41 @@ export default function SignUpPage() {
     },
   });
 
-  function onSubmit(data: FormValues) {
+  async function onSubmit(data: FormValues) {
     setIsLoading(true);
     setError(null);
-    console.log("Form submitted", data);
     
-    // Simulate API call
-    setTimeout(() => {
-        const users = JSON.parse(localStorage.getItem("users") || "[]");
-        if (users.find((u: any) => u.email === data.email)) {
-            setError("An account with this email already exists.");
-        } else {
-            const newUser = { name: data.name, email: data.email, password: data.password };
-            users.push(newUser);
-            localStorage.setItem("users", JSON.stringify(users));
-            
-            toast({
-              title: "Account created successfully!",
-              description: "Please sign in to continue.",
-            });
-            router.push("/signin");
-        }
+    if (!auth) {
+      setError("Authentication service is not available. Please try again later.");
+      setIsLoading(false);
+      return;
+    }
+
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
+      await updateProfile(userCredential.user, { displayName: data.name });
+
+      toast({
+        title: "Account created successfully!",
+        description: "Please sign in to continue.",
+      });
+      router.push("/signin");
+
+    } catch (error: any) {
+      switch (error.code) {
+        case 'auth/email-already-in-use':
+          setError("An account with this email already exists.");
+          break;
+        case 'auth/weak-password':
+          setError("The password is too weak. Please use a stronger password.");
+          break;
+        default:
+          setError("An unexpected error occurred. Please try again.");
+          break;
+      }
+    } finally {
         setIsLoading(false);
-    }, 1000);
+    }
   }
 
   return (
