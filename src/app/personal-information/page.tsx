@@ -6,7 +6,7 @@ import * as React from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
-import { Bot, CalendarIcon } from 'lucide-react';
+import { Bot } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 import { Button } from '@/components/ui/button';
@@ -28,12 +28,6 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
-import { Calendar } from '@/components/ui/calendar';
-import {
   Card,
   CardContent,
   CardDescription,
@@ -41,19 +35,25 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { cn } from '@/lib/utils';
-import { format } from 'date-fns';
+import { useAuth, useUser } from '@/firebase';
+import { updateProfile } from 'firebase/auth';
 
 const FormSchema = z.object({
   fullName: z.string().min(1, 'Full name is required.'),
   gender: z.enum(['Male', 'Female', 'Other']),
   email: z.string().email(),
-  dob: z.date({
-    required_error: 'A date of birth is required.',
-  }),
+  dob_month: z.string().min(1, "Month is required."),
+  dob_day: z.string().min(1, "Day is required."),
+  dob_year: z.string().min(1, "Year is required."),
   phone: z.string().regex(/^\d{10}$/, 'Please enter a valid 10-digit phone number.'),
   linkedin: z.string().url().optional().or(z.literal('')),
   github: z.string().url().optional().or(z.literal('')),
+}).refine(data => {
+    const date = new Date(`${data.dob_year}-${data.dob_month}-${data.dob_day}`);
+    return date.getDate() === parseInt(data.dob_day);
+}, {
+    message: "The selected date is invalid.",
+    path: ["dob_day"],
 });
 
 type FormValues = z.infer<typeof FormSchema>;
@@ -61,69 +61,102 @@ type FormValues = z.infer<typeof FormSchema>;
 export default function PersonalInformationPage() {
   const { toast } = useToast();
   const router = useRouter();
+  const auth = useAuth();
+  const { user, aac, isLoading: isUserLoading } = useUser();
   const [isLoading, setIsLoading] = React.useState(false);
-  const [currentUser, setCurrentUser] = React.useState<any>(null);
-
-  React.useEffect(() => {
-    const user = JSON.parse(localStorage.getItem('currentUser') || '{}');
-    if (user && user.email) {
-      setCurrentUser(user);
-    } else {
-      router.push('/signin');
-    }
-  }, [router]);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
-      fullName: currentUser?.name || '',
-      email: currentUser?.email || '',
+      fullName: '',
+      email: '',
       gender: undefined,
+      dob_month: '',
+      dob_day: '',
+      dob_year: '',
       phone: '',
       linkedin: '',
       github: '',
     },
   });
-  
-  // Update form defaults when currentUser is loaded
+
   React.useEffect(() => {
-      if(currentUser) {
-          form.reset({
-              fullName: currentUser.name || '',
-              email: currentUser.email || '',
-          });
-      }
-  }, [currentUser, form]);
+    if (!isUserLoading && !user) {
+      router.push('/signin');
+    }
+    if (!isUserLoading && user) {
+        const dob = aac?.dob ? new Date(aac.dob) : null;
+        form.reset({
+            fullName: user.displayName || aac?.fullName || '',
+            email: user.email || '',
+            gender: aac?.gender,
+            phone: aac?.phone || '',
+            linkedin: aac?.linkedin || '',
+            github: aac?.github || '',
+            dob_month: dob ? String(dob.getMonth() + 1) : '',
+            dob_day: dob ? String(dob.getDate()) : '',
+            dob_year: dob ? String(dob.getFullYear()) : '',
+        });
+    }
+  }, [isUserLoading, user, aac, router, form]);
 
-  function onSubmit(data: FormValues) {
+
+  async function onSubmit(data: FormValues) {
     setIsLoading(true);
+    if (!user || !auth) {
+        toast({ variant: 'destructive', title: 'Error', description: 'You must be signed in to update your profile.' });
+        setIsLoading(false);
+        return;
+    }
 
-    setTimeout(() => {
-      const users = JSON.parse(localStorage.getItem('users') || '[]');
-      const userIndex = users.findIndex((u: any) => u.email === currentUser.email);
+    try {
+        const dob = new Date(parseInt(data.dob_year), parseInt(data.dob_month) - 1, parseInt(data.dob_day)).toISOString();
 
-      if (userIndex !== -1) {
-        const updatedUser = { ...users[userIndex], ...data, personalInfoCompleted: true };
-        users[userIndex] = updatedUser;
-        localStorage.setItem('users', JSON.stringify(users));
-        localStorage.setItem('currentUser', JSON.stringify(updatedUser));
+        // Update Firebase Auth profile
+        await updateProfile(user, { displayName: data.fullName });
+
+        // NOTE: We're using localStorage to persist additional user info for this prototype
+        const users = JSON.parse(localStorage.getItem('users') || '[]');
+        const userIndex = users.findIndex((u: any) => u.email === user.email);
         
+        const updatedInfo = {
+            ...data,
+            dob,
+            personalInfoCompleted: true
+        };
+
+        if (userIndex !== -1) {
+            users[userIndex] = { ...users[userIndex], ...updatedInfo };
+        } else {
+            // This case handles users who signed up but somehow missed the initial localStorage write
+            users.push({ email: user.email, ...updatedInfo });
+        }
+        localStorage.setItem('users', JSON.stringify(users));
+        localStorage.setItem('currentUser', JSON.stringify({
+            ...JSON.parse(localStorage.getItem('currentUser') || '{}'),
+            ...updatedInfo,
+            displayName: data.fullName,
+        }));
+      
         toast({
-          title: 'Information Saved!',
+          title: 'Profile Saved!',
           description: 'Your personal details have been updated.',
         });
         router.push('/');
-      } else {
-         toast({
-            variant: 'destructive',
-            title: 'Error',
-            description: 'Could not find your account. Please sign in again.',
-         });
-         router.push('/signin');
-      }
 
-      setIsLoading(false);
-    }, 1000);
+    } catch (error) {
+       toast({ variant: 'destructive', title: 'Error', description: 'Could not save your details.' });
+    } finally {
+        setIsLoading(false);
+    }
+  }
+
+  const years = Array.from({ length: 100 }, (_, i) => new Date().getFullYear() - i);
+  const months = Array.from({ length: 12 }, (_, i) => ({ value: String(i + 1), label: new Date(0, i).toLocaleString('default', { month: 'long' }) }));
+  const days = Array.from({ length: 31 }, (_, i) => String(i + 1));
+  
+  if (isUserLoading) {
+      return <div className="flex items-center justify-center min-h-screen"><Loader2 className="h-12 w-12 animate-spin text-primary" /></div>;
   }
 
   return (
@@ -185,7 +218,7 @@ export default function PersonalInformationPage() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Gender</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <Select onValueChange={field.onChange} value={field.value}>
                           <FormControl>
                             <SelectTrigger>
                               <SelectValue placeholder="Select your gender" />
@@ -203,47 +236,6 @@ export default function PersonalInformationPage() {
                   />
                   <FormField
                     control={form.control}
-                    name="dob"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-col">
-                        <FormLabel>Date of Birth</FormLabel>
-                        <Popover>
-                          <PopoverTrigger asChild>
-                            <FormControl>
-                              <Button
-                                variant={"outline"}
-                                className={cn(
-                                  "w-full pl-3 text-left font-normal",
-                                  !field.value && "text-muted-foreground"
-                                )}
-                              >
-                                {field.value ? (
-                                  format(field.value, "PPP")
-                                ) : (
-                                  <span>Pick a date</span>
-                                )}
-                                <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                              </Button>
-                            </FormControl>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-auto p-0" align="start">
-                            <Calendar
-                              mode="single"
-                              selected={field.value}
-                              onSelect={field.onChange}
-                              disabled={(date) =>
-                                date > new Date() || date < new Date("1900-01-01")
-                              }
-                              initialFocus
-                            />
-                          </PopoverContent>
-                        </Popover>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
                     name="phone"
                     render={({ field }) => (
                       <FormItem>
@@ -255,6 +247,22 @@ export default function PersonalInformationPage() {
                       </FormItem>
                     )}
                   />
+                </div>
+
+                <div>
+                  <FormLabel>Date of Birth</FormLabel>
+                  <div className="grid grid-cols-3 gap-4 mt-2">
+                    <FormField control={form.control} name="dob_month" render={({ field }) => (
+                        <FormItem><Select onValueChange={field.onChange} value={field.value}><FormControl><SelectTrigger><SelectValue placeholder="Month" /></SelectTrigger></FormControl><SelectContent>{months.map(m => <SelectItem key={m.value} value={m.value}>{m.label}</SelectItem>)}</SelectContent></Select><FormMessage /></FormItem>
+                    )} />
+                    <FormField control={form.control} name="dob_day" render={({ field }) => (
+                        <FormItem><Select onValueChange={field.onChange} value={field.value}><FormControl><SelectTrigger><SelectValue placeholder="Day" /></SelectTrigger></FormControl><SelectContent>{days.map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}</SelectContent></Select><FormMessage /></FormItem>
+                    )} />
+                     <FormField control={form.control} name="dob_year" render={({ field }) => (
+                        <FormItem><Select onValueChange={field.onChange} value={field.value}><FormControl><SelectTrigger><SelectValue placeholder="Year" /></SelectTrigger></FormControl><SelectContent>{years.map(y => <SelectItem key={y} value={String(y)}>{y}</SelectItem>)}</SelectContent></Select><FormMessage /></FormItem>
+                    )} />
+                  </div>
+                   <FormMessage>{form.formState.errors.dob_day?.message}</FormMessage>
                 </div>
                 
                 <div>
@@ -300,3 +308,5 @@ export default function PersonalInformationPage() {
     </div>
   );
 }
+
+    
