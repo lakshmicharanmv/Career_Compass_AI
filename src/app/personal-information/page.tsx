@@ -42,18 +42,10 @@ const FormSchema = z.object({
   fullName: z.string().min(1, 'Full name is required.'),
   gender: z.enum(['Male', 'Female', 'Other']),
   email: z.string().email(),
-  dob_month: z.string().min(1, "Month is required."),
-  dob_day: z.string().min(1, "Day is required."),
-  dob_year: z.string().min(1, "Year is required."),
+  dob: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Please use YYYY-MM-DD format.'),
   phone: z.string().regex(/^\d{10}$/, 'Please enter a valid 10-digit phone number.'),
   linkedin: z.string().url().optional().or(z.literal('')),
   github: z.string().url().optional().or(z.literal('')),
-}).refine(data => {
-    const date = new Date(`${data.dob_year}-${data.dob_month}-${data.dob_day}`);
-    return date.getDate() === parseInt(data.dob_day);
-}, {
-    message: "The selected date is invalid.",
-    path: ["dob_day"],
 });
 
 type FormValues = z.infer<typeof FormSchema>;
@@ -71,9 +63,7 @@ export default function PersonalInformationPage() {
       fullName: '',
       email: '',
       gender: undefined,
-      dob_month: '',
-      dob_day: '',
-      dob_year: '',
+      dob: '',
       phone: '',
       linkedin: '',
       github: '',
@@ -85,7 +75,7 @@ export default function PersonalInformationPage() {
       router.push('/signin');
     }
     if (!isUserLoading && user) {
-        const dob = aac?.dob ? new Date(aac.dob) : null;
+        const dob = aac?.dob ? new Date(aac.dob).toISOString().split('T')[0] : '';
         form.reset({
             fullName: user.displayName || aac?.fullName || '',
             email: user.email || '',
@@ -93,9 +83,7 @@ export default function PersonalInformationPage() {
             phone: aac?.phone || '',
             linkedin: aac?.linkedin || '',
             github: aac?.github || '',
-            dob_month: dob ? String(dob.getMonth() + 1) : '',
-            dob_day: dob ? String(dob.getDate()) : '',
-            dob_year: dob ? String(dob.getFullYear()) : '',
+            dob: dob,
         });
     }
   }, [isUserLoading, user, aac, router, form]);
@@ -110,7 +98,7 @@ export default function PersonalInformationPage() {
     }
 
     try {
-        const dob = new Date(parseInt(data.dob_year), parseInt(data.dob_month) - 1, parseInt(data.dob_day)).toISOString();
+        const dob = new Date(data.dob).toISOString();
 
         // Update Firebase Auth profile
         await updateProfile(user, { displayName: data.fullName });
@@ -151,10 +139,6 @@ export default function PersonalInformationPage() {
     }
   }
 
-  const years = Array.from({ length: 100 }, (_, i) => new Date().getFullYear() - i);
-  const months = Array.from({ length: 12 }, (_, i) => ({ value: String(i + 1), label: new Date(0, i).toLocaleString('default', { month: 'long' }) }));
-  const days = Array.from({ length: 31 }, (_, i) => String(i + 1));
-  
   if (isUserLoading) {
       return <div className="flex items-center justify-center min-h-screen"><Loader2 className="h-12 w-12 animate-spin text-primary" /></div>;
   }
@@ -247,22 +231,19 @@ export default function PersonalInformationPage() {
                       </FormItem>
                     )}
                   />
-                </div>
-
-                <div>
-                  <FormLabel>Date of Birth</FormLabel>
-                  <div className="grid grid-cols-3 gap-4 mt-2">
-                    <FormField control={form.control} name="dob_month" render={({ field }) => (
-                        <FormItem><Select onValueChange={field.onChange} value={field.value}><FormControl><SelectTrigger><SelectValue placeholder="Month" /></SelectTrigger></FormControl><SelectContent>{months.map(m => <SelectItem key={m.value} value={m.value}>{m.label}</SelectItem>)}</SelectContent></Select><FormMessage /></FormItem>
-                    )} />
-                    <FormField control={form.control} name="dob_day" render={({ field }) => (
-                        <FormItem><Select onValueChange={field.onChange} value={field.value}><FormControl><SelectTrigger><SelectValue placeholder="Day" /></SelectTrigger></FormControl><SelectContent>{days.map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}</SelectContent></Select><FormMessage /></FormItem>
-                    )} />
-                     <FormField control={form.control} name="dob_year" render={({ field }) => (
-                        <FormItem><Select onValueChange={field.onChange} value={field.value}><FormControl><SelectTrigger><SelectValue placeholder="Year" /></SelectTrigger></FormControl><SelectContent>{years.map(y => <SelectItem key={y} value={String(y)}>{y}</SelectItem>)}</SelectContent></Select><FormMessage /></FormItem>
-                    )} />
-                  </div>
-                   <FormMessage>{form.formState.errors.dob_day?.message}</FormMessage>
+                   <FormField
+                    control={form.control}
+                    name="dob"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Date of Birth</FormLabel>
+                        <FormControl>
+                          <Input placeholder="YYYY-MM-DD" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                 </div>
                 
                 <div>
