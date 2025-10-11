@@ -14,6 +14,16 @@ export function useUser() {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setUser(user);
+      if (user) {
+        // Reload user data from localStorage when auth state changes.
+        // This ensures we have the latest profile info after updates.
+        const storedUser = localStorage.getItem('currentUser');
+        if (storedUser) {
+            setAac(JSON.parse(storedUser));
+        }
+      } else {
+        setAac(null);
+      }
       setIsLoading(false);
     });
 
