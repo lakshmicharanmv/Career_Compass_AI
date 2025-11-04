@@ -29,8 +29,7 @@ export function FirebaseProvider({ children }: { children: ReactNode }) {
   }, []);
 
   if (!firebase) {
-    // TODO: Add a better loading state.
-    return <div>Loading...</div>;
+    return null;
   }
 
   return (

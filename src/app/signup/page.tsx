@@ -77,11 +77,21 @@ export default function SignUpPage() {
       const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
       await updateProfile(userCredential.user, { displayName: data.name });
 
+      // Save initial user details to localStorage
+      const users = JSON.parse(localStorage.getItem('users') || '[]');
+      const newUser = {
+        email: data.email,
+        fullName: data.name,
+        personalInfoCompleted: false,
+      };
+      users.push(newUser);
+      localStorage.setItem('users', JSON.stringify(users));
+
       toast({
         title: "Account created successfully!",
-        description: "Please sign in to continue.",
+        description: "Redirecting to your profile setup...",
       });
-      router.push("/signin");
+      router.push("/personal-information");
 
     } catch (error: any) {
       switch (error.code) {

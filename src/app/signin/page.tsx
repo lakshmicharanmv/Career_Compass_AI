@@ -70,8 +70,20 @@ export default function SignInPage() {
     try {
       const persistence = data.rememberMe ? browserLocalPersistence : browserSessionPersistence;
       await setPersistence(auth, persistence);
-      await signInWithEmailAndPassword(auth, data.email, data.password);
+      const userCredential = await signInWithEmailAndPassword(auth, data.email, data.password);
       
+      const users = JSON.parse(localStorage.getItem('users') || '[]');
+      const existingUser = users.find((u: any) => u.email === data.email);
+
+      if (existingUser) {
+        localStorage.setItem('currentUser', JSON.stringify(existingUser));
+      } else {
+        localStorage.setItem('currentUser', JSON.stringify({ 
+          email: userCredential.user.email,
+          displayName: userCredential.user.displayName
+        }));
+      }
+
       toast({
         title: "Signed in successfully!",
         description: "Redirecting to the main page...",
