@@ -350,7 +350,7 @@ export default function UndergraduatePage() {
               )} />
 
               <FormField name="currentGrade" control={academicForm.control} render={({ field }) => (
-                <FormItem><FormLabel>Current CGPA / Percentage</FormLabel><FormControl><Input type="number" step="0.01" placeholder="e.g., 8.5" {...field} /></FormControl><FormMessage /></FormItem>
+                <FormItem><FormLabel>Current Percentage</FormLabel><FormControl><Input type="number" step="0.01" placeholder="e.g., 85" {...field} /></FormControl><FormMessage /></FormItem>
               )} />
             </div>
             <Button type="submit">Next: Skills</Button>
