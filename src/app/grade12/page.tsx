@@ -46,19 +46,29 @@ import { Separator } from '@/components/ui/separator';
 
 const validationMessage = "Please enter the correct marks (minimum 35%).";
 
+const numberValidation = z.preprocess(
+  (val) => (val === '' ? undefined : Number(val)),
+  z.number({ invalid_type_error: 'Must be a number' })
+    .optional()
+    .refine((val) => val === undefined || (val >= 35 && val <= 100), {
+      message: "Marks must be between 35 and 100.",
+    })
+);
+
+
 const formSchema = z.object({
   tenthPercentage: z.coerce.number().min(35, validationMessage).max(100),
   twelfthStream: z.enum(['Science', 'Commerce', 'Arts']),
-  physics: z.coerce.number().min(35, validationMessage).max(100).optional(),
-  chemistry: z.coerce.number().min(35, validationMessage).max(100).optional(),
-  math: z.coerce.number().min(35, validationMessage).max(100).optional(),
-  biology: z.coerce.number().min(35, validationMessage).max(100).optional(),
-  accounts: z.coerce.number().min(35, validationMessage).max(100).optional(),
-  business_studies: z.coerce.number().min(35, validationMessage).max(100).optional(),
-  economics: z.coerce.number().min(35, validationMessage).max(100).optional(),
-  history: z.coerce.number().min(35, validationMessage).max(100).optional(),
-  political_science: z.coerce.number().min(35, validationMessage).max(100).optional(),
-  sociology_psychology: z.coerce.number().min(35, validationMessage).max(100).optional(),
+  physics: numberValidation,
+  chemistry: numberValidation,
+  math: numberValidation,
+  biology: numberValidation,
+  accounts: numberValidation,
+  business_studies: numberValidation,
+  economics: numberValidation,
+  history: numberValidation,
+  political_science: numberValidation,
+  sociology_psychology: numberValidation,
   english: z.coerce.number().min(35, validationMessage).max(100),
   takeTest: z.enum(['yes', 'no']),
 }).refine(data => {
@@ -67,15 +77,15 @@ const formSchema = z.object({
     }
     return true;
 }, {
-    message: "At least one science subject is required.",
-    path: ['physics']
+    message: "At least one science subject is required for the Science stream.",
+    path: ['physics'] // This is a bit of a hack, but shows the error on the first field of the stream
 }).refine(data => {
     if (data.twelfthStream === 'Commerce') {
         return data.accounts !== undefined || data.business_studies !== undefined || data.economics !== undefined;
     }
     return true;
 }, {
-    message: "At least one commerce subject is required.",
+    message: "At least one commerce subject is required for the Commerce stream.",
     path: ['accounts']
 }).refine(data => {
     if (data.twelfthStream === 'Arts') {
@@ -83,7 +93,7 @@ const formSchema = z.object({
     }
     return true;
 }, {
-    message: "At least one arts subject is required.",
+    message: "At least one arts subject is required for the Arts stream.",
     path: ['history']
 });
 
