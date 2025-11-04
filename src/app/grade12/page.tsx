@@ -46,28 +46,48 @@ import { Separator } from '@/components/ui/separator';
 
 const validationMessage = "Please enter the correct marks (minimum 35%).";
 
-const FormSchema = z.object({
+const formSchema = z.object({
   tenthPercentage: z.coerce.number().min(35, validationMessage).max(100),
   twelfthStream: z.enum(['Science', 'Commerce', 'Arts']),
-  // Science
   physics: z.coerce.number().min(35, validationMessage).max(100).optional(),
   chemistry: z.coerce.number().min(35, validationMessage).max(100).optional(),
   math: z.coerce.number().min(35, validationMessage).max(100).optional(),
   biology: z.coerce.number().min(35, validationMessage).max(100).optional(),
-  // Commerce
   accounts: z.coerce.number().min(35, validationMessage).max(100).optional(),
   business_studies: z.coerce.number().min(35, validationMessage).max(100).optional(),
   economics: z.coerce.number().min(35, validationMessage).max(100).optional(),
-  // Arts
   history: z.coerce.number().min(35, validationMessage).max(100).optional(),
   political_science: z.coerce.number().min(35, validationMessage).max(100).optional(),
   sociology_psychology: z.coerce.number().min(35, validationMessage).max(100).optional(),
-  // Common
   english: z.coerce.number().min(35, validationMessage).max(100),
   takeTest: z.enum(['yes', 'no']),
+}).refine(data => {
+    if (data.twelfthStream === 'Science') {
+        return data.physics !== undefined || data.chemistry !== undefined || data.math !== undefined || data.biology !== undefined;
+    }
+    return true;
+}, {
+    message: "At least one science subject is required.",
+    path: ['physics']
+}).refine(data => {
+    if (data.twelfthStream === 'Commerce') {
+        return data.accounts !== undefined || data.business_studies !== undefined || data.economics !== undefined;
+    }
+    return true;
+}, {
+    message: "At least one commerce subject is required.",
+    path: ['accounts']
+}).refine(data => {
+    if (data.twelfthStream === 'Arts') {
+        return data.history !== undefined || data.political_science !== undefined || data.sociology_psychology !== undefined;
+    }
+    return true;
+}, {
+    message: "At least one arts subject is required.",
+    path: ['history']
 });
 
-type FormValues = z.infer<typeof FormSchema>;
+type FormValues = z.infer<typeof formSchema>;
 
 export default function Grade12Page() {
   const { toast } = useToast();
@@ -82,20 +102,20 @@ export default function Grade12Page() {
   const [view, setView] = React.useState<'form' | 'assessment' | 'loading' | 'results'>('form');
 
   const form = useForm<FormValues>({
-    resolver: zodResolver(FormSchema),
+    resolver: zodResolver(formSchema),
     defaultValues: {
       tenthPercentage: '' as any,
       english: '' as any,
-      physics: '' as any,
-      chemistry: '' as any,
-      math: '' as any,
-      biology: '' as any,
-      accounts: '' as any,
-      business_studies: '' as any,
-      economics: '' as any,
-      history: '' as any,
-      political_science: '' as any,
-      sociology_psychology: '' as any,
+      physics: undefined,
+      chemistry: undefined,
+      math: undefined,
+      biology: undefined,
+      accounts: undefined,
+      business_studies: undefined,
+      economics: undefined,
+      history: undefined,
+      political_science: undefined,
+      sociology_psychology: undefined,
       takeTest: 'no',
     },
   });
