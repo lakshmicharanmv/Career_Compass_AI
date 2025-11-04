@@ -53,7 +53,7 @@ const ResumeDetailsOutputSchema = ResumeDetailsInputSchema;
 export type ResumeDetailsOutput = z.infer<typeof ResumeDetailsOutputSchema>;
 
 
-export async function enhanceResumeDetails(input: ResumeDetailsInput): Promise<ResumeDetailsOutput> {
+export async function enhanceResumeDetails(input: ResumeDetailsInput): Promise<ResumeDetailsOutput | { error: true; message: string }> {
   return enhanceResumeDetailsFlow(input);
 }
 
@@ -132,24 +132,26 @@ const enhanceResumeDetailsFlow = ai.defineFlow(
   {
     name: 'enhanceResumeDetailsFlow',
     inputSchema: ResumeDetailsInputSchema,
-    outputSchema: ResumeDetailsOutputSchema,
+    outputSchema: z.union([ResumeDetailsOutputSchema, z.object({ error: z.literal(true), message: z.string() })]),
   },
   async (input) => {
     try {
       const { output } = await enhanceResumePrompt(input, { model: proModel });
       return output!;
     } catch (error: any) {
-      const errorMessage = error.message || '';
-      if (errorMessage.includes('503') || errorMessage.includes('overloaded') || errorMessage.includes('429')) {
-        try {
-           const { output } = await enhanceResumePrompt(input, { model: flashModel });
-           return output!;
-        } catch (fallbackError: any) {
-            throw fallbackError;
+        console.error('Error with proModel:', error.message);
+        const errorMessage = error.message || '';
+        if (errorMessage.includes('503') || errorMessage.includes('overloaded') || errorMessage.includes('429') || errorMessage.includes('API key not valid')) {
+            try {
+                const { output } = await enhanceResumePrompt(input, { model: flashModel });
+                return output!;
+            } catch (fallbackError: any) {
+                console.error('Error with flashModel:', fallbackError.message);
+                return { error: true, message: 'Our AI is currently busy. Please try again in a few moments.' };
+            }
+        } else {
+            return { error: true, message: `An unexpected error occurred: ${errorMessage}` };
         }
-      } else {
-         throw error;
-      }
     }
   }
 );

@@ -3,7 +3,7 @@
 
 import Link from 'next/link';
 import * as React from 'react';
-import { Bot, ArrowLeft, Loader2, SendHorizonal, User, RefreshCcw } from 'lucide-react';
+import { Bot, ArrowLeft, Loader2, SendHorizonal, User, RefreshCcw, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -13,7 +13,7 @@ import { aiCareerChatbot } from '@/ai/flows/ai-career-chatbot';
 import { cn } from '@/lib/utils';
 
 interface Message {
-  role: 'user' | 'assistant';
+  role: 'user' | 'assistant' | 'error';
   content: string;
 }
 
@@ -46,16 +46,17 @@ export default function CareerCounselorPage() {
 
     try {
       const result = await aiCareerChatbot({ query: input });
-      const assistantMessage: Message = { role: 'assistant', content: result.response };
-      setMessages((prev) => [...prev, assistantMessage]);
+      
+      if (result.error) {
+        const errorMessage: Message = { role: 'error', content: result.message };
+        setMessages((prev) => [...prev, errorMessage]);
+      } else {
+        const assistantMessage: Message = { role: 'assistant', content: result.response };
+        setMessages((prev) => [...prev, assistantMessage]);
+      }
     } catch (error) {
-      toast({
-        variant: 'destructive',
-        title: 'Uh oh! Something went wrong.',
-        description: 'There was a problem with the AI. Please try again.',
-      });
-      // remove the user message if AI fails
-      setMessages(prev => prev.slice(0, -1));
+       const errorMessage: Message = { role: 'error', content: 'An unexpected error occurred. Please try again.' };
+       setMessages((prev) => [...prev, errorMessage]);
     } finally {
       setIsLoading(false);
     }
@@ -114,9 +115,15 @@ export default function CareerCounselorPage() {
                           <Bot className="h-6 w-6 text-primary" />
                         </div>
                       )}
+                       {message.role === 'error' && (
+                        <div className="p-2 bg-destructive/10 rounded-full">
+                          <AlertTriangle className="h-6 w-6 text-destructive" />
+                        </div>
+                      )}
                       <div className={cn(
                         'p-3 rounded-lg max-w-[80%]',
-                        message.role === 'user' ? 'bg-primary text-primary-foreground' : 'bg-muted'
+                        message.role === 'user' ? 'bg-primary text-primary-foreground' : 'bg-muted',
+                        message.role === 'error' ? 'bg-destructive/10 text-destructive-foreground' : ''
                       )}>
                         <p className="text-sm whitespace-pre-wrap">{message.content}</p>
                       </div>

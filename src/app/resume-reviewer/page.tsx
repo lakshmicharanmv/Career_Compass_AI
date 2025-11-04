@@ -23,6 +23,7 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
+  CardFooter
 } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { reviewResume, ReviewResumeOutput } from '@/ai/flows/ai-resume-reviewer';
@@ -112,11 +113,7 @@ export default function ResumeReviewerPage() {
         setResult(aiResult);
       }
     } catch (error: any) {
-      toast({
-        variant: 'destructive',
-        title: 'Uh oh! Something went wrong.',
-        description: error.message || 'There was a problem analyzing your resume. Please try again.',
-      });
+        setResult({ error: true, message: error.message || 'An unknown error occurred during analysis.' });
     } finally {
       setIsLoading(false);
     }
@@ -191,16 +188,16 @@ export default function ResumeReviewerPage() {
   const renderResult = () => {
     if (!result) return null;
 
-    if ('error' in result && result.error) {
+    if (result.error) {
       return (
         <Card className="max-w-2xl mx-auto border-destructive/50">
            <CardHeader>
               <CardTitle className="flex items-center gap-2 text-destructive">
-                <AlertTriangle /> AI Service Unavailable
+                <AlertTriangle /> AI Service Error
               </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-destructive">{result.message || 'An unknown error occurred.'}</p>
+            <p>{result.message || 'An unknown error occurred.'}</p>
           </CardContent>
           <CardFooter>
             <Button onClick={() => { setResult(null); form.reset(); }}>
@@ -210,8 +207,8 @@ export default function ResumeReviewerPage() {
         </Card>
       );
     }
-    
-    if (result.atsScore === undefined) {
+
+    if ('atsScore' in result && result.atsScore === undefined) {
         return (
           <Card className="max-w-2xl mx-auto border-destructive/50">
            <CardHeader>

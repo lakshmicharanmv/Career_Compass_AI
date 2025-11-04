@@ -6,7 +6,7 @@ import * as React from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
-import { Bot, ArrowLeft, Loader2, Sparkles } from 'lucide-react';
+import { Bot, ArrowLeft, Loader2, Sparkles, AlertTriangle } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -48,17 +48,21 @@ const FormSchema = z.object({
 });
 
 type FormValues = z.infer<typeof FormSchema>;
+type RecommendationResult = RecommendStreamOutput & { error?: boolean, message?: string };
+type AssessmentResult = AssessmentQuestionsOutput & { error?: boolean, message?: string };
+
 
 export default function Grade10Page() {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = React.useState(false);
-  const [assessment, setAssessment] = React.useState<AssessmentQuestionsOutput | null>(null);
-  const [recommendation, setRecommendation] = React.useState<RecommendStreamOutput | null>(null);
+  const [assessment, setAssessment] = React.useState<AssessmentResult | null>(null);
+  const [recommendation, setRecommendation] = React.useState<RecommendationResult | null>(null);
   const [currentQuestionIndex, setCurrentQuestionIndex] = React.useState(0);
   const [userAnswers, setUserAnswers] = React.useState<string[]>([]);
   const [testScore, setTestScore] = React.useState<number | null>(null);
   const [rawScore, setRawScore] = React.useState<number | null>(null);
   const [formValues, setFormValues] = React.useState<FormValues | null>(null);
+  const [apiError, setApiError] = React.useState<string | null>(null);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(FormSchema),
@@ -72,9 +76,23 @@ export default function Grade10Page() {
       takeTest: 'no',
     },
   });
+  
+  const resetState = () => {
+      setIsLoading(false);
+      setAssessment(null);
+      setRecommendation(null);
+      setCurrentQuestionIndex(0);
+      setUserAnswers([]);
+      setTestScore(null);
+      setRawScore(null);
+      setFormValues(null);
+      setApiError(null);
+      form.reset();
+  }
 
   async function onSubmit(data: FormValues) {
     setIsLoading(true);
+    setApiError(null);
     setRecommendation(null);
     setAssessment(null);
     setCurrentQuestionIndex(0);
@@ -85,14 +103,18 @@ export default function Grade10Page() {
 
     try {
       if (data.takeTest === 'yes') {
-        const assessmentData = await generateAssessmentQuestions({
+        const assessmentData: AssessmentResult = await generateAssessmentQuestions({
           level: '10th',
           topic: 'General Aptitude for 10th Grade covering Math, Science, English, and Social Studies',
           numberOfQuestions: 20,
         });
-        setAssessment(assessmentData);
+        if(assessmentData.error) {
+            setApiError(assessmentData.message || 'Failed to generate assessment questions.');
+        } else {
+            setAssessment(assessmentData);
+        }
       } else {
-        const result = await recommendStream({
+        const result: RecommendationResult = await recommendStream({
           marks: {
             math: data.math,
             science: data.science,
@@ -102,14 +124,14 @@ export default function Grade10Page() {
             optional_marks: data.optional_marks,
           },
         });
-        setRecommendation(result);
+        if(result.error) {
+            setApiError(result.message || 'Failed to get recommendations.');
+        } else {
+            setRecommendation(result);
+        }
       }
     } catch (error) {
-      toast({
-        variant: 'destructive',
-        title: 'Uh oh! Something went wrong.',
-        description: 'There was a problem with your request. Please try again.',
-      });
+      setApiError('An unexpected error occurred. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -139,8 +161,9 @@ export default function Grade10Page() {
   const getRecommendationWithTestScore = async (score: number) => {
     if (!formValues) return;
     setIsLoading(true);
+    setApiError(null);
     try {
-      const result = await recommendStream({
+      const result: RecommendationResult = await recommendStream({
         marks: {
           math: formValues.math,
           science: formValues.science,
@@ -151,13 +174,13 @@ export default function Grade10Page() {
         },
         testScore: score,
       });
-      setRecommendation(result);
+      if(result.error) {
+        setApiError(result.message || 'Failed to get recommendations.');
+      } else {
+        setRecommendation(result);
+      }
     } catch (error) {
-      toast({
-        variant: 'destructive',
-        title: 'Uh oh! Something went wrong.',
-        description: 'There was a problem getting your recommendation.',
-      });
+       setApiError('An unexpected error occurred while getting your recommendation.');
     } finally {
       setIsLoading(false);
     }
@@ -219,7 +242,24 @@ export default function Grade10Page() {
   };
   
   const renderRecommendation = () => {
+    if (apiError) {
+      return (
+        <Card className="border-destructive">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-destructive"><AlertTriangle /> AI Service Error</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p>{apiError}</p>
+          </CardContent>
+          <CardFooter>
+            <Button onClick={resetState}>Start Over</Button>
+          </CardFooter>
+        </Card>
+      )
+    }
+
     if (!recommendation) return null;
+
     return (
       <Card className="bg-primary/10 border-primary">
         <CardHeader>
@@ -256,152 +296,173 @@ export default function Grade10Page() {
           </div>
         </CardContent>
         <CardFooter>
-            <Button onClick={() => {
-              setRecommendation(null)
-              form.reset();
-            }}>Start Over</Button>
+            <Button onClick={resetState}>Start Over</Button>
         </CardFooter>
       </Card>
     );
   };
 
-  const renderForm = () => (
-    <Card>
-      <CardHeader>
-        <CardTitle>Stream & Subject Selection</CardTitle>
-        <CardDescription>
-          Enter your 10th grade marks to get a personalized stream recommendation. You can also take an optional assessment test for a more accurate result.
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="math"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Math Marks (out of 100)</FormLabel>
-                    <FormControl>
-                      <Input type="number" placeholder=" " {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="science"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Science Marks (out of 100)</FormLabel>
-                    <FormControl>
-                      <Input type="number" placeholder=" " {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="english"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>English Marks (out of 100)</FormLabel>
-                    <FormControl>
-                      <Input type="number" placeholder=" " {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="social_studies"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Social Studies Marks (out of 100)</FormLabel>
-                    <FormControl>
-                      <Input type="number" placeholder=" " {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="optional_subject"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Optional Subject (Name)</FormLabel>
-                    <FormControl>
-                      <Input placeholder="e.g., Computer Science" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="optional_marks"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Optional Subject Marks</FormLabel>
-                    <FormControl>
-                      <Input type="number" placeholder=" " {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
-            <Separator />
-
-            <FormField
-              control={form.control}
-              name="takeTest"
-              render={({ field }) => (
-                <FormItem className="space-y-3">
-                  <FormLabel>Do you want to take an assessment test?</FormLabel>
-                  <FormControl>
-                    <RadioGroup
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                      className="flex flex-col space-y-1"
-                    >
-                      <FormItem className="flex items-center space-x-3 space-y-0">
+  const renderForm = () => {
+    if(apiError) {
+       return (
+        <Card className="border-destructive">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-destructive"><AlertTriangle /> AI Service Error</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p>{apiError}</p>
+          </CardContent>
+          <CardFooter>
+            <Button onClick={resetState}>Start Over</Button>
+          </CardFooter>
+        </Card>
+      )
+    }
+    return (
+        <Card>
+        <CardHeader>
+            <CardTitle>Stream & Subject Selection</CardTitle>
+            <CardDescription>
+            Enter your 10th grade marks to get a personalized stream recommendation. You can also take an optional assessment test for a more accurate result.
+            </CardDescription>
+        </CardHeader>
+        <CardContent>
+            <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField
+                    control={form.control}
+                    name="math"
+                    render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>Math Marks (out of 100)</FormLabel>
                         <FormControl>
-                          <RadioGroupItem value="yes" />
+                        <Input type="number" placeholder=" " {...field} />
                         </FormControl>
-                        <FormLabel className="font-normal">
-                          Yes, help me get a more accurate recommendation.
-                        </FormLabel>
-                      </FormItem>
-                      <FormItem className="flex items-center space-x-3 space-y-0">
+                        <FormMessage />
+                    </FormItem>
+                    )}
+                />
+                <FormField
+                    control={form.control}
+                    name="science"
+                    render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>Science Marks (out of 100)</FormLabel>
                         <FormControl>
-                          <RadioGroupItem value="no" />
+                        <Input type="number" placeholder=" " {...field} />
                         </FormControl>
-                        <FormLabel className="font-normal">
-                          No, just use my marks.
-                        </FormLabel>
-                      </FormItem>
-                    </RadioGroup>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <Button type="submit" disabled={isLoading} className="w-full md:w-auto">
-              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Get Recommendation
-            </Button>
-          </form>
-        </Form>
-      </CardContent>
-    </Card>
-  );
+                        <FormMessage />
+                    </FormItem>
+                    )}
+                />
+                <FormField
+                    control={form.control}
+                    name="english"
+                    render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>English Marks (out of 100)</FormLabel>
+                        <FormControl>
+                        <Input type="number" placeholder=" " {...field} />
+                        </FormControl>
+                        <FormMessage />
+                    </FormItem>
+                    )}
+                />
+                <FormField
+                    control={form.control}
+                    name="social_studies"
+                    render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>Social Studies Marks (out of 100)</FormLabel>
+                        <FormControl>
+                        <Input type="number" placeholder=" " {...field} />
+                        </FormControl>
+                        <FormMessage />
+                    </FormItem>
+                    )}
+                />
+                <FormField
+                    control={form.control}
+                    name="optional_subject"
+                    render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>Optional Subject (Name)</FormLabel>
+                        <FormControl>
+                        <Input placeholder="e.g., Computer Science" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                    </FormItem>
+                    )}
+                />
+                <FormField
+                    control={form.control}
+                    name="optional_marks"
+                    render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>Optional Subject Marks</FormLabel>
+                        <FormControl>
+                        <Input type="number" placeholder=" " {...field} />
+                        </FormControl>
+                        <FormMessage />
+                    </FormItem>
+                    )}
+                />
+                </div>
+
+                <Separator />
+
+                <FormField
+                control={form.control}
+                name="takeTest"
+                render={({ field }) => (
+                    <FormItem className="space-y-3">
+                    <FormLabel>Do you want to take an assessment test?</FormLabel>
+                    <FormControl>
+                        <RadioGroup
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                        className="flex flex-col space-y-1"
+                        >
+                        <FormItem className="flex items-center space-x-3 space-y-0">
+                            <FormControl>
+                            <RadioGroupItem value="yes" />
+                            </FormControl>
+                            <FormLabel className="font-normal">
+                            Yes, help me get a more accurate recommendation.
+                            </FormLabel>
+                        </FormItem>
+                        <FormItem className="flex items-center space-x-3 space-y-0">
+                            <FormControl>
+                            <RadioGroupItem value="no" />
+                            </FormControl>
+                            <FormLabel className="font-normal">
+                            No, just use my marks.
+                            </FormLabel>
+                        </FormItem>
+                        </RadioGroup>
+                    </FormControl>
+                    <FormMessage />
+                    </FormItem>
+                )}
+                />
+                <Button type="submit" disabled={isLoading} className="w-full md:w-auto">
+                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Get Recommendation
+                </Button>
+            </form>
+            </Form>
+        </CardContent>
+        </Card>
+    );
+  }
+
+  const renderContent = () => {
+    if(apiError) return renderRecommendation();
+    if(recommendation) return renderRecommendation();
+    if (assessment && testScore === null) return renderAssessment();
+    return renderForm();
+  }
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
@@ -417,12 +478,15 @@ export default function Grade10Page() {
           </h1>
         </div>
         <div className="max-w-5xl mx-auto">
-          {recommendation 
-            ? renderRecommendation()
-            : (assessment && !isLoading && testScore === null)
-              ? renderAssessment()
-              : renderForm()
-          }
+          {isLoading && !assessment ? (
+             <Card>
+                <CardHeader><CardTitle>Please Wait</CardTitle></CardHeader>
+                <CardContent className="flex justify-center items-center p-8">
+                    <Loader2 className="mr-2 h-8 w-8 animate-spin" />
+                    <p>Generating Recommendation...</p>
+                </CardContent>
+            </Card>
+          ) : renderContent()}
         </div>
       </main>
     </div>
