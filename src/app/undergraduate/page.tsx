@@ -112,14 +112,15 @@ const degreeData: Record<string, Record<string, Record<string, { skills: string[
   },
 };
 
+const validationMessage = "Please enter the correct marks (minimum 35%).";
 
 const academicSchema = z.object({
-  tenthPercentage: z.coerce.number().min(0).max(100),
-  twelfthPercentage: z.coerce.number().min(0).max(100),
+  tenthPercentage: z.coerce.number().min(35, validationMessage).max(100),
+  twelfthPercentage: z.coerce.number().min(35, validationMessage).max(100),
   twelfthStream: z.enum(['Science', 'Commerce', 'Arts']),
   degreeName: z.string().min(1, 'Degree name is required.'),
   specialization: z.string().min(1, 'Specialization is required.'),
-  currentGrade: z.coerce.number().min(0).max(100),
+  currentGrade: z.coerce.number().min(35, validationMessage).max(100),
 });
 
 const skillsSchema = z.object({

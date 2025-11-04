@@ -37,13 +37,15 @@ import { recommendStream, RecommendStreamOutput } from '@/ai/flows/recommend-str
 import { Progress } from '@/components/ui/progress';
 import { Separator } from '@/components/ui/separator';
 
+const validationMessage = "Please enter the correct marks (minimum 35%).";
+
 const FormSchema = z.object({
-  math: z.coerce.number().min(0).max(100),
-  science: z.coerce.number().min(0).max(100),
-  english: z.coerce.number().min(0).max(100),
-  social_studies: z.coerce.number().min(0).max(100),
+  math: z.coerce.number().min(35, validationMessage).max(100),
+  science: z.coerce.number().min(35, validationMessage).max(100),
+  english: z.coerce.number().min(35, validationMessage).max(100),
+  social_studies: z.coerce.number().min(35, validationMessage).max(100),
   optional_subject: z.string().optional(),
-  optional_marks: z.coerce.number().min(0).max(100).optional(),
+  optional_marks: z.coerce.number().min(35, validationMessage).max(100).optional(),
   takeTest: z.enum(['yes', 'no']),
 });
 

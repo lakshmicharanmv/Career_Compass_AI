@@ -44,24 +44,26 @@ import { recommendDegreeCourses, RecommendDegreeCoursesOutput } from '@/ai/flows
 import { Progress } from '@/components/ui/progress';
 import { Separator } from '@/components/ui/separator';
 
+const validationMessage = "Please enter the correct marks (minimum 35%).";
+
 const FormSchema = z.object({
-  tenthPercentage: z.coerce.number().min(0).max(100),
+  tenthPercentage: z.coerce.number().min(35, validationMessage).max(100),
   twelfthStream: z.enum(['Science', 'Commerce', 'Arts']),
   // Science
-  physics: z.coerce.number().min(0).max(100).optional(),
-  chemistry: z.coerce.number().min(0).max(100).optional(),
-  math: z.coerce.number().min(0).max(100).optional(),
-  biology: z.coerce.number().min(0).max(100).optional(),
+  physics: z.coerce.number().min(35, validationMessage).max(100).optional(),
+  chemistry: z.coerce.number().min(35, validationMessage).max(100).optional(),
+  math: z.coerce.number().min(35, validationMessage).max(100).optional(),
+  biology: z.coerce.number().min(35, validationMessage).max(100).optional(),
   // Commerce
-  accounts: z.coerce.number().min(0).max(100).optional(),
-  business_studies: z.coerce.number().min(0).max(100).optional(),
-  economics: z.coerce.number().min(0).max(100).optional(),
+  accounts: z.coerce.number().min(35, validationMessage).max(100).optional(),
+  business_studies: z.coerce.number().min(35, validationMessage).max(100).optional(),
+  economics: z.coerce.number().min(35, validationMessage).max(100).optional(),
   // Arts
-  history: z.coerce.number().min(0).max(100).optional(),
-  political_science: z.coerce.number().min(0).max(100).optional(),
-  sociology_psychology: z.coerce.number().min(0).max(100).optional(),
+  history: z.coerce.number().min(35, validationMessage).max(100).optional(),
+  political_science: z.coerce.number().min(35, validationMessage).max(100).optional(),
+  sociology_psychology: z.coerce.number().min(35, validationMessage).max(100).optional(),
   // Common
-  english: z.coerce.number().min(0).max(100),
+  english: z.coerce.number().min(35, validationMessage).max(100),
   takeTest: z.enum(['yes', 'no']),
 });
 
