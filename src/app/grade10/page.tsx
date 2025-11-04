@@ -62,6 +62,8 @@ const optionalSubjects = [
     "French",
     "German",
     "Sanskrit",
+    "Kannada",
+    "Telugu",
     "Economics",
     "Art",
     "Music",
