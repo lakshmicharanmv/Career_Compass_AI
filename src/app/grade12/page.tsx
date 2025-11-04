@@ -106,16 +106,16 @@ export default function Grade12Page() {
     defaultValues: {
       tenthPercentage: '' as any,
       english: '' as any,
-      physics: undefined,
-      chemistry: undefined,
-      math: undefined,
-      biology: undefined,
-      accounts: undefined,
-      business_studies: undefined,
-      economics: undefined,
-      history: undefined,
-      political_science: undefined,
-      sociology_psychology: undefined,
+      physics: '' as any,
+      chemistry: '' as any,
+      math: '' as any,
+      biology: '' as any,
+      accounts: '' as any,
+      business_studies: '' as any,
+      economics: '' as any,
+      history: '' as any,
+      political_science: '' as any,
+      sociology_psychology: '' as any,
       takeTest: 'no',
     },
   });
@@ -464,7 +464,7 @@ export default function Grade12Page() {
         ): (
             <p className="text-muted-foreground">Please wait while our AI analyzes your profile.</p>
         )}
-        <Loader2 className="h-12 w-12 animate-spin text-primary mt-4" />
+        <Loader2 className="h-12 w-12 animate-spin text-primary" />
       </CardContent>
     </Card>
   );
