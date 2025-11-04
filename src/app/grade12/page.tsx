@@ -73,29 +73,51 @@ const formSchema = z.object({
   takeTest: z.enum(['yes', 'no']),
 }).refine(data => {
     if (data.twelfthStream === 'Science') {
-        return data.physics !== undefined || data.chemistry !== undefined || data.math !== undefined || data.biology !== undefined;
+        const hasScienceMark = data.physics !== undefined || data.chemistry !== undefined || data.math !== undefined || data.biology !== undefined;
+        if (!hasScienceMark) return false;
+
+        const subjects = [data.physics, data.chemistry, data.math, data.biology];
+        for(const subject of subjects) {
+            if(subject !== undefined && (isNaN(subject) || subject < 35 || subject > 100)) return false;
+        }
+        return true;
     }
     return true;
 }, {
-    message: "At least one science subject is required for the Science stream.",
-    path: ['physics'] // This is a bit of a hack, but shows the error on the first field of the stream
+    message: "At least one science subject with valid marks (35-100) is required.",
+    path: ['physics']
 }).refine(data => {
     if (data.twelfthStream === 'Commerce') {
-        return data.accounts !== undefined || data.business_studies !== undefined || data.economics !== undefined;
+        const hasCommerceMark = data.accounts !== undefined || data.business_studies !== undefined || data.economics !== undefined;
+        if (!hasCommerceMark) return false;
+        
+        const subjects = [data.accounts, data.business_studies, data.economics];
+        for(const subject of subjects) {
+            if(subject !== undefined && (isNaN(subject) || subject < 35 || subject > 100)) return false;
+        }
+        return true;
     }
     return true;
 }, {
-    message: "At least one commerce subject is required for the Commerce stream.",
+    message: "At least one commerce subject with valid marks (35-100) is required.",
     path: ['accounts']
 }).refine(data => {
     if (data.twelfthStream === 'Arts') {
-        return data.history !== undefined || data.political_science !== undefined || data.sociology_psychology !== undefined;
+        const hasArtsMark = data.history !== undefined || data.political_science !== undefined || data.sociology_psychology !== undefined;
+        if (!hasArtsMark) return false;
+
+        const subjects = [data.history, data.political_science, data.sociology_psychology];
+        for(const subject of subjects) {
+            if(subject !== undefined && (isNaN(subject) || subject < 35 || subject > 100)) return false;
+        }
+        return true;
     }
     return true;
 }, {
-    message: "At least one arts subject is required for the Arts stream.",
+    message: "At least one arts subject with valid marks (35-100) is required.",
     path: ['history']
 });
+
 
 type FormValues = z.infer<typeof formSchema>;
 
@@ -116,16 +138,16 @@ export default function Grade12Page() {
     defaultValues: {
       tenthPercentage: '' as any,
       english: '' as any,
-      physics: '' as any,
-      chemistry: '' as any,
-      math: '' as any,
-      biology: '' as any,
-      accounts: '' as any,
-      business_studies: '' as any,
-      economics: '' as any,
-      history: '' as any,
-      political_science: '' as any,
-      sociology_psychology: '' as any,
+      physics: undefined,
+      chemistry: undefined,
+      math: undefined,
+      biology: undefined,
+      accounts: undefined,
+      business_studies: undefined,
+      economics: undefined,
+      history: undefined,
+      political_science: undefined,
+      sociology_psychology: undefined,
       takeTest: 'no',
     },
   });
@@ -294,6 +316,11 @@ export default function Grade12Page() {
                 </p>
             </div>
           )}
+          {testScore !== null && testScore < 35 && (
+            <div className="p-4 bg-yellow-100 dark:bg-yellow-900/30 border border-yellow-300 dark:border-yellow-700 rounded-lg text-yellow-800 dark:text-yellow-300 text-sm">
+                <p className="font-bold">Your marks are currently below average (less than 35%). You need to work on improving your performance. Anyway, here are your predictions based on the current data.</p>
+            </div>
+          )}
           <div className="space-y-4">
             <h4 className="font-semibold">Top Degree Options for You:</h4>
             <ul className="list-disc list-inside text-muted-foreground mt-2">
@@ -368,42 +395,42 @@ export default function Grade12Page() {
                         {stream === 'Science' && (
                             <>
                                 <FormField control={form.control} name="physics" render={({ field }) => (
-                                    <FormItem><FormLabel>Physics</FormLabel><FormControl><Input type="number" placeholder=" " {...field} /></FormControl><FormMessage /></FormItem>
+                                    <FormItem><FormLabel>Physics</FormLabel><FormControl><Input type="number" placeholder=" " {...field} value={field.value ?? ''} /></FormControl><FormMessage /></FormItem>
                                 )} />
                                 <FormField control={form.control} name="chemistry" render={({ field }) => (
-                                    <FormItem><FormLabel>Chemistry</FormLabel><FormControl><Input type="number" placeholder=" " {...field} /></FormControl><FormMessage /></FormItem>
+                                    <FormItem><FormLabel>Chemistry</FormLabel><FormControl><Input type="number" placeholder=" " {...field} value={field.value ?? ''} /></FormControl><FormMessage /></FormItem>
                                 )} />
                                 <FormField control={form.control} name="math" render={({ field }) => (
-                                    <FormItem><FormLabel>Math</FormLabel><FormControl><Input type="number" placeholder=" " {...field} /></FormControl><FormMessage /></FormItem>
+                                    <FormItem><FormLabel>Math</FormLabel><FormControl><Input type="number" placeholder=" " {...field} value={field.value ?? ''} /></FormControl><FormMessage /></FormItem>
                                 )} />
                                 <FormField control={form.control} name="biology" render={({ field }) => (
-                                    <FormItem><FormLabel>Biology</FormLabel><FormControl><Input type="number" placeholder=" " {...field} /></FormControl><FormMessage /></FormItem>
+                                    <FormItem><FormLabel>Biology</FormLabel><FormControl><Input type="number" placeholder=" " {...field} value={field.value ?? ''} /></FormControl><FormMessage /></FormItem>
                                 )} />
                             </>
                         )}
                         {stream === 'Commerce' && (
                             <>
                                 <FormField control={form.control} name="accounts" render={({ field }) => (
-                                    <FormItem><FormLabel>Accounts</FormLabel><FormControl><Input type="number" placeholder=" " {...field} /></FormControl><FormMessage /></FormItem>
+                                    <FormItem><FormLabel>Accounts</FormLabel><FormControl><Input type="number" placeholder=" " {...field} value={field.value ?? ''} /></FormControl><FormMessage /></FormItem>
                                 )} />
                                 <FormField control={form.control} name="business_studies" render={({ field }) => (
-                                    <FormItem><FormLabel>Business Studies</FormLabel><FormControl><Input type="number" placeholder=" " {...field} /></FormControl><FormMessage /></FormItem>
+                                    <FormItem><FormLabel>Business Studies</FormLabel><FormControl><Input type="number" placeholder=" " {...field} value={field.value ?? ''} /></FormControl><FormMessage /></FormItem>
                                 )} />
                                 <FormField control={form.control} name="economics" render={({ field }) => (
-                                    <FormItem><FormLabel>Economics</FormLabel><FormControl><Input type="number" placeholder=" " {...field} /></FormControl><FormMessage /></FormItem>
+                                    <FormItem><FormLabel>Economics</FormLabel><FormControl><Input type="number" placeholder=" " {...field} value={field.value ?? ''} /></FormControl><FormMessage /></FormItem>
                                 )} />
                             </>
                         )}
                         {stream === 'Arts' && (
                             <>
                                 <FormField control={form.control} name="history" render={({ field }) => (
-                                    <FormItem><FormLabel>History</FormLabel><FormControl><Input type="number" placeholder=" " {...field} /></FormControl><FormMessage /></FormItem>
+                                    <FormItem><FormLabel>History</FormLabel><FormControl><Input type="number" placeholder=" " {...field} value={field.value ?? ''} /></FormControl><FormMessage /></FormItem>
                                 )} />
                                 <FormField control={form.control} name="political_science" render={({ field }) => (
-                                    <FormItem><FormLabel>Political Science</FormLabel><FormControl><Input type="number" placeholder=" " {...field} /></FormControl><FormMessage /></FormItem>
+                                    <FormItem><FormLabel>Political Science</FormLabel><FormControl><Input type="number" placeholder=" " {...field} value={field.value ?? ''} /></FormControl><FormMessage /></FormItem>
                                 )} />
                                 <FormField control={form.control} name="sociology_psychology" render={({ field }) => (
-                                    <FormItem><FormLabel>Sociology/Psychology</FormLabel><FormControl><Input type="number" placeholder=" " {...field} /></FormControl><FormMessage /></FormItem>
+                                    <FormItem><FormLabel>Sociology/Psychology</FormLabel><FormControl><Input type="number" placeholder=" " {...field} value={field.value ?? ''} /></FormControl><FormMessage /></FormItem>
                                 )} />
                             </>
                         )}

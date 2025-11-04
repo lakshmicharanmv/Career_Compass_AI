@@ -282,6 +282,11 @@ export default function Grade10Page() {
                 </p>
             </div>
           )}
+          {testScore !== null && testScore < 35 && (
+            <div className="p-4 bg-yellow-100 dark:bg-yellow-900/30 border border-yellow-300 dark:border-yellow-700 rounded-lg text-yellow-800 dark:text-yellow-300 text-sm">
+                <p className="font-bold">Your marks are currently below average (less than 35%). You need to work on improving your performance. Anyway, here are your predictions based on the current data.</p>
+            </div>
+          )}
           <div className="space-y-4">
             <div>
               <h3 className="font-bold text-lg text-accent">{recommendation.recommendedStream}</h3>
