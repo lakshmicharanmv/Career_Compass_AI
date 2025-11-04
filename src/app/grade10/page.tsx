@@ -36,6 +36,7 @@ import { generateAssessmentQuestions, AssessmentQuestionsOutput } from '@/ai/flo
 import { recommendStream, RecommendStreamOutput } from '@/ai/flows/recommend-stream';
 import { Progress } from '@/components/ui/progress';
 import { Separator } from '@/components/ui/separator';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const validationMessage = "Please enter the correct marks (minimum 35%).";
 
@@ -53,6 +54,19 @@ type FormValues = z.infer<typeof FormSchema>;
 type RecommendationResult = RecommendStreamOutput & { error?: boolean, message?: string };
 type AssessmentResult = AssessmentQuestionsOutput & { error?: boolean, message?: string };
 
+const optionalSubjects = [
+    "Computer Science",
+    "Physical Education",
+    "Information Technology",
+    "Hindi",
+    "French",
+    "German",
+    "Sanskrit",
+    "Economics",
+    "Art",
+    "Music",
+    "Home Science",
+];
 
 export default function Grade10Page() {
   const { toast } = useToast();
@@ -394,10 +408,19 @@ export default function Grade10Page() {
                     name="optional_subject"
                     render={({ field }) => (
                     <FormItem>
-                        <FormLabel>Optional Subject (Name)</FormLabel>
-                        <FormControl>
-                        <Input placeholder="e.g., Computer Science" {...field} />
-                        </FormControl>
+                        <FormLabel>Optional Subject</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormControl>
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Select an optional subject" />
+                                </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                                {optionalSubjects.map(subject => (
+                                    <SelectItem key={subject} value={subject}>{subject}</SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
                         <FormMessage />
                     </FormItem>
                     )}
