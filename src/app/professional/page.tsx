@@ -42,6 +42,7 @@ const formSchema = z.object({
 type FormValues = z.infer<typeof formSchema>;
 type Step = 'form' | 'assessmentChoice' | 'assessment' | 'loading' | 'results';
 type RecommendationOutput = ProfessionalCareerAdvisorOutput & { error?: boolean; message?: string };
+type AssessmentResult = AssessmentQuestionsOutput & { error?: boolean, message?: string };
 
 
 const industries = [ "Information Technology", "Healthcare", "Finance", "Education", "Manufacturing", "Retail", "Arts & Entertainment", "Legal", "Public Sector", "Engineering", "Construction & Trades" ];
@@ -57,7 +58,7 @@ export default function ProfessionalPage() {
   const [step, setStep] = React.useState<Step>('form');
   const [isLoading, setIsLoading] = React.useState(false);
   const [formData, setFormData] = React.useState<FormValues | null>(null);
-  const [assessment, setAssessment] = React.useState<AssessmentQuestionsOutput | null>(null);
+  const [assessment, setAssessment] = React.useState<AssessmentResult | null>(null);
   const [recommendation, setRecommendation] = React.useState<RecommendationOutput | null>(null);
   const [currentQuestionIndex, setCurrentQuestionIndex] = React.useState(0);
   const [userAnswers, setUserAnswers] = React.useState<string[]>([]);
@@ -90,15 +91,22 @@ export default function ProfessionalPage() {
     setIsLoading(true);
     if (choice === 'yes') {
       try {
-        const assessmentData = await generateAssessmentQuestions({
+        const assessmentData: AssessmentResult = await generateAssessmentQuestions({
           level: 'Pro',
           topic: `General aptitude and industry trends for a professional in the ${formData.currentIndustry} sector.`,
           numberOfQuestions: 15,
         });
-        setAssessment(assessmentData);
-        setStep('assessment');
+
+        if (assessmentData.error) {
+            setApiError(assessmentData.message || "Failed to generate assessment.");
+            setStep('results');
+        } else {
+            setAssessment(assessmentData);
+            setStep('assessment');
+        }
       } catch (error) {
-        toast({ variant: 'destructive', title: 'Error', description: 'Could not generate assessment questions.' });
+        setApiError("An unexpected error occurred while generating the assessment.");
+        setStep('results');
       } finally {
         setIsLoading(false);
       }
@@ -148,7 +156,7 @@ export default function ProfessionalPage() {
       });
 
       if(result.error) {
-        setApiError(result.message || "Our AI is currently busy and both our primary and backup systems are overloaded. We apologize for the inconvenience. Please try again in a few moments.");
+        setApiError(result.message || "An unexpected error occurred.");
         setRecommendation(null);
       } else {
         setRecommendation(result);
@@ -339,7 +347,7 @@ export default function ProfessionalPage() {
         <Card className="border-destructive/50">
            <CardHeader>
               <CardTitle className="flex items-center gap-2 text-destructive">
-                <AlertTriangle /> Service Temporarily Unavailable
+                <AlertTriangle /> AI Service Error
               </CardTitle>
           </CardHeader>
           <CardContent>

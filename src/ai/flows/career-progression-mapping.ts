@@ -61,20 +61,18 @@ const careerProgressionFlow = ai.defineFlow(
       const { output } = await careerProgressionPrompt(input, { model: proModel });
       return output!;
     } catch (error: any) {
+      console.error('Error with proModel:', error.message);
       const errorMessage = error.message || '';
-      if (errorMessage.includes('503') || errorMessage.includes('overloaded') || errorMessage.includes('429')) {
+      if (errorMessage.includes('503') || errorMessage.includes('overloaded') || errorMessage.includes('429') || errorMessage.includes('API key not valid')) {
         try {
            const { output } = await careerProgressionPrompt(input, { model: flashModel });
            return output!;
         } catch (fallbackError: any) {
-            const fallbackMessage = (fallbackError.message || '') as string;
-             if (fallbackMessage.includes('503') || fallbackMessage.includes('overloaded') || fallbackMessage.includes('429')) {
-                return { error: true, message: 'Our AI is currently busy. Please try again in a few moments.' };
-            }
-            throw fallbackError;
+            console.error('Error with flashModel:', fallbackError.message);
+            return { error: true, message: 'Our AI is currently busy. Please try again in a few moments.' };
         }
       } else {
-         throw error;
+         return { error: true, message: `An unexpected error occurred: ${errorMessage}` };
       }
     }
   }

@@ -6,7 +6,7 @@ import * as React from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
-import { Bot, ArrowLeft, Loader2, Sparkles } from 'lucide-react';
+import { Bot, ArrowLeft, Loader2, Sparkles, AlertTriangle } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -120,18 +120,22 @@ const formSchema = z.object({
 
 
 type FormValues = z.infer<typeof formSchema>;
+type RecommendationResult = RecommendDegreeCoursesOutput & { error?: boolean, message?: string };
+type AssessmentResult = AssessmentQuestionsOutput & { error?: boolean, message?: string };
+
 
 export default function Grade12Page() {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = React.useState(false);
-  const [assessment, setAssessment] = React.useState<AssessmentQuestionsOutput | null>(null);
-  const [recommendation, setRecommendation] = React.useState<RecommendDegreeCoursesOutput | null>(null);
+  const [assessment, setAssessment] = React.useState<AssessmentResult | null>(null);
+  const [recommendation, setRecommendation] = React.useState<RecommendationResult | null>(null);
   const [currentQuestionIndex, setCurrentQuestionIndex] = React.useState(0);
   const [userAnswers, setUserAnswers] = React.useState<string[]>([]);
   const [testScore, setTestScore] = React.useState<number | null>(null);
   const [rawScore, setRawScore] = React.useState<number | null>(null);
   const [formValues, setFormValues] = React.useState<FormValues | null>(null);
   const [view, setView] = React.useState<'form' | 'assessment' | 'loading' | 'results'>('form');
+  const [apiError, setApiError] = React.useState<string | null>(null);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -156,6 +160,7 @@ export default function Grade12Page() {
 
   async function onSubmit(data: FormValues) {
     setIsLoading(true);
+    setApiError(null);
     setFormValues(data);
 
     try {
@@ -165,22 +170,24 @@ export default function Grade12Page() {
         if (data.twelfthStream === 'Commerce') topic = 'Accounts, Business basics & number reasoning.';
         if (data.twelfthStream === 'Arts') topic = 'GK, History basics & critical thinking.';
         
-        const assessmentData = await generateAssessmentQuestions({
+        const assessmentData: AssessmentResult = await generateAssessmentQuestions({
           level: '12th',
           topic: topic,
           numberOfQuestions: 20,
         });
-        setAssessment(assessmentData);
-        setView('assessment');
+        if(assessmentData.error) {
+            setApiError(assessmentData.message || "Failed to generate assessment.");
+            setView('results');
+        } else {
+            setAssessment(assessmentData);
+            setView('assessment');
+        }
       } else {
         await getRecommendationWithTestScore(null);
       }
     } catch (error) {
-      toast({
-        variant: 'destructive',
-        title: 'Uh oh! Something went wrong.',
-        description: 'There was a problem with your request. Please try again.',
-      });
+      setApiError("An unexpected error occurred.");
+      setView('results');
     } finally {
       setIsLoading(false);
     }
@@ -211,8 +218,9 @@ export default function Grade12Page() {
     if (!formValues) return;
     setView('loading');
     setIsLoading(true);
+    setApiError(null);
     try {
-      const result = await recommendDegreeCourses({
+      const result: RecommendationResult = await recommendDegreeCourses({
         tenthPercentage: formValues.tenthPercentage,
         twelfthStream: formValues.twelfthStream,
         twelfthMarks: {
@@ -230,15 +238,16 @@ export default function Grade12Page() {
         },
         aptitudeTestScore: score ?? undefined,
       });
-      setRecommendation(result);
+
+      if (result.error) {
+        setApiError(result.message || "Failed to get recommendations.");
+      } else {
+        setRecommendation(result);
+      }
       setView('results');
     } catch (error) {
-      toast({
-        variant: 'destructive',
-        title: 'Uh oh! Something went wrong.',
-        description: 'There was a problem getting your recommendation.',
-      });
-      setView('form');
+       setApiError('An unexpected error occurred while getting your recommendation.');
+       setView('results');
     } finally {
       setIsLoading(false);
     }
@@ -254,6 +263,7 @@ export default function Grade12Page() {
     setTestScore(null);
     setRawScore(null);
     setFormValues(null);
+    setApiError(null);
     form.reset();
   }
 
@@ -297,7 +307,24 @@ export default function Grade12Page() {
   };
   
   const renderRecommendation = () => {
+    if (apiError) {
+      return (
+         <Card className="border-destructive">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-destructive"><AlertTriangle /> AI Service Error</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p>{apiError}</p>
+          </CardContent>
+          <CardFooter>
+            <Button onClick={startOver}>Start Over</Button>
+          </CardFooter>
+        </Card>
+      )
+    }
+
     if (!recommendation) return null;
+
     return (
       <Card className="bg-primary/10 border-primary">
         <CardHeader>
