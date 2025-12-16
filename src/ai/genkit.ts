@@ -6,4 +6,4 @@ export const ai = genkit({
 });
 
 export const proModel = googleAI.model('gemini-2.5-pro');
-export const flashModel = googleAI.model('gemini-1.5-flash-latest');
+export const flashModel = googleAI.model('gemini-1.5-flash');
