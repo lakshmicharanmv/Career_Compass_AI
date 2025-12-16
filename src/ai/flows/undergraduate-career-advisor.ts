@@ -86,12 +86,18 @@ const recommendUndergraduateOptionsFlow = ai.defineFlow(
   async (input) => {
     try {
       const { output } = await recommendUndergraduateOptionsPrompt(input, { model: proModel });
-      return output!;
+      if (!output) {
+        throw new Error('AI response was empty.');
+      }
+      return output;
     } catch (error: any) {
       console.error('Error with proModel:', error.message);
       try {
         const { output } = await recommendUndergraduateOptionsPrompt(input, { model: flashModel });
-        return output!;
+        if (!output) {
+          throw new Error('AI response was empty on fallback.');
+        }
+        return output;
       } catch (fallbackError: any) {
         console.error('Error with flashModel:', fallbackError.message);
         return { error: true, message: `An unexpected error occurred: ${fallbackError.message}` };
