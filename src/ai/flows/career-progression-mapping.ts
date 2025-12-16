@@ -65,17 +65,15 @@ const careerProgressionFlow = ai.defineFlow(
       }
       return output;
     } catch (error: any) {
-      console.error('Error with proModel:', error.message);
-      try {
-        const { output } = await careerProgressionPrompt(input, { model: flashModel });
-        if (!output) {
-          throw new Error('AI response was empty on fallback.');
-        }
-        return output;
-      } catch (fallbackError: any) {
-        console.error('Error with flashModel:', fallbackError.message);
-        return { error: true, message: `An unexpected error occurred: ${fallbackError.message}` };
+      console.error('AI Error:', error.message);
+      const errorMessage = error.message || '';
+      if (errorMessage.includes('429')) {
+          return { error: true, message: 'You have exceeded the API rate limit. Please try again in a few moments.' };
       }
+      if (errorMessage.includes('503') || errorMessage.includes('overloaded')) {
+          return { error: true, message: 'Our AI is currently busy. Please try again in a few moments.' };
+      }
+      return { error: true, message: 'An unexpected error occurred while communicating with the AI. Please try again.' };
     }
   }
 );
