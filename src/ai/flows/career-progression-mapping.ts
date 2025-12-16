@@ -1,3 +1,4 @@
+
 'use server';
 
 /**
@@ -62,17 +63,12 @@ const careerProgressionFlow = ai.defineFlow(
       return output!;
     } catch (error: any) {
       console.error('Error with proModel:', error.message);
-      const errorMessage = error.message || '';
-      if (errorMessage.includes('503') || errorMessage.includes('overloaded') || errorMessage.includes('429') || errorMessage.includes('API key not valid')) {
-        try {
-           const { output } = await careerProgressionPrompt(input, { model: flashModel });
-           return output!;
-        } catch (fallbackError: any) {
-            console.error('Error with flashModel:', fallbackError.message);
-            return { error: true, message: 'Our AI is currently busy. Please try again in a few moments.' };
-        }
-      } else {
-         return { error: true, message: `An unexpected error occurred: ${errorMessage}` };
+      try {
+        const { output } = await careerProgressionPrompt(input, { model: flashModel });
+        return output!;
+      } catch (fallbackError: any) {
+        console.error('Error with flashModel:', fallbackError.message);
+        return { error: true, message: `An unexpected error occurred: ${fallbackError.message}` };
       }
     }
   }
